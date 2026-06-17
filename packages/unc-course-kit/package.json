@@ -1,0 +1,19 @@
+{
+  "name": "unc-course-kit",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "description": "UNC Campus Virtual — Course scaffolding CLI for Gemini CLI + OpenCode teams",
+  "license": "ISC",
+  "bin": {
+    "unc-course-kit": "./src/index.ts"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^7.x",
+    "yaml": "^2.7.x"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.x",
+    "@types/node": "^25.x"
+  }
+}

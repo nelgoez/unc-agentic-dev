@@ -1,0 +1,44 @@
+# ====================================
+# UNC Agentic Dev — .gitignore
+# ====================================
+
+# Dependencies
+node_modules/
+
+# Build Artifacts
+dist/
+build/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+*.tmp
+
+# IDE & Editor
+.idea/
+.windsurf/
+.cursor/
+*.swp
+*.swo
+*.code-workspace
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Vercel
+.vercel
+
+# AI CLI Tools
+.serena
+.gemini/
+.backups/
+
+# Local config overrides
+.mcp.local.json
+opencode.local.jsonc
+dbhub.toml
+
+# Planning / scratch
+.scratch/

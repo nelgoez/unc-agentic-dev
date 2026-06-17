@@ -1,0 +1,737 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Campus Virtual UNC · Propuesta de Servicios</title>
+    <link rel="stylesheet" href="../../../../../../.agents/skills/html-ppt/assets/fonts.css" />
+    <link rel="stylesheet" href="../../../../../../.agents/skills/html-ppt/assets/base.css" />
+    <link
+      rel="stylesheet"
+      href="../../../../../../.agents/skills/html-ppt/assets/animations/animations.css"
+    />
+    <style>
+      /* pitch-deck adapted for UNC Campus Virtual */
+      .deck {
+        --bg: #ffffff;
+        --bg-soft: #f6f8fc;
+        --surface: #ffffff;
+        --surface-2: #f0f3f8;
+        --border: rgba(10, 35, 60, 0.08);
+        --border-strong: rgba(10, 35, 60, 0.16);
+        --text-1: #0a1628;
+        --text-2: #44556d;
+        --text-3: #7a8da6;
+        --accent: #1a3a8a;
+        --accent-2: #3466d0;
+        --accent-3: #5b8def;
+        --grad: linear-gradient(135deg, #1a3a8a 0%, #3466d0 55%, #5b8def 100%);
+        --grad-soft: linear-gradient(135deg, #eef2ff, #e8eeff 55%, #e2eaff);
+        --radius: 16px;
+        --radius-lg: 24px;
+        --shadow: 0 10px 36px rgba(10, 30, 50, 0.07), 0 2px 6px rgba(10, 30, 50, 0.03);
+        --font-sans: 'Inter', 'Noto Sans SC', sans-serif;
+      }
+      .slide {
+        padding: 88px 112px;
+        font-family: var(--font-sans);
+      }
+      .kicker {
+        color: var(--accent);
+        font-weight: 700;
+        font-size: 15px;
+        letter-spacing: 0.06em;
+      }
+      .h1 {
+        font-size: 78px;
+        line-height: 1.02;
+        font-weight: 900;
+        letter-spacing: -0.035em;
+        color: var(--text-1);
+      }
+      .h2 {
+        font-size: 56px;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--text-1);
+      }
+      .h3 {
+        font-size: 36px;
+        font-weight: 750;
+        letter-spacing: -0.02em;
+      }
+      .mega {
+        font-size: 160px;
+        font-weight: 900;
+        line-height: 0.92;
+        letter-spacing: -0.05em;
+        background: var(--grad);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .mega-sub {
+        font-size: 26px;
+        color: var(--text-2);
+        margin-top: 14px;
+      }
+      .cover-bg {
+        position: absolute;
+        inset: 0;
+        background: var(--grad-soft);
+        z-index: -1;
+      }
+      .cover-blob {
+        position: absolute;
+        right: -120px;
+        top: -100px;
+        width: 480px;
+        height: 480px;
+        border-radius: 50%;
+        background: var(--grad);
+        filter: blur(6px);
+        opacity: 0.28;
+        z-index: -1;
+      }
+      .card {
+        border-radius: var(--radius);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+        border: 1px solid var(--border);
+        padding: 32px 28px;
+      }
+      .card-accent {
+        background: var(--grad);
+        color: #fff;
+        border: none;
+        box-shadow: 0 16px 40px rgba(26, 58, 138, 0.25);
+      }
+      .card-accent h4,
+      .card-accent .metric .n,
+      .card-accent .n {
+        color: #fff;
+      }
+      .card-accent .dim,
+      .card-accent .l {
+        color: rgba(255, 255, 255, 0.82);
+      }
+      .num-tag {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--accent);
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .metric {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .metric .n {
+        font-size: 60px;
+        font-weight: 900;
+        letter-spacing: -0.035em;
+        line-height: 1;
+        color: var(--text-1);
+      }
+      .metric .l {
+        color: var(--text-2);
+        font-size: 15px;
+      }
+      .team-card {
+        text-align: center;
+        padding: 28px 18px;
+      }
+      .ask-box {
+        background: var(--grad);
+        color: #fff;
+        padding: 56px 64px;
+        border-radius: var(--radius-lg);
+        box-shadow: 0 24px 60px rgba(26, 58, 138, 0.3);
+      }
+      .ask-box .h2 {
+        color: #fff;
+      }
+      .ask-box .dim {
+        color: rgba(255, 255, 255, 0.82);
+      }
+      .section-num {
+        font-size: 200px;
+        font-weight: 900;
+        line-height: 0.85;
+        color: var(--surface-2);
+        position: absolute;
+        right: 72px;
+        bottom: 40px;
+        z-index: 0;
+        letter-spacing: -0.05em;
+      }
+      .slide > * {
+        position: relative;
+        z-index: 1;
+      }
+      .deck-footer {
+        color: var(--text-3);
+      }
+      .brand-dot {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--grad);
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+      .brand {
+        font-weight: 800;
+        font-size: 20px;
+        letter-spacing: -0.02em;
+      }
+      .pricing-tag {
+        font-size: 14px;
+        font-weight: 700;
+        padding: 4px 12px;
+        border-radius: 99px;
+        display: inline-block;
+      }
+      .pricing-tag-mvp1 {
+        background: #eef2ff;
+        color: var(--accent);
+      }
+      .pricing-tag-mvp2 {
+        background: #e8eeff;
+        color: var(--accent-2);
+      }
+      .pricing-tag-mvp3 {
+        background: var(--grad);
+        color: #fff;
+      }
+      .price-num {
+        font-size: 50px;
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: -0.03em;
+      }
+      .price-row {
+        display: flex;
+        gap: 24px;
+        margin-top: 12px;
+        font-size: 14px;
+        color: var(--text-2);
+      }
+      .mt-xxs {
+        margin-top: 6px;
+      }
+      .mt-s {
+        margin-top: 18px;
+      }
+      .mt-m {
+        margin-top: 28px;
+      }
+      .mt-l {
+        margin-top: 40px;
+      }
+      .tc {
+        text-align: center;
+      }
+      .row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .g2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
+      .g3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 18px;
+      }
+      .dim {
+        color: var(--text-2);
+        font-size: 16px;
+        line-height: 1.55;
+      }
+      .lede {
+        font-size: 22px;
+        color: var(--text-2);
+        max-width: 48ch;
+        line-height: 1.5;
+      }
+      .pill {
+        display: inline-block;
+        padding: 7px 18px;
+        border-radius: 99px;
+        font-size: 14px;
+        font-weight: 600;
+        border: 1px solid var(--border);
+      }
+      .pill-accent {
+        background: var(--grad);
+        color: #fff;
+        border: none;
+      }
+      .gradient-text {
+        background: var(--grad);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .check {
+        color: var(--good);
+        font-weight: 700;
+      }
+      .empty {
+        color: var(--text-3);
+      }
+      .scope-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 14px;
+      }
+      .scope-list li {
+        padding: 8px 0;
+        font-size: 15px;
+        color: var(--text-2);
+        border-bottom: 1px solid var(--border);
+      }
+      .scope-list li:before {
+        content: '→';
+        margin-right: 10px;
+        color: var(--accent);
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="deck">
+      <!-- 1. Cover -->
+      <section class="slide" data-title="Portada">
+        <div class="cover-bg"></div>
+        <div class="cover-blob"></div>
+        <div style="position: absolute; top: 56px; left: 112px">
+          <span class="brand-dot"></span><span class="brand">Campus Virtual UNC</span>
+        </div>
+        <p class="kicker">Propuesta de Servicios Profesionales · Junio 2026</p>
+        <h1 class="h1 anim-fade-up" data-anim="fade-up">
+          Tres niveles de intervención<br />para
+          <span class="gradient-text">escalar la retención</span><br />y medir lo que importa.
+        </h1>
+        <p class="lede mt-m">
+          Reenganche automatizado · Dashboard de actividades · Inducción estudiantil ·
+          Estandarización de cursos
+        </p>
+        <div class="deck-footer">
+          <span>Confidencial · Campus Virtual UNC</span
+          ><span class="slide-number" data-current="1" data-total="7"></span>
+        </div>
+      </section>
+
+      <!-- 2. El Desafío -->
+      <section class="slide" data-title="Desafío">
+        <span class="section-num">01</span>
+        <p class="num-tag">EL DESAFIO</p>
+        <h2 class="h2 mt-s">Tres problemas que escalan<br />con cada cohorte.</h2>
+        <div class="grid g3 mt-l">
+          <div class="card">
+            <div class="metric">
+              <div class="n">↗</div>
+              <div
+                class="l"
+                style="font-size: 17px; font-weight: 700; color: var(--text-1); margin-top: 4px"
+              >
+                Abandono silencioso
+              </div>
+            </div>
+            <p class="dim mt-s" style="font-size: 15px">
+              Estudiantes inactivos en Módulo 1 sin intervención automatizada. Sin rescate, se
+              pierden.
+            </p>
+          </div>
+          <div class="card">
+            <div class="metric">
+              <div class="n">✕</div>
+              <div
+                class="l"
+                style="font-size: 17px; font-weight: 700; color: var(--text-1); margin-top: 4px"
+              >
+                Decisiones a ciegas
+              </div>
+            </div>
+            <p class="dim mt-s" style="font-size: 15px">
+              Sin dashboard de actividades, los responsables no saben qué curso tiene 0% o 100% de
+              completitud.
+            </p>
+          </div>
+          <div class="card">
+            <div class="metric">
+              <div class="n">⏳</div>
+              <div
+                class="l"
+                style="font-size: 17px; font-weight: 700; color: var(--text-1); margin-top: 4px"
+              >
+                Fricción desde el día 1
+              </div>
+            </div>
+            <p class="dim mt-s" style="font-size: 15px">
+              Sin inducción estandarizada ni progresión encadenada, cada curso reinventa la rueda.
+            </p>
+          </div>
+        </div>
+        <p class="dim mt-l" style="font-style: italic">
+          "La insuficiencia presupuestaria compromete la continuidad de proyectos académicos." —
+          Declaración CS UNC, Feb 2026
+        </p>
+      </section>
+
+      <!-- 3. Tres Niveles - Overview -->
+      <section class="slide" data-title="Propuesta">
+        <span class="section-num">02</span>
+        <p class="num-tag">PROPUESTA</p>
+        <h2 class="h2 mt-s">
+          Tres niveles.<br /><span class="gradient-text">Una plataforma.</span>
+        </h2>
+        <p class="lede mt-m">
+          Cada nivel suma capacidades sobre el anterior. Sin duplicar esfuerzo. Sin reinventar
+          integraciones.
+        </p>
+        <div class="grid g3 mt-l">
+          <div class="card">
+            <span class="pricing-tag pricing-tag-mvp1">MVP 1</span>
+            <h3 class="h3 mt-s" style="font-size: 28px">Rescate</h3>
+            <p class="dim" style="font-size: 15px; margin-top: 8px">
+              Emails automatizados de reenganche + analítica de respuesta. 6 semanas.
+            </p>
+            <div class="metric mt-m">
+              <div class="n" style="font-size: 44px">110–155</div>
+              <div class="l">módulos UNC</div>
+            </div>
+          </div>
+          <div class="card card-accent">
+            <span class="pricing-tag" style="background: rgba(255, 255, 255, 0.2); color: #fff"
+              >MVP 2</span
+            >
+            <h3 class="h3 mt-s" style="font-size: 28px; color: #fff">Visibilidad</h3>
+            <p
+              class="dim"
+              style="font-size: 15px; color: rgba(255, 255, 255, 0.82); margin-top: 8px"
+            >
+              MVP 1 + Dashboard de actividades con alertas. 12 semanas.
+            </p>
+            <div class="metric mt-m">
+              <div class="n" style="font-size: 44px; color: #fff">190–270</div>
+              <div class="l" style="color: rgba(255, 255, 255, 0.82)">módulos UNC</div>
+            </div>
+          </div>
+          <div class="card">
+            <span class="pricing-tag pricing-tag-mvp2">MVP 3</span>
+            <h3 class="h3 mt-s" style="font-size: 28px">Ciclo Completo</h3>
+            <p class="dim" style="font-size: 15px; margin-top: 8px">
+              MVP 2 + Inducción estudiantil + Estandarización. 18 semanas.
+            </p>
+            <div class="metric mt-m">
+              <div class="n" style="font-size: 44px">320–460</div>
+              <div class="l">módulos UNC</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. MVP 1 - Rescate -->
+      <section class="slide" data-title="MVP 1">
+        <span class="section-num">A</span>
+        <p class="num-tag">MVP 1 · 6–8 SEMANAS</p>
+        <h2 class="h2 mt-s">Rescate <span class="gradient-text">Inmediato</span>.</h2>
+        <p class="lede mt-m">
+          Plugin mod_reengagement activado en 3 cursos piloto. Emails que rescatan estudiantes
+          inactivos y mantienen el ritmo de los activos.
+        </p>
+        <div class="g2 mt-l" style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px">
+          <div>
+            <h4 style="font-size: 17px; font-weight: 700">Entregables</h4>
+            <ul class="scope-list">
+              <li>6 piezas de email HTML — 2 por curso (rescate M1 + mantenimiento M2)</li>
+              <li>Cursos: IA y Automatización, Python 1, Yoga y Mindfulness</li>
+              <li>Configuración del plugin en producción (3 cursos)</li>
+              <li>Pruebas de disparo en DEV con usuarios testing</li>
+              <li>Activación controlada del cron</li>
+              <li>Setup de eventos analíticos (email_sent, completion_updated)</li>
+            </ul>
+          </div>
+          <div class="card card-accent">
+            <h4 style="color: #fff">KPIs instrumentados</h4>
+            <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 12px">
+              <div>
+                <div style="font-size: 28px; font-weight: 900; color: #fff">↗</div>
+                <div style="color: rgba(255, 255, 255, 0.85); font-size: 14px">
+                  Tasa de Reactivación (%)
+                </div>
+              </div>
+              <div>
+                <div style="font-size: 28px; font-weight: 900; color: #fff">⏱</div>
+                <div style="color: rgba(255, 255, 255, 0.85); font-size: 14px">
+                  Tiempo Medio de Respuesta
+                </div>
+              </div>
+              <div>
+                <div style="font-size: 28px; font-weight: 900; color: #fff">👆</div>
+                <div style="color: rgba(255, 255, 255, 0.85); font-size: 14px">
+                  Clics en enlaces vs finalización
+                </div>
+              </div>
+            </div>
+            <div class="mt-m">
+              <span class="price-num" style="color: #fff">110–155</span>
+              <div class="price-row" style="color: rgba(255, 255, 255, 0.82)">
+                <span>módulos UNC</span><span>$5.7M–$8.0M ARS</span><span>≈ $4.7K–$6.6K USD</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="deck-footer">
+          <span class="slide-number" data-current="4" data-total="7"></span>
+        </div>
+      </section>
+
+      <!-- 5. MVP 2 - Visibilidad -->
+      <section class="slide" data-title="MVP 2">
+        <span class="section-num">B</span>
+        <p class="num-tag">MVP 2 · 10–14 SEMANAS</p>
+        <h2 class="h2 mt-s">
+          <span class="gradient-text">Visibilidad</span>.<br />Todo MVP 1, más datos.
+        </h2>
+        <div class="g2 mt-l" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 28px">
+          <div>
+            <h4 style="font-size: 17px; font-weight: 700">Entregables adicionales</h4>
+            <ul class="scope-list">
+              <li>Dashboard de Análisis de Actividades sobre Moodle Configurable Reports</li>
+              <li>Tasa de completitud por actividad y por curso</li>
+              <li>Alertas: 0% (bloqueo) y 100% (anomalía)</li>
+              <li>Reportes exportables para responsables académicos</li>
+              <li>Cruce de datos: emails de reenganche vs progreso de actividades</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4 style="font-weight: 700">¿Para qué sirve?</h4>
+            <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 10px">
+              <div style="display: flex; align-items: center; gap: 10px">
+                <span class="check">✓</span
+                ><span class="dim" style="font-size: 14px"
+                  >Identificar actividades que traban el avance</span
+                >
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px">
+                <span class="check">✓</span
+                ><span class="dim" style="font-size: 14px"
+                  >Detectar cursos con fricción extrema (0% o 100%)</span
+                >
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px">
+                <span class="check">✓</span
+                ><span class="dim" style="font-size: 14px"
+                  >Tomar decisiones basadas en datos, no en intuición</span
+                >
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px">
+                <span class="check">✓</span
+                ><span class="dim" style="font-size: 14px"
+                  >Justificar inversiones con evidencia cuantitativa</span
+                >
+              </div>
+            </div>
+            <div class="mt-l">
+              <span class="price-num">190–270</span>
+              <div class="price-row">
+                <span style="font-weight: 600">módulos UNC</span><span>$9.8M–$14.0M ARS</span
+                ><span>≈ $8.1K–$11.6K USD</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="deck-footer">
+          <span class="slide-number" data-current="5" data-total="7"></span>
+        </div>
+      </section>
+
+      <!-- 6. MVP 3 - Ciclo Completo -->
+      <section class="slide" data-title="MVP 3">
+        <span class="section-num">C</span>
+        <p class="num-tag">MVP 3 · 16–22 SEMANAS</p>
+        <h2 class="h2 mt-s">
+          <span class="gradient-text">Ciclo Completo</span>.<br />Desde el día 1 hasta el
+          certificado.
+        </h2>
+        <div class="g2 mt-l" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px">
+          <div class="card">
+            <h4 style="font-weight: 700; color: var(--accent)">Inducción Estudiantil</h4>
+            <ul class="scope-list" style="margin-top: 10px">
+              <li>Tour de Automatriculación</li>
+              <li>Tour de Autoregistro</li>
+              <li>Video de bienvenida institucional</li>
+              <li>Mails de confirmación (2 variantes)</li>
+              <li>Módulo 0 en todos los cursos activos</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h4 style="font-weight: 700; color: var(--accent)">Estandarización</h4>
+            <ul class="scope-list" style="margin-top: 10px">
+              <li>Exámenes auto-calificados</li>
+              <li>Progresión encadenada por módulo</li>
+              <li>Material obligatorio configurado</li>
+              <li>Emisión de certificados automatizada</li>
+            </ul>
+          </div>
+        </div>
+        <div
+          class="card card-accent mt-l"
+          style="padding: 28px 32px; display: flex; align-items: center; gap: 40px"
+        >
+          <div class="price-num" style="color: #fff; white-space: nowrap">320–460</div>
+          <div
+            class="price-row"
+            style="
+              flex-direction: column;
+              gap: 4px;
+              margin-top: 0;
+              color: rgba(255, 255, 255, 0.85);
+            "
+          >
+            <span style="font-weight: 700; font-size: 15px">módulos UNC</span>
+            <span>$16.5M – $23.8M ARS</span>
+            <span>≈ $13.6K – $19.6K USD</span>
+          </div>
+          <div style="color: rgba(255, 255, 255, 0.85); font-size: 14px; line-height: 1.5">
+            Todo MVP 1 + MVP 2, más inducción y estandarización. El paquete completo para el ciclo
+            de vida del estudiante.
+          </div>
+        </div>
+        <div class="deck-footer">
+          <span class="slide-number" data-current="6" data-total="7"></span>
+        </div>
+      </section>
+
+      <!-- 7. Comparativa + Próximos Pasos -->
+      <section class="slide" data-title="Comparativa">
+        <span class="section-num">→</span>
+        <p class="num-tag">RESUMEN</p>
+        <h2 class="h2 mt-s">
+          Elija el nivel.<br />La <span class="gradient-text">decisión</span> es de ustedes.
+        </h2>
+        <div class="grid g3 mt-l">
+          <div class="card">
+            <span class="pricing-tag pricing-tag-mvp1">MVP 1 — Rescate</span>
+            <div
+              style="
+                margin-top: 14px;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                font-size: 14px;
+              "
+            >
+              <span class="check">✓ Emails de reenganche</span>
+              <span class="check">✓ Analítica de reenganche</span>
+              <span class="empty">— Dashboard</span>
+              <span class="empty">— Alertas</span>
+              <span class="empty">— Inducción</span>
+              <span class="empty">— Estandarización</span>
+            </div>
+            <div class="mt-m">
+              <span class="price-num" style="font-size: 36px">110–155</span>
+              <div class="dim" style="font-size: 13px; margin-top: 2px">módulos · 6–8 sem</div>
+            </div>
+          </div>
+          <div class="card card-accent">
+            <span class="pricing-tag" style="background: rgba(255, 255, 255, 0.2); color: #fff"
+              >MVP 2 — Visibilidad</span
+            >
+            <div
+              style="
+                margin-top: 14px;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                font-size: 14px;
+              "
+            >
+              <span style="color: rgba(255, 255, 255, 0.9)">✓ Emails de reenganche</span>
+              <span style="color: rgba(255, 255, 255, 0.9)">✓ Analítica de reenganche</span>
+              <span style="color: rgba(255, 255, 255, 0.9)">✓ Dashboard</span>
+              <span style="color: rgba(255, 255, 255, 0.9)">✓ Alertas</span>
+              <span style="color: rgba(255, 255, 255, 0.6)">— Inducción</span>
+              <span style="color: rgba(255, 255, 255, 0.6)">— Estandarización</span>
+            </div>
+            <div class="mt-m">
+              <span class="price-num" style="font-size: 36px; color: #fff">190–270</span>
+              <div
+                class="dim"
+                style="font-size: 13px; margin-top: 2px; color: rgba(255, 255, 255, 0.82)"
+              >
+                módulos · 10–14 sem
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <span class="pricing-tag pricing-tag-mvp2">MVP 3 — Ciclo Completo</span>
+            <div
+              style="
+                margin-top: 14px;
+                display: flex;
+                flex-direction: column;
+                gap: 6px;
+                font-size: 14px;
+              "
+            >
+              <span class="check">✓ Emails de reenganche</span>
+              <span class="check">✓ Analítica de reenganche</span>
+              <span class="check">✓ Dashboard</span>
+              <span class="check">✓ Alertas</span>
+              <span class="check">✓ Inducción</span>
+              <span class="check">✓ Estandarización</span>
+            </div>
+            <div class="mt-m">
+              <span class="price-num" style="font-size: 36px">320–460</span>
+              <div class="dim" style="font-size: 13px; margin-top: 2px">módulos · 16–22 sem</div>
+            </div>
+          </div>
+        </div>
+        <div class="ask-box mt-l" style="padding: 36px 48px">
+          <h2 class="h2" style="font-size: 38px">Próximos pasos</h2>
+          <div class="row" style="gap: 32px; margin-top: 16px">
+            <div>
+              <span style="font-weight: 900; font-size: 20px; color: #fff">1.</span>
+              <span style="color: rgba(255, 255, 255, 0.9); font-size: 15px"
+                >Revisión y ajuste de alcance</span
+              >
+            </div>
+            <div>
+              <span style="font-weight: 900; font-size: 20px; color: #fff">2.</span>
+              <span style="color: rgba(255, 255, 255, 0.9); font-size: 15px"
+                >Definición del tier</span
+              >
+            </div>
+            <div>
+              <span style="font-weight: 900; font-size: 20px; color: #fff">3.</span>
+              <span style="color: rgba(255, 255, 255, 0.9); font-size: 15px"
+                >Presentación a PSI (Montes)</span
+              >
+            </div>
+            <div>
+              <span style="font-weight: 900; font-size: 20px; color: #fff">4.</span>
+              <span style="color: rgba(255, 255, 255, 0.9); font-size: 15px"
+                >Contrato e inicio</span
+              >
+            </div>
+          </div>
+          <p class="dim" style="color: rgba(255, 255, 255, 0.7); margin-top: 18px; font-size: 13px">
+            Precios en módulos UNC (valor: $51.700 ARS según RR-2026-701-UNC-REC). Ajuste por
+            inflación si pago demorado >60 días.
+          </p>
+        </div>
+      </section>
+    </div>
+    <script src="../../../../../../.agents/skills/html-ppt/assets/runtime.js"></script>
+  </body>
+</html>

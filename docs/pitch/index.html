@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="es" data-theme="pitch-deck-vc">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>UNC Course Kit · Propuesta</title>
+    <link rel="stylesheet" href="assets/fonts.css" />
+    <link rel="stylesheet" href="assets/base.css" />
+    <link rel="stylesheet" id="theme-link" href="assets/themes/pitch-deck-vc.css" />
+    <link rel="stylesheet" href="assets/animations/animations.css" />
+    <style>
+      .section-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        margin: 12px 0;
+        border-left: 4px solid var(--accent);
+      }
+      .section-card.danger {
+        border-left-color: var(--bad);
+      }
+      .section-card.warn {
+        border-left-color: var(--warn);
+      }
+      .section-card.good {
+        border-left-color: var(--good);
+      }
+      .diff-add {
+        color: var(--good);
+      }
+      .diff-remove {
+        color: var(--bad);
+        text-decoration: line-through;
+      }
+      .code-block {
+        background: var(--bg-soft);
+        border-radius: var(--radius);
+        padding: 16px;
+        font-family: var(--font-mono);
+        font-size: 0.85em;
+        line-height: 1.6;
+        overflow-x: auto;
+      }
+      .row-gates {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .gate-step {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        flex: 1;
+        min-width: 140px;
+        text-align: center;
+        border: 1px solid var(--border);
+      }
+      .gate-step .num {
+        font-size: 2em;
+        font-weight: 900;
+        color: var(--accent);
+      }
+      .gate-step .label {
+        font-size: 0.85em;
+        color: var(--text-2);
+        margin-top: 4px;
+      }
+      .flow-arrow {
+        font-size: 2em;
+        color: var(--accent-2);
+        display: flex;
+        align-items: center;
+      }
+      table.compact {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85em;
+      }
+      table.compact th {
+        text-align: left;
+        padding: 8px 12px;
+        background: var(--bg-soft);
+        border-bottom: 2px solid var(--border);
+        font-weight: 600;
+      }
+      table.compact td {
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--border);
+      }
+      .cost-total {
+        font-size: 3em;
+        font-weight: 900;
+        color: var(--accent);
+      }
+      .checklist-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin: 8px 0;
+      }
+      .checklist-item::before {
+        content: '☐';
+        font-size: 1.2em;
+        color: var(--accent-2);
+        flex-shrink: 0;
+      }
+      .checklist-item.done::before {
+        content: '☑';
+        color: var(--good);
+      }
+      .tag {
+        display: inline-block;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-size: 0.75em;
+        font-weight: 600;
+      }
+      .tag-free {
+        background: #dcfce7;
+        color: #166534;
+      }
+      .tag-opt {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .tag-core {
+        background: #dbeafe;
+        color: #1e40af;
+      }
+      .nav-hint {
+        font-size: 0.75em;
+        color: var(--text-3);
+        letter-spacing: 0.02em;
+        text-transform: none;
+        margin: 0 16px;
+        flex: 1;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body
+    data-themes="pitch-deck-vc,catppuccin-mocha,terminal-green,blueprint,corporate-clean"
+    data-theme-base="assets/themes/"
+  >
+    <div class="deck">
+      <!-- 1. Cover -->
+      <section class="slide center tc" data-title="Cover">
+        <div style="max-width: 800px">
+          <p class="kicker" data-anim="fade-up">UNC Campus Virtual · 2026</p>
+          <h1 class="h1 anim-rise-in" data-anim="rise-in" style="font-size: 3em; line-height: 1.2">
+            Curso-as-Código
+          </h1>
+          <p class="lede" style="margin: 24px auto">
+            Pipeline de validación, revisión y publicación<br />para cursos Moodle con Gemini CLI
+          </p>
+          <div style="display: flex; gap: 16px; justify-content: center; margin-top: 32px">
+            <span class="tag tag-free">100% Open Source</span>
+            <span class="tag tag-free">Costo Cero</span>
+            <span class="tag tag-opt">Gemini Free Tier</span>
+          </div>
+        </div>
+        <div class="notes">
+          Buenos días. Hoy les quiero presentar una propuesta para transformar cómo creamos y
+          validamos cursos en el Campus Virtual. La llamamos Curso-as-Código.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC Course Kit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="14"></span>
+        </div>
+      </section>
+
+      <!-- 2. Problem: Curso 269 -->
+      <section class="slide" data-title="El Problema">
+        <p class="kicker">Caso real · 16 de junio 2026</p>
+        <h2 class="h2">Un error crítico en producción</h2>
+        <div class="section-card danger">
+          <strong>Curso 269</strong> — "Aprendiendo a caminar en Python - Certificación 1"
+        </div>
+        <div class="grid g2 mt-s">
+          <div class="card card-soft">
+            <h4>🔴 Módulo 3</h4>
+            <p class="dim">Bloqueado permanentemente</p>
+            <div class="code-block" style="margin-top: 8px; font-size: 0.8em">
+              Not available unless:<br />
+              The activity <span class="diff-remove">"Notebook Funcion-Lambda"</span> is marked
+              complete
+            </div>
+            <p style="margin-top: 8px; color: var(--bad); font-weight: 600">
+              Esa actividad NO EXISTE en el curso
+            </p>
+          </div>
+          <div class="card card-soft">
+            <h4>🔴 Cierre</h4>
+            <p class="dim">Bloqueado en cascada</p>
+            <p style="margin-top: 8px; font-size: 0.85em">
+              Requería <strong>6 actividades</strong> del Módulo 3... que estaba bloqueado.
+            </p>
+            <p style="margin-top: 8px; color: var(--warn); font-weight: 600">
+              Deadlock: ninguna actividad se puede completar
+            </p>
+          </div>
+        </div>
+        <div
+          style="
+            margin-top: 16px;
+            background: var(--bg-soft);
+            border-radius: var(--radius);
+            padding: 12px;
+          "
+        >
+          <p class="dim" style="font-size: 0.85em">
+            Detección: un estudiante reportó no poder avanzar.<br />
+            Impacto: debugging reactivo, corrección urgente en producción, experiencia del
+            estudiante dañada.
+          </p>
+        </div>
+        <div class="notes">
+          Este es el caso que desencadenó esta propuesta. El 16 de junio, el curso 269 tenía un
+          error crítico: el Módulo 3 requería una actividad llamada Notebook Funcion-Lambda para
+          desbloquearse. Esa actividad nunca existió. Probablemente alguien la renombró, o era un
+          PDF que no estaba trackeado como actividad. El resultado es que todo el resto del curso
+          quedó bloqueado. Y nadie lo supo hasta que un estudiante lo reportó.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC Course Kit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="14"></span>
+        </div>
+      </section>
+
+      <!-- 3. Root Cause -->
+      <section class="slide" data-title="Análisis">
+        <p class="kicker">Root cause analysis</p>
+        <h2 class="h2">¿Por qué pasó?</h2>
+        <div class="grid g2 mt-l">
+          <div class="card card-outline">
+            <h4>🏗️ Creación manual</h4>
+            <p class="dim">
+              Las dependencias se configuran una por una en Moodle. No hay validación cruzada entre
+              lo que se escribe y lo que existe.
+            </p>
+          </div>
+          <div class="card card-outline">
+            <h4>🔍 Sin revisión</h4>
+            <p class="dim">
+              No hay un paso de peer review antes de publicar. El prompter crea, configura y publica
+              solo.
+            </p>
+          </div>
+          <div class="card card-outline">
+            <h4>📋 Sin checklist</h4>
+            <p class="dim">
+              No hay una lista de verificación que asegure que cada actividad existe antes de usarla
+              como condición de acceso.
+            </p>
+          </div>
+          <div class="card card-outline">
+            <h4>📊 Sin post-mortem</h4>
+            <p class="dim">
+              El error solo se detecta cuando un estudiante lo reporta. No hay monitoreo proactivo.
+            </p>
+          </div>
+        </div>
+        <div style="margin-top: 20px; text-align: center">
+          <p class="lede" style="font-size: 1em">
+            El problema no es la persona. <strong>Es la falta de proceso.</strong>
+          </p>
+        </div>
+        <div class="notes">
+          Analizando las causas, vemos cuatro problemas estructurales. Primero, la creación manual
+          —cada condición de acceso se escribe a mano, sin verificar que la actividad destino
+          exista. Segundo, no hay revisión por otro miembro del equipo antes de publicar. Tercero,
+          no hay checklist que garantice que todo está en orden. Y cuarto, no hay monitoreo: el
+          error solo se descubre cuando un estudiante lo reporta. El problema no es la persona que
+          creó el curso. Es la falta de proceso.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC Course Kit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="14"></span>
+        </div>
+      </section>
+
+      <!-- 4. Solution Overview -->
+      <section class="slide center tc" data-title="Solución">
+        <div style="max-width: 800px">
+          <p class="kicker" data-anim="fade-up">La propuesta</p>
+          <h1 class="h1 anim-rise-in" data-anim="rise-in">UNC Course Kit</h1>
+          <p class="lede" style="margin: 16px auto">
+            Un generador de blueprint + pipeline de validación<br />que transforma la creación de
+            cursos en un proceso estructurado.
+          </p>
+          <div class="row-gates" style="margin-top: 32px">
+            <div class="gate-step">
+              <div class="num">1</div>
+              <div class="label">Blueprint</div>
+              <p class="dim" style="font-size: 0.8em">curso.yaml machine-readable</p>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="gate-step">
+              <div class="num">2</div>
+              <div class="label">Validar</div>
+              <p class="dim" style="font-size: 0.8em">validate-deps automático</p>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="gate-step">
+              <div class="num">3</div>
+              <div class="label">Revisar</div>
+              <p class="dim" style="font-size: 0.8em">Peer review + QA</p>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="gate-step">
+              <div class="num">4</div>
+              <div class="label">Publicar</div>
+              <p class="dim" style="font-size: 0.8em">Subir a Moodle</p>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="gate-step">
+              <div class="num">5</div>
+              <div class="label">Monitorear</div>
+              <p class="dim" style="font-size: 0.8em">KPIs + alertas</p>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          La solución es simple en concepto: tratemos el curso como código. En lugar de configurar
+          dependencias a mano en Moodle, generamos un blueprint machine-readable —un archivo
+          curso.yaml— que describe toda la estructura del curso. Ese blueprint pasa por validación
+          automática, revisión por pares, y solo entonces se publica. Y después de publicado, lo
+          monitoreamos.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC Course Kit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="14"></span>
+        </div>
+      </section>
+
+      <!-- 5. Gemini CLI Visual -->
+      <section class="slide" data-title="Gemini CLI">
+        <p class="kicker">La herramienta que el equipo ya conoce</p>
+        <h2 class="h2">Gemini CLI: del browser al terminal</h2>
+        <p class="lede" style="margin: 8px 0">
+          El equipo ya usa Gemini en el browser. Gemini CLI es
+          <strong>lo mismo, pero con superpoderes</strong>: ve archivos, ejecuta comandos, usa MCP,
+          y se configura con un archivo de texto.
+        </p>
+        <div class="grid g2 mt-l">
+          <div class="card card-outline">
+            <h4>🌐 Lo que usan hoy</h4>
+            <ul style="font-size: 0.85em; color: var(--text-2); margin-top: 8px">
+              <li>Gemini en el browser</li>
+              <li>Copiar/pegar prompts manualmente</li>
+              <li>Subir archivos uno por uno</li>
+              <li>Sin acceso al file system local</li>
+              <li>Sin herramientas (shell, MCP)</li>
+            </ul>
+          </div>
+          <div class="card card-outline">
+            <h4>💻 Gemini CLI</h4>
+            <ul style="font-size: 0.85em; color: var(--text-2); margin-top: 8px">
+              <li>Mismo modelo Gemini</li>
+              <li>Lee archivos del proyecto directamente</li>
+              <li>Ejecuta comandos en tu terminal</li>
+              <li>Usa MCP servers (GitHub, DBs, APIs)</li>
+              <li>Pegá capturas con Ctrl+V</li>
+              <li><strong>Gratis, open source</strong></li>
+            </ul>
+          </div>
+        </div>
+        <div style="margin-top: 16px; text-align: center">
+          <img
+            src="images/gemini-cli-official.png"
+            alt="Gemini CLI interfaz oficial"
+            style="
+              max-width: 90%;
+              border-radius: var(--radius-lg);
+              border: 1px solid var(--border);
+              box-shadow: var(--shadow-lg);
+            "
+          />
+          <p class="dim" style="margin-top: 8px; font-size: 0.75em">
+            Gemini CLI — interfaz oficial (Google)
+          </p>
+        </div>
+        <div class="notes">
+          El equipo ya está familiarizado con Gemini. La diferencia es que hoy usan el browser:
+          copian prompts, pegan resultados, suben archivos manualmente. Gemini CLI es el mismo
+          modelo —Gemini— pero corriendo directo en la terminal. Lee archivos del proyecto, ejecuta
+          comandos, usa MCP servers, y lo más importante: se configura con un settings.json que el
+          unc-course-kit genera automáticamente. El equipo no tiene que aprender nada nuevo —sigue
+          usando Gemini, pero con más herramientas.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC Course Kit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="14"></span>
+        </div>
+      </section>
+
+      <!-- 6. Pipeline 3 Stages -->
+      <section class="slide" data-title="Pipeline">
+        <p class="kicker">El proceso completo</p>
+        <h2 class="h2">3 etapas, 3 tipos de control</h2>
+        <div class="grid g3 mt-l">
+          <div>
+            <div class="section-card good" style="margin: 0">
+              <h3 style="color: var(--good)">❶ Pre-build</h3>
+              <p class="dim" style="margin: 8px 0; font-size: 0.85em">Al generar el curso</p>
+              <table class="compact">
+                <tr>
+                  <td>validate-deps</td>
+                  <td><span style="color: var(--good)">✅</span></td>
+                </tr>
+                <tr>
+                  <td>Revisión de blueprint</td>
+                  <td><span style="color: var(--warn)">📋 Manual</span></td>
+                </tr>
+              </table>
+              <div
+                style="
+                  margin-top: 8px;
+                  padding: 8px;
+                  background: var(--bg-soft);
+                  border-radius: var(--radius);
+                  font-size: 0.8em;
+                "
+              >
+                ⚡ Errores se detectan <strong>antes</strong> de generar contenido
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="section-card warn" style="margin: 0">
+              <h3 style="color: var(--warn)">❷ Pre-publish</h3>
+              <p class="dim" style="margin: 8px 0; font-size: 0.85em">Antes de activar en Moodle</p>
+              <table class="compact">
+                <tr>
+                  <td>Validación vs Moodle real</td>
+                  <td><span style="color: var(--good)">✅</span></td>
+                </tr>
+                <tr>
+                  <td>Grafo visual</td>
+                  <td><span style="color: var(--accent)">◑ Opt-in</span></td>
+                </tr>
+                <tr>
+                  <td>Peer review</td>
+                  <td><span style="color: var(--warn)">📋 Manual</span></td>
+                </tr>
+                <tr>
+                  <td>Prueba como estudiante</td>
+                  <td><span style="color: var(--warn)">📋 Manual</span></td>
+                </tr>
+              </table>
+              <div
+                style="
+                  margin-top: 8px;
+                  padding: 8px;
+                  background: var(--bg-soft);
+                  border-radius: var(--radius);
+                  font-size: 0.8em;
+                "
+              >
+                🔒 Nadie publica sin firma + validate-deps pasado
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="section-card" style="margin: 0">
+              <h3>❸ Post-publish</h3>
+              <p class="dim" style="margin: 8px 0; font-size: 0.85em">Curso en producción</p>
+              <table class="compact">
+                <tr>
+                  <td>Dashboard de KPIs</td>
+                  <td><span style="color: var(--good)">✅</span></td>
+                </tr>
+                <tr>
+                  <td>Alertas de anomalías</td>
+                  <td><span style="color: var(--good)">✅</span></td>
+                </tr>
+                <tr>
+                  <td>Activitymap en Moodle</td>
+                  <td><span style="color: var(--accent)">◑ Opt-in</span></td>
+                </tr>
+              </table>
+              <div
+                style="
+                  margin-top: 8px;
+                  padding: 8px;
+                  background: var(--bg-soft);
+                  border-radius: var(--radius);
+                  font-size: 0.8em;
+                "
+              >
+                📊 Si un módulo tiene 0 completados → alerta
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          El pipeline tiene tres etapas. En pre-build, la validación es automática: el validate-deps
+          corre al generar el blueprint y detecta gates rotos antes de escribir una línea de
+          contenido. En pre-publish, hay controles mixtos: validación automática contra Moodle, más
+          peer review y prueba manual como estudiante. En post-publish, monitoreamos KPIs y
+          recibimos alertas si algo anda mal. La clave está en que cada etapa tiene un gate que
+          impide avanzar si no se cumplió el control anterior.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC Course Kit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="14"></span>
+        </div>
+      </section>
+
+      <!-- 7. Peer Review CI/CD -->
+      <section class="slide" data-title="Peer Review">
+        <p class="kicker">Curso-as-Código</p>
+        <h2 class="h2">Peer review como Pull Request</h2>
+        <p class="lede" style="margin: 8px 0">
+          El mismo modelo que GitHub usa para revisar código, aplicado a cursos Moodle.
+        </p>
+        <div class="grid g2 mt-m">
+          <div class="card card-outline">
+            <h4>📝 El prompter escribe</h4>
+            <div class="code-block" style="font-size: 0.75em; margin-top: 8px">
+              <span class="dim2"># curso.yaml — sección Módulo 3</span><br />
+              unlock_requires:<br />
+              - item: <span class="diff-remove">"Notebook Funcion-Lambda"</span>
+            </div>
+          </div>
+          <div class="card card-outline">
+            <h4>👀 El revisor ve el diff</h4>
+            <div class="code-block" style="font-size: 0.75em; margin-top: 8px">
+              <span class="dim2">$ git diff curso.yaml</span><br />
+              unlock_requires:<br />
+              <span class="diff-remove"> - item: "Notebook Funcion-Lambda"</span><br />
+              <span class="diff-add"> + item: "Funciones Lambda"</span>
+            </div>
+          </div>
+        </div>
+        <div class="row-gates" style="margin-top: 16px">
+          <div class="gate-step" style="flex: 1; padding: 12px">
+            <div class="num" style="font-size: 1.2em">🔍</div>
+            <div class="label">Revisor corre validate-deps</div>
+          </div>
+          <div class="flow-arrow" style="font-size: 1.2em">→</div>
+          <div
+            class="gate-step"
+            style="flex: 1; padding: 12px; background: var(--good); color: white"
+          >
+            <div class="num" style="font-size: 1.2em; color: white">✅</div>
+            <div class="label" style="color: white">Aprueba o rechaza</div>
+          </div>
+          <div class="flow-arrow" style="font-size: 1.2em">→</div>
+          <div class="gate-step" style="flex: 1; padding: 12px">
+            <div class="num" style="font-size: 1.2em">🚀</div>
+            <div class="label">Se publica a Moodle</div>
+          </div>
+        </div>
+        <div class="notes">
+          Acá está la innovación clave. En lugar de depender de una sola persona para todo el ciclo,
+          cada cambio al curso pasa por un proceso de revisión como el que usan los desarrolladores
+          para código. El prompter escribe el blueprint. Otro miembro del equipo —el revisor— ve
+          exactamente qué cambió con un git diff, corre la validación automática, y aprueba o
+          rechaza. Esto garantiza que dos pares de ojos vean cada gate, cada condición, cada
+          dependencia, antes de que llegue a producción.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC Course Kit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="14"></span>
+        </div>
+      </section>
+
+      <!-- 8. Diff example + validate-deps -->
+      <section class="slide" data-title="Validación">
+        <p class="kicker">Automatizado</p>
+        <h2 class="h2">validate-deps detecta el error</h2>
+        <p class="lede" style="margin: 8px 0">
+          El validador corre automáticamente al generar el curso. Este es el output para el curso
+          269:
+        </p>
+        <div
+          style="
+            background: #1e1e2e;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            font-family: var(--font-mono);
+            font-size: 0.9em;
+            line-height: 1.8;
+            color: #cdd6f4;
+            margin-top: 16px;
+          "
+        >
+          <div><span style="color: #f38ba8">🔴 ERROR (1)</span></div>
+          <div style="margin-left: 20px">
+            <span style="color: #f38ba8">"Notebook Funcion-Lambda"</span> no existe en ninguna
+            sección del curso<br />
+            <span style="color: #6c7086">→ Afecta: Módulo 3 (bloqueado permanentemente)</span><br />
+            <span style="color: #6c7086">→ Cascada: Cierre también bloqueado</span>
+          </div>
+          <div style="margin-top: 12px"><span style="color: #f9e2af">⚠️ ADVERTENCIA (1)</span></div>
+          <div style="margin-left: 20px">
+            <span style="color: #f9e2af">"Botón al módulo 2"</span> es type=label — no soporta
+            completion tracking<br />
+            <span style="color: #6c7086">→ Si se usa como gate, nunca se completará</span>
+          </div>
+          <div style="margin-top: 16px; border-top: 1px solid #313244; padding-top: 12px">
+            <span style="color: #a6e3a1">💡 Sugerencia:</span> ¿Querés corregir "Notebook
+            Funcion-Lambda" antes de continuar?
+          </div>
+        </div>
+        <div class="notes">
+          Esto es lo que el validador produce automáticamente. Detecta el gate roto, la cascada, y
+          hasta las advertencias sobre recursos que no soportan completion tracking. Si el equipo
+          hubiera tenido esto antes de publicar el curso 269, el error se habría detectado en el
+          momento cero, antes de que cualquier estudiante lo viera.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC Course Kit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="14"></span>
+        </div>
+      </section>
+
+      <!-- 9. Manual Controls -->
+      <section class="slide" data-title="Controles Manuales">
+        <p class="kicker">Intervención humana</p>
+        <h2 class="h2">Puntos de control obligatorios</h2>
+        <p class="dim" style="margin: 8px 0">
+          Cada fase del kit tiene un checklist que <strong>alguien debe firmar</strong> antes de
+          avanzar.
+        </p>
+        <table class="compact" style="margin-top: 16px">
+          <thead>
+            <tr>
+              <th>Fase</th>
+              <th>Control</th>
+              <th>Responsable</th>
+              <th>¿Obligatorio?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>01-Fundación</td>
+              <td>Objetivos definidos, narrativa trazada</td>
+              <td>Content lead</td>
+              <td><span style="color: var(--good)">✅</span></td>
+            </tr>
+            <tr>
+              <td>02-Scaffold</td>
+              <td>Estructura en Moodle, gates configurados</td>
+              <td>Dev lead</td>
+              <td><span style="color: var(--good)">✅</span></td>
+            </tr>
+            <tr>
+              <td>03-Contenido</td>
+              <td>HTML generado, links verificados</td>
+              <td>Prompter</td>
+              <td><span style="color: var(--good)">✅</span></td>
+            </tr>
+            <tr style="background: var(--bg-soft); font-weight: 600">
+              <td>04-Revisión</td>
+              <td>QA + validate-deps + <strong>peer review + firma</strong></td>
+              <td>Peer reviewer</td>
+              <td><span style="color: var(--bad)">🔴 GATE</span></td>
+            </tr>
+            <tr>
+              <td>05-Publicación</td>
+              <td>Subido a Moodle, verificado como estudiante</td>
+              <td>Publisher</td>
+              <td><span style="color: var(--good)">✅</span></td>
+            </tr>
+            <tr>
+              <td>06-Mantenimiento</td>
+              <td>KPIs revisados semanalmente</td>
+              <td>Coordinator</td>
+              <td><span style="color: var(--good)">✅</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div
+          style="
+            margin-top: 16px;
+            padding: 12px;
+            background: var(--bg-soft);
+            border-radius: var(--radius);
+            font-size: 0.85em;
+          "
+        >
+          <strong>🔴 La Fase 04 es el punto de corte:</strong> nada se publica sin validate-deps
+          pasado, checklist de QA completo, peer review aprobado y firma del revisor.
+        </div>
+        <div class="notes">
+          El proceso no es solo automático. Definimos puntos de control manual obligatorios en cada
+          fase. El más importante es la Fase 04, Revisión: es el gate que impide publicar si no se
+          cumplen tres condiciones: validate-deps pasado, QA checklist completo, y peer review
+          aprobado con firma. Esto asegura que ningún curso llegue a producción sin al menos dos
+          pares de ojos que lo hayan revisado.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC Course Kit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="14"></span>
+        </div>
+      </section>
+
+      <!-- 10. Options Comparison -->
+      <section class="slide" data-title="Herramientas">
+        <p class="kicker">Opciones de validación visual</p>
+        <h2 class="h2">Múltiples niveles, un solo pipeline</h2>
+        <table class="compact" style="margin-top: 16px">
+          <thead>
+            <tr>
+              <th>Herramienta</th>
+              <th>Tipo</th>
+              <th>Setup</th>
+              <th>Uso</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>validate-deps.ts</strong></td>
+              <td>Script standalone (Bun/TS)</td>
+              <td><span style="color: var(--good)">0</span></td>
+              <td><span class="tag tag-core">Siempre</span> al generar</td>
+            </tr>
+            <tr>
+              <td><strong>Mermaid CLI</strong></td>
+              <td>Diagrama SVG desde texto</td>
+              <td><code>npx @mermaid-js/mermaid-cli</code></td>
+              <td>Diagrama estático en docs</td>
+            </tr>
+            <tr>
+              <td><strong>Graphify</strong></td>
+              <td>Pipeline Python + grafo interactivo</td>
+              <td><code>pip install graphifyy[gemini]</code></td>
+              <td><span class="tag tag-opt">Opt-in</span> exploración visual</td>
+            </tr>
+            <tr>
+              <td><strong>Moodle activitymap</strong></td>
+              <td>Plugin Moodle nativo</td>
+              <td>Instalación server-side</td>
+              <td><span class="tag tag-opt">Opt-in</span> en producción</td>
+            </tr>
+            <tr>
+              <td><strong>Moodle block_availdep</strong></td>
+              <td>Bloque Moodle en sidebar</td>
+              <td>Instalación server-side</td>
+              <td><span class="tag tag-opt">Opt-in</span> vista rápida</td>
+            </tr>
+          </tbody>
+        </table>
+        <div
+          style="
+            margin-top: 16px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+          "
+        >
+          <span class="tag tag-core">validate-deps: SIEMPRE</span>
+          <span class="tag" style="background: #e0e7ff; color: #3730a3"
+            >Graphify/Mermaid: opt-in PRE-PUBLISH</span
+          >
+          <span class="tag tag-opt">Activitymap: opt-in PRODUCCIÓN</span>
+        </div>
+        <div class="notes">
+          No tenemos que elegir una sola herramienta. validate-deps corre siempre, es liviano y no
+          requiere setup. Si el equipo quiere exploración visual, puede optar por Graphify que
+          genera un grafo interactivo. Y si quieren que los estudiantes también vean las
+          dependencias, el plugin activitymap de Moodle lo muestra nativamente en el curso.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC Course Kit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="14"></span>
+        </div>
+      </section>
+
+      <!-- 11. Cost -->
+      <section class="slide center tc" data-title="Costo">
+        <div>
+          <p class="kicker">Inversión</p>
+          <h1 class="h1 anim-rise-in" data-anim="rise-in">
+            Costo total: <span style="color: var(--good)">$0</span>
+          </h1>
+          <p class="lede" style="margin: 8px auto">Todo el stack es open source o free tier.</p>
+          <div class="grid g3 mt-l" style="text-align: left">
+            <div class="card card-outline">
+              <h4>🟢 CLI + validación</h4>
+              <p class="dim">TypeScript + Bun. Cero dependencias externas.</p>
+              <div style="margin-top: 8px"><span class="tag tag-core">Interno</span></div>
+            </div>
+            <div class="card card-outline">
+              <h4>🟢 Agente + LLM</h4>
+              <p class="dim">Gemini CLI + Gemini API (Free Tier). Sin tarjeta.</p>
+              <div style="margin-top: 8px"><span class="tag tag-free">Free</span></div>
+            </div>
+            <div class="card card-outline">
+              <h4>🟢 Visualización</h4>
+              <p class="dim">Graphify + activitymap. Open source.</p>
+              <div style="margin-top: 8px"><span class="tag tag-free">Open Source</span></div>
+            </div>
+          </div>
+          <p style="margin-top: 20px; font-size: 0.85em; color: var(--text-2)">
+            La única inversión es el tiempo de implementación inicial: ~3 semanas para el piloto.
+          </p>
+        </div>
+        <div class="notes">
+          El costo total es cero dólares. Todo lo que proponemos es open source o free tier. El CLI
+          se desarrolla internamente en TypeScript, el agente que usan ya es Gemini CLI que es
+          gratis, el LLM corre con el Free Tier de Gemini que no requiere tarjeta, y las
+          herramientas visuales son open source. La única inversión real es el tiempo de
+          implementación: aproximadamente tres semanas para tener un piloto funcionando.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC Course Kit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="14"></span>
+        </div>
+      </section>
+
+      <!-- 12. Roadmap -->
+      <section class="slide" data-title="Roadmap">
+        <p class="kicker">Plan de implementación</p>
+        <h2 class="h2">3 semanas al piloto</h2>
+        <div style="margin-top: 20px">
+          <div style="display: flex; gap: 12px; margin-bottom: 12px">
+            <div
+              style="
+                flex: 1;
+                padding: 16px;
+                background: var(--surface);
+                border-radius: var(--radius-lg);
+                border-left: 4px solid var(--accent);
+              "
+            >
+              <div style="font-size: 0.8em; color: var(--accent); font-weight: 700">Semana 1</div>
+              <div style="font-weight: 600">Core</div>
+              <ul
+                style="font-size: 0.8em; color: var(--text-2); margin-top: 8px; padding-left: 16px"
+              >
+                <li>Schema generalizado</li>
+                <li>validate-deps.ts</li>
+                <li>Integración con generador</li>
+              </ul>
+            </div>
+            <div
+              style="
+                flex: 1;
+                padding: 16px;
+                background: var(--surface);
+                border-radius: var(--radius-lg);
+                border-left: 4px solid var(--warn);
+              "
+            >
+              <div style="font-size: 0.8em; color: var(--warn); font-weight: 700">Semana 2</div>
+              <div style="font-weight: 600">QA + Revisión</div>
+              <ul
+                style="font-size: 0.8em; color: var(--text-2); margin-top: 8px; padding-left: 16px"
+              >
+                <li>Peer review templates</li>
+                <li>Validación vs Moodle real</li>
+                <li>Checklist por fase</li>
+              </ul>
+            </div>
+            <div
+              style="
+                flex: 1;
+                padding: 16px;
+                background: var(--surface);
+                border-radius: var(--radius-lg);
+                border-left: 4px solid var(--good);
+              "
+            >
+              <div style="font-size: 0.8em; color: var(--good); font-weight: 700">Semana 3</div>
+              <div style="font-weight: 600">Visual + Piloto</div>
+              <ul
+                style="font-size: 0.8em; color: var(--text-2); margin-top: 8px; padding-left: 16px"
+              >
+                <li>Graphify opt-in</li>
+                <li>Mermaid diagramas</li>
+                <li>Piloto con 1 curso real</li>
+              </ul>
+            </div>
+          </div>
+          <div
+            style="
+              padding: 16px;
+              background: var(--bg-soft);
+              border-radius: var(--radius-lg);
+              text-align: center;
+            "
+          >
+            <strong>Semana 4+:</strong> Feedback → ajustes → rollout a todos los cursos
+          </div>
+        </div>
+        <div class="notes">
+          El plan es concreto: tres semanas para llegar al piloto. Semana uno: el core del generador
+          con el schema generalizado y el validador de dependencias. Semana dos: los templates de
+          peer review y la validación contra Moodle real usando el usuario admin. Semana tres: las
+          herramientas visuales opt-in y el piloto con un curso real. Después de eso, feedback,
+          ajustes, y rollout al resto de los cursos.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC Course Kit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="14"></span>
+        </div>
+      </section>
+
+      <!-- 13. CTA -->
+      <section class="slide center tc" data-title="CTA">
+        <div style="max-width: 700px">
+          <p class="kicker">Próximos pasos</p>
+          <h1 class="h1 anim-rise-in" data-anim="rise-in">¿Empezamos?</h1>
+          <p class="lede" style="margin: 16px auto">
+            Ya tenemos la evidencia, el plan, y el stack listo.<br />La única pregunta es
+            <strong>cuándo</strong>.
+          </p>
+          <div style="margin-top: 32px; display: flex; gap: 16px; justify-content: center">
+            <div
+              style="
+                background: var(--surface);
+                border-radius: var(--radius-lg);
+                padding: 20px;
+                flex: 1;
+                text-align: left;
+              "
+            >
+              <div style="font-size: 1.2em; margin-bottom: 8px">📋</div>
+              <h4>Revisar propuesta</h4>
+              <p class="dim" style="font-size: 0.85em">docs/pitch/PROPUESTA-unc-course-kit.md</p>
+            </div>
+            <div
+              style="
+                background: var(--surface);
+                border-radius: var(--radius-lg);
+                padding: 20px;
+                flex: 1;
+                text-align: left;
+              "
+            >
+              <div style="font-size: 1.2em; margin-bottom: 8px">🔑</div>
+              <h4>Obtener admin Moodle</h4>
+              <p class="dim" style="font-size: 0.85em">
+                Necesitamos acceso para validar contra cursos reales
+              </p>
+            </div>
+            <div
+              style="
+                background: var(--surface);
+                border-radius: var(--radius-lg);
+                padding: 20px;
+                flex: 1;
+                text-align: left;
+              "
+            >
+              <div style="font-size: 1.2em; margin-bottom: 8px">🚀</div>
+              <h4>Piloto</h4>
+              <p class="dim" style="font-size: 0.85em">1 curso real en 3 semanas</p>
+            </div>
+          </div>
+        </div>
+        <div class="notes">
+          La propuesta está lista. Tenemos la evidencia del curso 269, el plan detallado, el stack
+          técnico validado, y todo es de costo cero. Los próximos pasos son: revisar esta propuesta,
+          obtener un usuario admin de Moodle para poder validar contra cursos reales, y tomar la
+          decisión de arrancar el piloto. En tres semanas podemos tener el primer curso funcionando
+          con el nuevo proceso.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC Course Kit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="14"></span>
+        </div>
+      </section>
+
+      <!-- 14. Thanks -->
+      <section class="slide center tc" data-title="Thanks">
+        <div>
+          <h1 class="h1" style="font-size: 120px; line-height: 1; margin-bottom: 24px">
+            <span class="gradient-text">Gracias</span>
+          </h1>
+          <p class="lede" style="max-width: 500px; margin: 0 auto">
+            Este documento es el punto de partida.<br />
+            Cuando estén listos, arrancamos.
+          </p>
+          <p class="dim" style="margin-top: 32px">UNC Campus Virtual · Junio 2026</p>
+          <div style="margin-top: 24px; display: flex; gap: 8px; justify-content: center">
+            <span class="tag tag-core">validate-deps</span>
+            <span class="tag tag-free">Gemini CLI</span>
+            <span class="tag tag-opt">Graphify</span>
+            <span class="tag tag-free">$0</span>
+          </div>
+        </div>
+        <div class="notes">
+          Gracias por su tiempo. Esta propuesta es el punto de partida, no el destino. Cuando el
+          equipo esté listo para dar el siguiente paso, tenemos todo listo para arrancar. La
+          inversión es mínima, el riesgo es bajo, y el beneficio —cero bugs de dependencias— es
+          concreto y medible.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC Course Kit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="14"></span>
+        </div>
+      </section>
+    </div>
+    <script src="assets/runtime.js"></script>
+  </body>
+</html>

@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Propuesta de Servicios — Campus Virtual UNC</title>
+    <style>
+      @page {
+        margin: 25mm 20mm;
+        size: A4;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          'Segoe UI',
+          system-ui,
+          -apple-system,
+          sans-serif;
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 24px;
+        color: #1a1a2e;
+        line-height: 1.6;
+        font-size: 15px;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      header {
+        border-bottom: 3px solid #1a3a8a;
+        padding-bottom: 20px;
+        margin-bottom: 32px;
+      }
+      header h1 {
+        font-size: 28px;
+        color: #1a3a8a;
+        margin-bottom: 4px;
+      }
+      header .sub {
+        color: #555;
+        font-size: 14px;
+      }
+      .meta {
+        background: #f0f3f8;
+        padding: 14px 18px;
+        border-radius: 8px;
+        font-size: 14px;
+        margin-bottom: 28px;
+        line-height: 1.8;
+      }
+      .meta strong {
+        color: #1a3a8a;
+      }
+      h2 {
+        font-size: 22px;
+        color: #1a3a8a;
+        margin: 32px 0 12px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid #e0e4ed;
+      }
+      h3 {
+        font-size: 17px;
+        color: #2d3a5c;
+        margin: 18px 0 8px;
+      }
+      p {
+        margin-bottom: 10px;
+      }
+      ul {
+        padding-left: 22px;
+        margin-bottom: 14px;
+      }
+      li {
+        margin-bottom: 5px;
+      }
+      .contexto-box {
+        background: #f6f8fc;
+        border-left: 4px solid #1a3a8a;
+        padding: 14px 18px;
+        border-radius: 0 8px 8px 0;
+        margin-bottom: 24px;
+        font-size: 14px;
+      }
+      .tier {
+        background: #fff;
+        border: 1px solid #dde2ed;
+        border-radius: 10px;
+        padding: 24px;
+        margin-bottom: 28px;
+      }
+      .tier.accent {
+        border-color: #1a3a8a;
+        box-shadow: 0 4px 16px rgba(26, 58, 138, 0.08);
+      }
+      .tier-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 14px;
+      }
+      .tier-header h2 {
+        margin: 0;
+        padding: 0;
+        border: none;
+      }
+      .tag {
+        display: inline-block;
+        padding: 3px 12px;
+        border-radius: 99px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+      .tag-mvp1 {
+        background: #eef2ff;
+        color: #1a3a8a;
+      }
+      .tag-mvp2 {
+        background: #e8eeff;
+        color: #3466d0;
+      }
+      .tag-mvp3 {
+        background: #1a3a8a;
+        color: #fff;
+      }
+      .tag-time {
+        background: #f0f3f8;
+        color: #555;
+        font-weight: 600;
+      }
+      .entregables {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 10px;
+      }
+      .entregable {
+        background: #f8f9fc;
+        padding: 10px 14px;
+        border-radius: 6px;
+        font-size: 14px;
+      }
+      .entregable strong {
+        color: #1a3a8a;
+      }
+      .price-box {
+        background: linear-gradient(135deg, #1a3a8a, #3466d0);
+        color: #fff;
+        border-radius: 8px;
+        padding: 18px 20px;
+        margin-top: 16px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 24px;
+        align-items: center;
+      }
+      .price-box .modulos {
+        font-size: 30px;
+        font-weight: 900;
+      }
+      .price-box .detail {
+        font-size: 14px;
+        opacity: 0.85;
+      }
+      .price-box .detail span {
+        display: block;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 14px 0 24px;
+        font-size: 14px;
+      }
+      th {
+        background: #1a3a8a;
+        color: #fff;
+        padding: 10px 12px;
+        text-align: left;
+        font-weight: 600;
+      }
+      td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #e0e4ed;
+      }
+      tr:nth-child(even) td {
+        background: #f8f9fc;
+      }
+      .check {
+        color: #1a7a1a;
+        font-weight: 700;
+        font-size: 16px;
+      }
+      .empty {
+        color: #c0c4d0;
+      }
+      .terms {
+        background: #f6f8fc;
+        border-radius: 8px;
+        padding: 20px 22px;
+      }
+      .terms dt {
+        font-weight: 700;
+        color: #1a3a8a;
+        margin-top: 12px;
+      }
+      .terms dd {
+        margin-left: 0;
+        font-size: 14px;
+        color: #3a4055;
+      }
+      .next-steps {
+        counter-reset: step;
+        list-style: none;
+        padding: 0;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .next-step {
+        background: #f0f3f8;
+        padding: 14px 18px;
+        border-radius: 8px;
+        font-size: 14px;
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+      }
+      .next-step .num {
+        background: #1a3a8a;
+        color: #fff;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 13px;
+        flex-shrink: 0;
+      }
+      footer {
+        margin-top: 36px;
+        padding-top: 16px;
+        border-top: 1px solid #e0e4ed;
+        font-size: 12px;
+        color: #888;
+        text-align: center;
+      }
+      .print-btn {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        background: #1a3a8a;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        z-index: 999;
+      }
+      .print-btn:hover {
+        background: #3466d0;
+      }
+      @media print {
+        .print-btn {
+          display: none;
+        }
+        body {
+          margin: 0;
+          padding: 0;
+          max-width: none;
+          font-size: 13px;
+        }
+        .tier {
+          break-inside: avoid;
+        }
+        .price-box {
+          break-inside: avoid;
+        }
+        table {
+          font-size: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <button class="print-btn" onclick="window.print()">🖨 Imprimir / Guardar PDF</button>
+
+    <header>
+      <h1>Propuesta de Servicios Profesionales</h1>
+      <p class="sub">Campus Virtual · Universidad Nacional de Córdoba</p>
+    </header>
+
+    <div class="meta">
+      <strong>Preparado para:</strong> Patricia Altamirano, Dirección de Campus Virtual<br />
+      <strong>Fecha:</strong> Junio 2026<br />
+      <strong>Moneda de referencia:</strong> Módulo UNC ($51.700 ARS c/u, valor 2026) · ARS · USD
+      (referencia)
+    </div>
+
+    <section>
+      <h2>Contexto</h2>
+      <p>El Campus Virtual UNC enfrenta tres desafíos que crecen con cada cohorte:</p>
+      <ol>
+        <li>
+          <strong>Abandono silencioso</strong> — estudiantes inactivos en el Módulo 1 sin
+          intervención automatizada. Sin un sistema de rescate, se pierden.
+        </li>
+        <li>
+          <strong>Decisiones a ciegas</strong> — sin un dashboard de actividades, los responsables
+          académicos no saben qué curso tiene 0% o 100% de completitud.
+        </li>
+        <li>
+          <strong>Fricción de punta a punta</strong> — desde la inducción hasta la certificación,
+          hay vacíos que cada curso resuelve por su cuenta, generando inconsistencia y abandono.
+        </li>
+      </ol>
+      <div class="contexto-box">
+        Esta propuesta ofrece <strong>tres niveles de intervención incremental</strong>. Cada nivel
+        suma capacidades sobre el anterior. La Universidad elige según prioridad y presupuesto.
+      </div>
+    </section>
+
+    <!-- MVP 1 -->
+    <div class="tier accent">
+      <div class="tier-header">
+        <h2>MVP 1 — Rescate Inmediato</h2>
+        <div>
+          <span class="tag tag-mvp1">NIVEL 1</span> <span class="tag tag-time">6–8 semanas</span>
+        </div>
+      </div>
+      <p>
+        Activación del plugin <em>mod_reengagement</em> en 3 cursos piloto con comunicaciones
+        automatizadas de rescate y mantenimiento de ritmo.
+      </p>
+      <h3>Entregables</h3>
+      <div class="entregables">
+        <div class="entregable">
+          <strong>6 emails HTML</strong><br />2 por curso: rescate (M1) y mantenimiento (M2)
+        </div>
+        <div class="entregable">
+          <strong>3 cursos cubiertos</strong><br />IA y Automatización, Python 1, Yoga y Mindfulness
+        </div>
+        <div class="entregable">
+          <strong>Configuración en producción</strong><br />Plugin instalado y parametrizado en los
+          3 cursos
+        </div>
+        <div class="entregable">
+          <strong>Pruebas de disparo</strong><br />Testing en DEV con usuarios antes del lanzamiento
+        </div>
+        <div class="entregable">
+          <strong>Activación controlada</strong><br />Cron activado sin riesgo de envíos prematuros
+        </div>
+        <div class="entregable">
+          <strong>Analítica instrumentada</strong><br />KPIs: Reactivación (%), Tiempo de Respuesta,
+          Clics vs Finalización
+        </div>
+      </div>
+      <div class="price-box">
+        <span class="modulos">110–155 módulos</span>
+        <div class="detail">
+          <span>$5.700.000 – $8.000.000 ARS</span>
+          <span>≈ USD 4.700 – 6.600</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MVP 2 -->
+    <div class="tier">
+      <div class="tier-header">
+        <h2>MVP 2 — Visibilidad</h2>
+        <div>
+          <span class="tag tag-mvp2">NIVEL 2</span> <span class="tag tag-time">10–14 semanas</span>
+        </div>
+      </div>
+      <p>
+        <strong>Todo MVP 1, más:</strong> un dashboard de actividades que da visibilidad a los
+        responsables académicos.
+      </p>
+      <h3>Entregables adicionales</h3>
+      <div class="entregables">
+        <div class="entregable">
+          <strong>Dashboard de actividades</strong><br />Construido sobre Moodle Configurable
+          Reports
+        </div>
+        <div class="entregable">
+          <strong>Tasa de completitud</strong><br />Visualización por actividad y por curso
+        </div>
+        <div class="entregable">
+          <strong>Alertas automáticas</strong><br />0% = posible bloqueo · 100% = posible anomalía
+        </div>
+        <div class="entregable">
+          <strong>Reportes exportables</strong><br />Para toma de decisiones de responsables
+          académicos
+        </div>
+        <div class="entregable">
+          <strong>Cruce de datos</strong><br />Emails de reenganche vs progreso real de actividades
+        </div>
+      </div>
+      <div class="price-box">
+        <span class="modulos">190–270 módulos</span>
+        <div class="detail">
+          <span>$9.800.000 – $14.000.000 ARS</span>
+          <span>≈ USD 8.100 – 11.600</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- MVP 3 -->
+    <div class="tier">
+      <div class="tier-header">
+        <h2>MVP 3 — Ciclo Completo</h2>
+        <div>
+          <span class="tag tag-mvp3">NIVEL 3</span> <span class="tag tag-time">16–22 semanas</span>
+        </div>
+      </div>
+      <p>
+        <strong>Todo MVP 2, más:</strong> inducción estudiantil y estandarización de cursos. El
+        paquete completo para el ciclo de vida del estudiante.
+      </p>
+      <h3>Entregables adicionales</h3>
+      <div class="entregables">
+        <div class="entregable">
+          <strong>Inducción estudiantil</strong><br />Tour de Automatriculación + Autoregistro
+        </div>
+        <div class="entregable">
+          <strong>Video de bienvenida</strong><br />Institucional, integrado al flujo de ingreso
+        </div>
+        <div class="entregable">
+          <strong>Mails de confirmación</strong><br />2 variantes: Automatriculación y Autoregistro
+        </div>
+        <div class="entregable">
+          <strong>Módulo 0</strong><br />Configurado en todos los cursos activos
+        </div>
+        <div class="entregable">
+          <strong>Exámenes auto-calificados</strong><br />Con progresión encadenada por módulo
+        </div>
+        <div class="entregable">
+          <strong>Certificados automatizados</strong><br />Emisión al completar requisitos del curso
+        </div>
+      </div>
+      <div class="price-box">
+        <span class="modulos">320–460 módulos</span>
+        <div class="detail">
+          <span>$16.500.000 – $23.800.000 ARS</span>
+          <span>≈ USD 13.600 – 19.600</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla comparativa -->
+    <section>
+      <h2>Tabla Comparativa</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Capacidad</th>
+            <th>MVP 1<br />Rescate</th>
+            <th>MVP 2<br />Visibilidad</th>
+            <th>MVP 3<br />Ciclo Completo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Emails de reenganche</td>
+            <td class="check">✓</td>
+            <td class="check">✓</td>
+            <td class="check">✓</td>
+          </tr>
+          <tr>
+            <td>Analítica de reenganche</td>
+            <td class="check">✓</td>
+            <td class="check">✓</td>
+            <td class="check">✓</td>
+          </tr>
+          <tr>
+            <td>Dashboard de actividades</td>
+            <td class="empty">—</td>
+            <td class="check">✓</td>
+            <td class="check">✓</td>
+          </tr>
+          <tr>
+            <td>Alertas automáticas</td>
+            <td class="empty">—</td>
+            <td class="check">✓</td>
+            <td class="check">✓</td>
+          </tr>
+          <tr>
+            <td>Inducción estudiantil</td>
+            <td class="empty">—</td>
+            <td class="empty">—</td>
+            <td class="check">✓</td>
+          </tr>
+          <tr>
+            <td>Estandarización de cursos</td>
+            <td class="empty">—</td>
+            <td class="empty">—</td>
+            <td class="check">✓</td>
+          </tr>
+          <tr style="border-top: 2px solid #1a3a8a; font-weight: 700">
+            <td>Módulos UNC</td>
+            <td>110–155</td>
+            <td>190–270</td>
+            <td>320–460</td>
+          </tr>
+          <tr style="font-weight: 600">
+            <td>Pesos (ARS)</td>
+            <td>$5.7M–$8.0M</td>
+            <td>$9.8M–$14.0M</td>
+            <td>$16.5M–$23.8M</td>
+          </tr>
+          <tr style="font-weight: 600">
+            <td>USD (referencia)</td>
+            <td>$4.7K–$6.6K</td>
+            <td>$8.1K–$11.6K</td>
+            <td>$13.6K–$19.6K</td>
+          </tr>
+          <tr>
+            <td>Tiempo estimado</td>
+            <td>6–8 semanas</td>
+            <td>10–14 semanas</td>
+            <td>16–22 semanas</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Términos -->
+    <section>
+      <h2>Términos de Pago</h2>
+      <dl class="terms">
+        <dt>Modalidad</dt>
+        <dd>Contratación de servicios profesionales informáticos bajo normativa UNC vigente.</dd>
+        <dt>Unidad de contratación</dt>
+        <dd>Módulo UNC (valor: <strong>$51.700 ARS</strong> según RR-2026-701-UNC-REC).</dd>
+        <dt>Ajuste por inflación</dt>
+        <dd>
+          Si el pago se demora más de 60 días corridos desde la fecha de factura, el monto en
+          módulos se recalcula al valor del módulo vigente al momento del pago efectivo.
+        </dd>
+        <dt>Hitos de facturación</dt>
+        <dd>
+          <strong>40%</strong> al inicio del proyecto<br />
+          <strong>30%</strong> a la entrega intermedia<br />
+          <strong>30%</strong> a la entrega final y aceptación
+        </dd>
+        <dt>Mantenimiento post-entrega (opcional)</dt>
+        <dd>
+          15% del valor del contrato por año. Incluye actualizaciones de seguridad, correcciones y
+          mejoras menores.
+        </dd>
+      </dl>
+    </section>
+
+    <!-- Próximos pasos -->
+    <section>
+      <h2>Próximos Pasos</h2>
+      <ol class="next-steps">
+        <li class="next-step">
+          <span class="num">1</span> Revisión y ajuste de alcance por parte de Campus Virtual
+        </li>
+        <li class="next-step">
+          <span class="num">2</span> Definición del nivel seleccionado (MVP 1, 2 o 3)
+        </li>
+        <li class="next-step">
+          <span class="num">3</span> Presentación formal a Prosecretaría de Informática (Ing.
+          Alfredo M. Montes)
+        </li>
+        <li class="next-step">
+          <span class="num">4</span> Firma de contrato e inicio de actividades
+        </li>
+      </ol>
+    </section>
+
+    <footer>
+      Esta propuesta tiene validez por 60 días desde la fecha de emisión.<br />
+      Los precios en módulos UNC se ajustan al valor del módulo vigente a la fecha de
+      contratación.<br />
+      Equivalencias en ARS y USD calculadas a tipo de cambio oficial estimado. Verificar al momento
+      de presentación.
+    </footer>
+  </body>
+</html>

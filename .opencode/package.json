@@ -1,0 +1,7 @@
+{
+  "name": "unc-opencode-extensions",
+  "private": true,
+  "dependencies": {
+    "@opencode-ai/plugin": "1.2.27"
+  }
+}

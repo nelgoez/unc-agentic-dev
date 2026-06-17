@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNC Campus Virtual — Entregables y Tiempos</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 0 20px;
+    color: #1a1a1a;
+    line-height: 1.5;
+  }
+  h1 { font-size: 1.4em; margin-bottom: 4px; }
+  h2 { font-size: 1.1em; margin: 28px 0 8px; border-bottom: 2px solid #2563eb; padding-bottom: 4px; }
+  p.sub { color: #666; font-size: 0.9em; margin: 0 0 20px; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 0.9em; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #e5e7eb; }
+  th { background: #f3f4f6; font-weight: 600; color: #374151; }
+  tr:last-child td { border-bottom: none; }
+  .total-row td { border-top: 2px solid #2563eb; font-weight: 600; }
+  .footer { color: #999; font-size: 0.8em; margin-top: 40px; border-top: 1px solid #e5e7eb; padding-top: 12px; }
+</style>
+</head>
+<body>
+
+<h1>UNC Campus Virtual</h1>
+<p class="sub">Propuesta de entregables y tiempos estimados</p>
+
+<h2>1. Templates HTML de email</h2>
+<table>
+  <tr><th>Entregable</th><th>Tiempo estimado</th></tr>
+  <tr><td>6 templates de reengagement (2 por curso: IA, Python, Yoga) — HTML inline, responsive, placeholders Moodle, deep links, bot&oacute;n CTA, link de soporte</td><td>3 semanas</td></tr>
+  <tr><td>2 templates de inducci&oacute;n (confirmaci&oacute;n de autoregistro y automatriculaci&oacute;n)</td><td>1 semana</td></tr>
+  <tr class="total-row"><td>Total templates</td><td>4 semanas</td></tr>
+</table>
+
+<h2>2. Configuraci&oacute;n del plugin Reengagement</h2>
+<table>
+  <tr><th>Entregable</th><th>Tiempo estimado</th></tr>
+  <tr><td>Configuraci&oacute;n en entorno DEV: par&aacute;metros, IDs de actividades, fechas, condiciones de disparo para los 3 cursos</td><td>2 semanas</td></tr>
+  <tr><td>Pruebas de disparo con usuarios de testing y ajustes</td><td>1 semana</td></tr>
+  <tr><td>Pase a producci&oacute;n: instalaci&oacute;n del plugin, configuraci&oacute;n, checklist de IDs, activaci&oacute;n de cron y monitoreo inicial</td><td>2 semanas</td></tr>
+  <tr class="total-row"><td>Total Reengagement</td><td>5 semanas</td></tr>
+</table>
+
+<h2>3. Dashboard de an&aacute;lisis de actividades</h2>
+<table>
+  <tr><th>Entregable</th><th>Tiempo estimado</th></tr>
+  <tr><td>Queries SQL para completitud por actividad y por curso en Configurable Reports</td><td>2 semanas</td></tr>
+  <tr><td>Configuraci&oacute;n visual del dashboard y alertas para actividades con 0% o 100% de completitud</td><td>1 semana</td></tr>
+  <tr class="total-row"><td>Total Dashboard</td><td>3 semanas</td></tr>
+</table>
+
+<h2>4. Anal&iacute;tica de reengagement</h2>
+<table>
+  <tr><th>Entregable</th><th>Tiempo estimado</th></tr>
+  <tr><td>Query de cruce de eventos Moodle: <code>email_sent</code> + <code>course_module_completion_updated</code> para calcular tasa de reactivaci&oacute;n y tiempo de respuesta</td><td>1 semana</td></tr>
+</table>
+
+<h2>5. Inducci&oacute;n de estudiantes — M&oacute;dulo 0</h2>
+<table>
+  <tr><th>Entregable</th><th>Tiempo estimado</th></tr>
+  <tr><td>Estructuraci&oacute;n del contenido introductorio y carga en Moodle para todos los cursos</td><td>1 semana</td></tr>
+</table>
+
+<h2>Resumen</h2>
+<table>
+  <tr><th>Fase</th><th>Semanas</th></tr>
+  <tr><td>Templates HTML de email (8 en total)</td><td>4</td></tr>
+  <tr><td>Plugin Reengagement (DEV + PROD)</td><td>5</td></tr>
+  <tr><td>Dashboard de actividades</td><td>3</td></tr>
+  <tr><td>Query de anal&iacute;tica</td><td>1</td></tr>
+  <tr><td>M&oacute;dulo 0</td><td>1</td></tr>
+  <tr class="total-row"><td>Total estimado</td><td>14 semanas</td></tr>
+</table>
+
+<div class="footer">Junio 2026</div>
+
+</body>
+</html>

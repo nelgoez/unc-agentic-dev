@@ -1,0 +1,116 @@
+{
+  // UNC Campus Virtual — OpenCode shared team config.
+  // Secrets use {env:VAR} placeholders resolved from local .env (via `bun run opencode`).
+  // See .env.example for required vars.
+  "$schema": "https://opencode.ai/config.json",
+
+  // Instructions — context files pre-loaded every session.
+  // Saves tokens by avoiding repeated Read-tool calls.
+  "instructions": [
+    ".context/unc-overview.md",
+    ".context/cursos-activos.md",
+    ".context/course-kit-pitch.md",
+  ],
+
+  // MCP servers for the UNC ecosystem
+  "mcp": {
+    "context7": {
+      "type": "local",
+      "command": ["bunx", "-y", "@upstash/context7-mcp"],
+      "enabled": true,
+    },
+    "tavily": {
+      "type": "local",
+      "command": [
+        "bunx",
+        "-y",
+        "mcp-remote",
+        "https://mcp.tavily.com/mcp/?tavilyApiKey={env:TAVILY_API_KEY}",
+      ],
+      "enabled": false,
+    },
+    "playwright": {
+      "type": "local",
+      "command": [
+        "npx",
+        "@playwright/mcp@latest",
+        "--caps",
+        "vision,pdf,testing,tracing,tabs",
+        "--timeout-action",
+        "10000",
+        "--timeout-navigation",
+        "30000",
+      ],
+      "enabled": false,
+    },
+    "supabase": {
+      "type": "remote",
+      "url": "https://mcp.supabase.com/mcp?project_ref={env:SUPABASE_PROJECT_REF}",
+      "enabled": false,
+    },
+  },
+
+  // Permissions — safe defaults, allow common dev tools
+  "permission": {
+    "edit": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "bash": {
+      "*": "ask",
+
+      "bun *": "allow",
+      "bunx *": "allow",
+      "npm *": "allow",
+      "npx *": "allow",
+
+      "git *": "allow",
+      "gh *": "allow",
+
+      "ls *": "allow",
+      "cat *": "allow",
+      "echo *": "allow",
+      "mkdir *": "allow",
+      "cp *": "allow",
+      "mv *": "allow",
+      "find *": "allow",
+      "grep *": "allow",
+      "rg *": "allow",
+      "curl *": "allow",
+      "supabase *": "allow",
+
+      "rm -rf *": "deny",
+      "sudo rm *": "deny",
+      "sudo *": "deny",
+      "git push --force *": "deny",
+      "git push -f *": "deny",
+      "git reset --hard *": "deny",
+      "git clean -fd *": "deny",
+      "git branch -D *": "deny",
+      "chmod 777 *": "deny",
+    },
+  },
+
+  // Custom commands for UNC workflows
+  "command": {
+    "resume": {
+      "description": "Resume last session — loads progress files from .context/",
+      "template": "You are resuming a previously interrupted session for $ARGUMENTS.\n\nLoad the current state:\n@.context/$ARGUMENTS/PROGRESS.md\n@.context/$ARGUMENTS/ROADMAP.md\n\nSummarize what was in progress and suggest next action.\nSkip missing files gracefully.",
+      "agent": "plan",
+    },
+    "reengagement": {
+      "description": "Work on Moodle Reengagement plugin — loads implementation plan",
+      "template": "Load and analyze the Reengagement implementation context:\n\n1. Read @.context/reengagement/plan-implementacion.md\n2. Read @.context/reengagement/cursos-config.md\n\nReport:\n- Current phase and status\n- Pending actions per course (IA, Python, Yoga)\n- Next deadline or milestone",
+      "agent": "plan",
+    },
+    "dashboard": {
+      "description": "Work on Activity Analysis Dashboard — loads config and status",
+      "template": "Load the dashboard context:\n\n1. Read @.context/dashboard/requirements.md\n2. Read @.context/dashboard/PROGRESS.md\n\nReport current dashboard state, next features, and any blockers.",
+      "agent": "plan",
+    },
+    "pitch": {
+      "description": "Load UNC Course Kit pitch and project state — proposal to management",
+      "template": "Load the Course Kit pitch context:\n\n1. Read @.context/course-kit-pitch.md\n2. Read @docs/pitch/PROPUESTA-unc-course-kit.md\n\nSummarize:\n- What is being proposed\n- Current project state\n- Next steps needed to move forward",
+      "agent": "plan",
+    },
+  },
+}
