@@ -10,6 +10,7 @@
     ".context/unc-overview.md",
     ".context/cursos-activos.md",
     ".context/course-kit-pitch.md",
+    ".context/cicd-course-pipeline.md",
   ],
 
   // MCP servers for the UNC ecosystem
