@@ -25,6 +25,10 @@ El caso del **curso 269** (`reports/audit/audit-course-269.html`) motivó esta p
 - Cierre bloqueado en cascada
 - Detectado solo cuando un estudiante lo reportó
 
+## Principio de diseño
+
+**Non-Dev First** — el pipeline prioriza que prompters no-desarrolladores no configuren nada. Toda optimización (split de prompts, compresión de contexto) corre automágica desde el kit. Ver sección 10 en la propuesta para reglas detalladas.
+
 ## Stack técnico
 
 Todo el stack es open source / free tier (costo $0):

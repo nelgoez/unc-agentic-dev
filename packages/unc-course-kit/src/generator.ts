@@ -84,8 +84,9 @@ function renderGeminiSettings(config: CursoConfig): string {
       },
       context: {
         fileName: ['context/curso-overview.md'],
-        includeDirectories: ['context/fases'],
-        loadFromIncludeDirectories: true,
+        // Non-Dev First: no auto-load all phases — loads only the overview.
+        // Prompter loads the active phase manually via @context/fases/XX-*.md
+        // This keeps context under MECW (<1000 tokens per phase).
       },
       model: {
         name: 'gemini-2.5-flash',
@@ -125,7 +126,8 @@ function renderCursoOverview(config: CursoConfig): string {
     0,
   )
 
-  return `# ${config.name}
+  // Keep overview compact — per-module detail loaded only when needed via @ref
+  const overview = `# ${config.name}
 
 ${config.description}
 
@@ -144,7 +146,7 @@ ${config.modules
 ${m.activities
   .map(
     (a) =>
-      `- [${a.mandatory ? 'x' : ' '}] **${a.name}** (${a.type})${a.gatesToNextModule ? ' → *requisito para siguiente módulo*' : ''}${a.rescueTrigger ? ' — 🆘 rescue' : ''}${a.maintenanceTrigger ? ' — 🔄 maintenance' : ''}`,
+      `- [${a.mandatory ? 'x' : ' '}] **${a.name}** (${a.type})${a.gatesToNextModule ? ' → gate' : ''}${a.rescueTrigger ? ' rescue' : ''}${a.maintenanceTrigger ? ' maint' : ''}`,
   )
   .join('\n')}`,
   )
@@ -152,21 +154,16 @@ ${m.activities
 
 ## Reengagement
 
-- Rescue email after ${config.reengagement.rescueDelayHours}h of inactivity
-- Maintenance email after ${config.reengagement.maintenanceDelayHours}h of inactivity
-
-## Actividades con Rescue Trigger
-
-${config.modules
-  .flatMap((m) =>
-    m.activities.filter((a) => a.rescueTrigger).map((a) => `- **${m.name}** → ${a.name}`),
-  )
-  .join('\n')}
+- Rescue email after ${config.reengagement.rescueDelayHours}h
+- Maintenance email after ${config.reengagement.maintenanceDelayHours}h
 
 ---
 
 *Generado por unc-course-kit*
 `
+
+  contextBudget('curso-overview', overview)
+  return overview
 }
 
 function formatActivities(config: CursoConfig): string {
@@ -187,6 +184,57 @@ ${m.activities
     .join('\n\n')
 }
 
+/**
+ * Estimate token count for a string.
+ * ~4 chars per token for Spanish text (conservative).
+ */
+function estimateTokens(text: string): number {
+  return Math.ceil(text.length / 4)
+}
+
+/**
+ * Context budget threshold — warn if estimated tokens exceed this.
+ * Based on MECW research (Paulsen 2025): degradation starts ~1000 tokens.
+ */
+const CONTEXT_BUDGET_WARN = 800
+const CONTEXT_BUDGET_CRITICAL = 1500
+
+/**
+ * Check prompt size against budget. Logs warning if exceeded.
+ * Non-dev first: no config needed, runs automatically.
+ */
+function contextBudget(label: string, prompt: string): void {
+  const tokens = estimateTokens(prompt)
+  if (tokens >= CONTEXT_BUDGET_CRITICAL) {
+    console.warn(
+      `  ⚠️  [${label}] ~${tokens} tokens — CRÍTICO (MECW research: degradación probable). Partí este prompt en módulos.`,
+    )
+  } else if (tokens >= CONTEXT_BUDGET_WARN) {
+    console.warn(
+      `  ⚠️  [${label}] ~${tokens} tokens — cerca del límite. Considerá partir por módulo.`,
+    )
+  } else {
+    console.log(`  ✓  [${label}] ~${tokens} tokens — dentro del budget.`)
+  }
+}
+
+/**
+ * Render a single module's activities table (for per-module prompting).
+ * Smaller context than formatActivities() — keeps prompts under MECW.
+ */
+function formatModuleActivities(module: CursoConfig['modules'][0]): string {
+  return `### ${module.name}
+
+| # | Actividad | Tipo | Obligatoria | Requisito | Criteria | Rescue | Tiempo |
+|---|-----------|------|-------------|-----------|----------|--------|--------|
+${module.activities
+  .map(
+    (a) =>
+      `| ${a.order} | ${a.name} | ${a.type} | ${a.mandatory ? 'Sí' : 'No'} | ${a.gatesToNextModule ? 'Sí' : 'No'} | ${renderCriteria(a)} | ${a.rescueTrigger ? 'Sí' : 'No'} | ${a.estimatedTimeMinutes}min |`,
+  )
+  .join('\n')}`
+}
+
 function renderCriteria(a: Activity): string {
   switch (a.completionCriteria.kind) {
     case 'view':
@@ -201,7 +249,7 @@ function renderCriteria(a: Activity): string {
 }
 
 function renderFaseFundacion(config: CursoConfig): string {
-  return `# Fase 1: Fundación — Definir el curso
+  const prompt = `# Fase 1: Fundación — Definir el curso
 
 ## Objetivo
 
@@ -239,66 +287,97 @@ Ayudame a definir:
 - [ ] Narrativa del curso trazada
 - [ ] Tipo de contenido decidido por actividad
 `
+
+  contextBudget('01-fundacion', prompt)
+  return prompt
 }
 
 function renderFaseScaffold(config: CursoConfig): string {
-  return `# Fase 2: Scaffold — Armar la estructura en Moodle
+  const gates = config.modules.flatMap((m) => m.activities.filter((a) => a.gatesToNextModule))
+  const specialActs = config.modules.flatMap((m) =>
+    m.activities.filter((a) => a.gatesToNextModule || a.rescueTrigger || a.maintenanceTrigger),
+  )
+
+  // Build per-module instructions separately to keep each prompt small
+  const moduleInstructions = config.modules
+    .map(
+      (m, i) => `### ${m.name}
+${formatModuleActivities(m)}
+
+Completá este módulo antes de pasar al siguiente.
+${
+  m.activities.some((a) => a.gatesToNextModule)
+    ? `⚠️  Este módulo tiene actividades gate: ${m.activities
+        .filter((a) => a.gatesToNextModule)
+        .map((a) => `"${a.name}"`)
+        .join(', ')}`
+    : ''
+}`,
+    )
+    .join('\n\n')
+
+  const prompt = `# Fase 2: Scaffold — Armar la estructura en Moodle
 
 ## Objetivo
 
 Crear la estructura vacía del curso en Moodle: módulos, secciones y actividades sin contenido todavía.
 
-## Qué hacer
+## Qué hacer — module por módulo
 
-1. **Crear los módulos** en Moodle (o generar el archivo de configuración)
-2. **Crear cada actividad** con su nombre y tipo, sin contenido todavía
-3. **Configurar las condiciones de acceso** (actividades que gatean al siguiente módulo)
-4. **Configurar los triggers de reengagement** en \`mod_reengagement\`
+Trabajá UN MÓDULO POR VEZ para mantener el contexto acotado.
+No pases al siguiente hasta que el actual esté completo.
 
-## Actividades que requieren configuración especial
+${moduleInstructions}
 
-${config.modules
-  .flatMap((m) =>
-    m.activities
-      .filter((a) => a.gatesToNextModule || a.rescueTrigger || a.maintenanceTrigger)
-      .map(
-        (a) =>
-          `- **${m.name} > ${a.name}**:${a.gatesToNextModule ? ' [GATE]' : ''}${a.rescueTrigger ? ' [RESCUE]' : ''}${a.maintenanceTrigger ? ' [MAINTENANCE]' : ''}`,
-      ),
-  )
-  .join('\n')}
+## Configuración especial
 
-## Prompt para Gemini
+${
+  specialActs.length > 0
+    ? specialActs
+        .map(
+          (a) =>
+            `- **${a.name}**: ${a.gatesToNextModule ? '[GATE] ' : ''}${a.rescueTrigger ? '[RESCUE] ' : ''}${a.maintenanceTrigger ? '[MAINTENANCE]' : ''}`,
+        )
+        .join('\n')
+    : '- Ninguna'
+}
+
+## Prompt para Gemini (usar por módulo)
 
 \`\`\`
-Necesito configurar el curso "${config.name}" en Moodle.
+Trabajemos el módulo "[NOMBRE_MODULO]" del curso "${config.name}".
 
-Estructura:
-${formatActivities(config)}
+Actividades del módulo:
+${formatModuleActivities(config.modules[0])}
 
-Actividades con condición de acceso (gates):
-${config.modules
-  .flatMap((m) =>
-    m.activities
-      .filter((a) => a.gatesToNextModule)
-      .map((a) => `- "${a.name}" en ${m.name} — completar esto desbloquea el siguiente módulo`),
-  )
-  .join('\n')}
-
-Generame:
-1. La configuración XML o los pasos para crear esta estructura en Moodle
-2. Las reglas de \`availability\` para las actividades gate
-3. La configuración de \`mod_reengagement\` para rescue y maintenance
+Generame para ESTE MÓDULO:
+1. La configuración XML o los pasos para crear las actividades en Moodle
+2. Las reglas de \`availability\` (condiciones de acceso)
+3. La configuración de \`mod_reengagement\` si aplica
 \`\`\`
+
+> Una vez que esté listo el módulo, pasá al siguiente.
+> Esto mantiene el contexto chico y la calidad alta.
 
 ## Checklist
 
-- [ ] Módulos creados en Moodle
-- [ ] Actividades creadas (sin contenido)
+- [ ] Módulo 1: actividades creadas (sin contenido)
+- [ ] Módulo 2: actividades creadas (sin contenido)
+${
+  config.modules.length > 2
+    ? config.modules
+        .slice(2)
+        .map((m, i) => `- [ ] Módulo ${i + 3}: actividades creadas (sin contenido)`)
+        .join('\n')
+    : ''
+}
 - [ ] Condiciones de acceso configuradas
 - [ ] Triggers de reengagement configurados
 - [ ] Roles y permisos verificados
 `
+
+  contextBudget('02-scaffold', prompt)
+  return prompt
 }
 
 function renderFaseContenido(config: CursoConfig): string {
@@ -306,7 +385,7 @@ function renderFaseContenido(config: CursoConfig): string {
     m.activities.filter((a) => a.type === 'html' || a.type === 'video' || a.type === 'url'),
   )
 
-  return `# Fase 3: Contenido — Generar materiales con Gemini
+  const prompt = `# Fase 3: Contenido — Generar materiales con Gemini
 
 ## Objetivo
 
@@ -375,74 +454,93 @@ Incluí:
 - [ ] Videos seleccionados/embebidos
 - [ ] Links verificados
 `
+
+  contextBudget('03-contenido', prompt)
+  return prompt
 }
 
 function renderFaseRevision(config: CursoConfig): string {
-  return `# Fase 4: Revisión — Control de calidad del contenido
+  const totalActs = config.modules.reduce((sum, m) => sum + m.activities.length, 0)
+  const gates = config.modules.flatMap((m) => m.activities.filter((a) => a.gatesToNextModule))
+
+  const moduleChecklists = config.modules
+    .map(
+      (m, i) => `### Módulo ${i + 1}: ${m.name} (${m.activities.length} actividades)
+- [ ] Contenido: ortografía, tono, claridad
+- [ ] Links y recursos verificados
+- [ ] Accesibilidad: alt text, contraste, subtítulos
+- [ ] Criterios de finalización correctos
+`,
+    )
+    .join('\n')
+
+  const prompt = `# Fase 4: Revisión — Control de calidad del contenido
 
 ## Objetivo
 
 Verificar que todo el contenido sea correcto, accesible, consistente y esté listo para publicar.
 
-## Qué revisar
+## Resumen del curso
 
-### 1. Contenido
-- [ ] Ortografía y gramática en todos los textos
+- **Módulos:** ${config.modules.length} (${totalActs} actividades totales)
+- **Actividades gate:** ${gates.length}
+- **Módulos:** ${config.modules.map((m) => `"${m.name}"`).join(', ')}
+
+## Qué revisar (por módulo)
+
+Revisá UN MÓDULO POR VEZ. No pases al siguiente hasta que el actual esté completo.
+
+${moduleChecklists}
+
+### Revisión transversal (una vez por curso)
+- [ ] Progresión módulo a módulo tiene sentido pedagógico
 - [ ] Tono consistente en todo el curso
-- [ ] Las instrucciones son claras para el estudiante
-- [ ] No hay referencias rotas a otros módulos/actividades
+- [ ] Condiciones de acceso (gates) bien configuradas
+- [ ] Triggers de reengagement apuntan a actividades correctas
+- [ ] Tiempos estimados realistas
 
-### 2. Links y recursos
-- [ ] Todos los enlaces externos funcionan
-- [ ] Los videos embebidos se cargan correctamente
-- [ ] Los archivos adjuntos están subidos
-
-### 3. Accesibilidad
-- [ ] Las imágenes tienen texto alternativo (alt)
-- [ ] El contraste de colores es suficiente
-- [ ] El contenido es navegable con teclado
-- [ ] Los videos tienen subtítulos o transcripción
-
-### 4. Consistencia pedagógica
-- [ ] Los objetivos del módulo se cumplen con las actividades
-- [ ] La progresión módulo a módulo tiene sentido
-- [ ] Las actividades obligatorias están marcadas como tales
-- [ ] Los criterios de finalización son razonables
-
-### 5. Configuración técnica
-- [ ] Las condiciones de acceso (gates) están bien configuradas
-- [ ] Los triggers de reengagement apuntan a las actividades correctas
-- [ ] Los tiempos estimados son realistas
-
-## Prompt para Gemini
+## Prompt para Gemini (usar por módulo)
 
 \`\`\`
-Actuá como revisor pedagógico del curso "${config.name}".
+Actuá como revisor pedagógico del módulo "[NOMBRE_MODULO]" del curso "${config.name}".
 
-Estructura del curso:
-${formatActivities(config)}
+Actividades del módulo:
+${formatModuleActivities(config.modules[0])}
 
-Revisame:
-1. ¿La progresión de módulos tiene sentido pedagógico?
-2. ¿Las actividades obligatorias están bien elegidas?
-3. ¿Hay suficientes actividades de evaluación?
-4. ¿El tiempo estimado total es razonable?
+Revisame para ESTE MÓDULO:
+1. ¿Las actividades cumplen los objetivos del módulo?
+2. ¿Hay errores de ortografía, tono o claridad?
+3. ¿Las actividades obligatorias están bien elegidas?
+4. ¿Los criterios de finalización son razonables?
 
 Dame sugerencias concretas de mejora.
 \`\`\`
 
+> Revisá un módulo a la vez. Esto mantiene la calidad alta y el contexto acotado.
+
 ## Checklist final
 
-- [ ] Revisión de contenido completa
+- [ ] Módulo 1: revisión completa
+${
+  config.modules.length > 1
+    ? config.modules
+        .slice(1)
+        .map((m, i) => `- [ ] Módulo ${i + 2}: revisión completa`)
+        .join('\n')
+    : ''
+}
+- [ ] Revisión transversal completada
 - [ ] Links verificados
 - [ ] Accesibilidad revisada
-- [ ] Consistencia pedagógica confirmada
 - [ ] Configuración técnica validada
 `
+
+  contextBudget('04-revision', prompt)
+  return prompt
 }
 
 function renderFasePublicacion(config: CursoConfig): string {
-  return `# Fase 5: Publicación — Subir a Moodle y activar
+  const prompt = `# Fase 5: Publicación — Subir a Moodle y activar
 
 ## Objetivo
 
@@ -503,10 +601,13 @@ ${config.modules
 - [ ] Curso visible para estudiantes
 - [ ] Vista previa como estudiante verificada
 `
+
+  contextBudget('05-publicacion', prompt)
+  return prompt
 }
 
 function renderFaseMantenimiento(config: CursoConfig): string {
-  return `# Fase 6: Mantenimiento — Monitoreo y optimización continua
+  const prompt = `# Fase 6: Mantenimiento — Monitoreo y optimización continua
 
 ## Objetivo
 
@@ -576,6 +677,9 @@ Basado en estos datos, recomendame:
 - [ ] Revisar consultas en foros y responder pendientes
 - [ ] Reportar avances al equipo
 `
+
+  contextBudget('06-mantenimiento', prompt)
+  return prompt
 }
 
 function renderQAChecklist(config: CursoConfig): string {
@@ -583,7 +687,7 @@ function renderQAChecklist(config: CursoConfig): string {
     m.activities.filter((a) => a.gatesToNextModule),
   )
 
-  return `# QA: Left-Right Testing — ${config.name}
+  const prompt = `# QA: Left-Right Testing — ${config.name}
 
 ## Cobertura de actividades obligatorias
 
@@ -657,4 +761,7 @@ ${
 ---
 *QA generado por unc-course-kit*
 `
+
+  contextBudget('qa-checklist', prompt)
+  return prompt
 }

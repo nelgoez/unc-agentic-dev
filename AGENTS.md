@@ -82,6 +82,7 @@ Courses and their rescue/maintenance trigger points:
 - Environment variables loaded via `dotenv-cli` (see .env.example)
 - Secrets NEVER committed — use `{env:VAR}` in opencode.jsonc
 - Follow existing patterns in `../diploma-tracking-system/`
+- **Non-Dev First** — toda optimización debe requerir cero configuración del prompter. Split de prompts, compresión, y validación deben ser automágicas.
 
 ## Session Rules
 

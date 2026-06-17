@@ -1,0 +1,22 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Opencode-DCP/opencode-dynamic-context-pruning/master/dcp.schema.json",
+  "enabled": true,
+  "autoUpdate": true,
+  "pruneNotification": "minimal",
+  "pruneNotificationType": "toast",
+  "compress": {
+    "mode": "range",
+    "permission": "allow",
+    "maxContextLimit": 80000,
+    "minContextLimit": 30000,
+  },
+  "strategies": {
+    "deduplication": {
+      "enabled": true,
+    },
+    "purgeErrors": {
+      "enabled": true,
+      "turns": 4,
+    },
+  },
+}

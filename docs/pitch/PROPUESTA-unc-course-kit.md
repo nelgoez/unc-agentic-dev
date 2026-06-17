@@ -276,7 +276,29 @@ El proyecto ya usa `.env` para claves compartidas. Graphify lee `GEMINI_API_KEY`
 
 ---
 
-## 10. Próximos Pasos
+## 10. Principio de Diseño: Non-Dev First
+
+El pipeline está pensado para **prompters no-desarrolladores**. Toda decisión técnica se filtra por esta regla:
+
+### Reglas
+
+1. **Cero configuración para el prompter** — si necesita editar archivos, correr comandos CLI, o entender conceptos (MCP, plugins, context window), no pasa. El dev configura UNA VEZ en el shared config del repo; el prompter no toca nada.
+2. **Auto-mágico por defecto** — las optimizaciones corren solas (split de prompts, compresión de contexto, validación). El prompter solo ve que "anda mejor".
+3. **Degradación graceful** — si una herramienta de optimización falla, el curso se genera igual. Nunca un plugin caído bloquea la creación.
+4. **Split antes que comprimir** — partir prompts en piezas chicas (un módulo por llamada) es más robusto que comprimir contexto. Es la defensa principal contra el MECW (Maximum Effective Context Window).
+5. **validate-deps es el único gate obligatorio** — la validación algorítmica (TypeScript puro) no depende de LLMs ni de contexto. Corre siempre, falla siempre si hay un error real.
+
+### Cómo se aplica a decisiones futuras
+
+| Escenario                   | Sin guideline                                                        | Con guideline                                                       |
+| --------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Nuevo plugin de compresión  | "Instalá con npm, agregá al opencode.json, configurá los thresholds" | "El dev lo precarga en el shared config. El prompter no se entera." |
+| Nuevo validador LLM-based   | "Corré `bun validate:ai` antes de publicar"                          | "No se usa — validate-deps.ts es TypeScript puro, no necesita LLM." |
+| Nueva feature de generación | Prompt que manda todo el curso de una                                | Prompt itera por módulo — siempre.                                  |
+
+---
+
+## 11. Próximos Pasos
 
 1. ✅ Esta propuesta está lista para revisión
 2. ⬜ **Decisión:** ¿Seguimos con la implementación?
