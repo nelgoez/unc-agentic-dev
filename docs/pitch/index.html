@@ -173,7 +173,7 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="14"></span>
+          <span class="slide-number" data-current="1" data-total="15"></span>
         </div>
       </section>
 
@@ -232,7 +232,7 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="14"></span>
+          <span class="slide-number" data-current="1" data-total="15"></span>
         </div>
       </section>
 
@@ -285,11 +285,98 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="14"></span>
+          <span class="slide-number" data-current="1" data-total="15"></span>
         </div>
       </section>
 
-      <!-- 4. Solution Overview -->
+      <!-- 4. The Gap: Design vs Technical -->
+      <section class="slide" data-title="El Gap">
+        <p class="kicker">El problema inmediato</p>
+        <h2 class="h2">Diseño vs Técnico: dos mundos, un curso</h2>
+        <p class="lede" style="margin: 8px 0">
+          Hoy hay pasantes de diseño corrigiendo cosas visibles. Los bugs estructurales siguen
+          invisibles. La pregunta es <strong>quién arregla qué</strong>.
+        </p>
+        <div class="grid g2 mt-m" style="gap: 12px">
+          <div style="background: var(--surface); border-radius: var(--radius-lg); padding: 20px">
+            <h4>🎨 Pasantes de diseño</h4>
+            <p class="dim" style="font-size: 0.85em">Ven y arreglan:</p>
+            <ul style="font-size: 0.8em; color: var(--text-2); margin-top: 8px; padding-left: 16px">
+              <li>Colores, imágenes, textos</li>
+              <li>Formato de actividades</li>
+              <li>Links rotos visibles</li>
+              <li>Consistencia visual entre módulos</li>
+            </ul>
+            <div
+              style="
+                margin-top: 12px;
+                padding: 8px;
+                background: var(--bg-soft);
+                border-radius: var(--radius);
+                font-size: 0.8em;
+              "
+            >
+              ✅ Perfecto para diseño.<br />
+              ❌ <strong>No pueden ver</strong> gates rotos ni deadlocks
+            </div>
+          </div>
+          <div style="background: var(--surface); border-radius: var(--radius-lg); padding: 20px">
+            <h4>🔧 Nosotros (dev)</h4>
+            <p class="dim" style="font-size: 0.85em">Detectamos y corregimos:</p>
+            <ul style="font-size: 0.8em; color: var(--text-2); margin-top: 8px; padding-left: 16px">
+              <li>Gates a actividades inexistentes</li>
+              <li>Deadlocks en cascada</li>
+              <li>Recursos sin completion tracking</li>
+              <li>Condiciones de acceso inválidas</li>
+              <li>Dependencias rotas (como curso 269)</li>
+            </ul>
+            <div
+              style="
+                margin-top: 12px;
+                padding: 8px;
+                background: #dcfce7;
+                color: #166534;
+                border-radius: var(--radius);
+                font-size: 0.8em;
+              "
+            >
+              ✅ validate-deps detecta todo esto en segundos
+            </div>
+          </div>
+        </div>
+        <div
+          style="
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--bg-soft);
+            border-radius: var(--radius-lg);
+            text-align: center;
+          "
+        >
+          <p style="font-size: 0.9em">
+            <strong>La solución:</strong> un pase de posta simple — cada bug se etiqueta como
+            <span style="color: var(--accent)">diseño</span> o
+            <span style="color: var(--bad)">técnico</span>.<br />
+            Los pasantes arreglan diseño. <strong>validate-deps</strong> encuentra lo técnico.
+            Nosotros corregimos lo que los pasantes no pueden ver.
+          </p>
+        </div>
+        <div class="notes">
+          Hoy la situación es que hay pasantes de diseño trabajando en los cursos. Ellos pueden ver
+          y corregir problemas visuales —colores, imágenes, textos— pero no pueden detectar bugs
+          estructurales como un gate que referencia una actividad que no existe. Eso es invisible a
+          simple vista. La propuesta es simple: establezcamos un pase de posta. Cada bug se etiqueta
+          como diseño o técnico. validate-deps encuentra los técnicos automáticamente. Nosotros
+          corregimos los que los pasantes no pueden ver.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC Course Kit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="15"></span>
+        </div>
+      </section>
+
+      <!-- 5. Solution Overview -->
       <section class="slide center tc" data-title="Solución">
         <div style="max-width: 800px">
           <p class="kicker" data-anim="fade-up">La propuesta</p>
@@ -340,11 +427,11 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="14"></span>
+          <span class="slide-number" data-current="1" data-total="15"></span>
         </div>
       </section>
 
-      <!-- 5. Gemini CLI Visual -->
+      <!-- 6. Gemini CLI Visual -->
       <section class="slide" data-title="Gemini CLI">
         <p class="kicker">La herramienta que el equipo ya conoce</p>
         <h2 class="h2">Gemini CLI: del browser al terminal</h2>
@@ -416,11 +503,11 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="14"></span>
+          <span class="slide-number" data-current="1" data-total="15"></span>
         </div>
       </section>
 
-      <!-- 6. Pipeline 3 Stages -->
+      <!-- 7. Pipeline 3 Stages -->
       <section class="slide" data-title="Pipeline">
         <p class="kicker">El proceso completo</p>
         <h2 class="h2">3 etapas, 3 tipos de control</h2>
@@ -530,11 +617,11 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="14"></span>
+          <span class="slide-number" data-current="1" data-total="15"></span>
         </div>
       </section>
 
-      <!-- 7. Peer Review CI/CD -->
+      <!-- 8. Peer Review CI/CD -->
       <section class="slide" data-title="Peer Review">
         <p class="kicker">Curso-as-Código</p>
         <h2 class="h2">Peer review como Pull Request</h2>
@@ -590,11 +677,11 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="14"></span>
+          <span class="slide-number" data-current="1" data-total="15"></span>
         </div>
       </section>
 
-      <!-- 8. Diff example + validate-deps -->
+      <!-- 9. Diff example + validate-deps -->
       <section class="slide" data-title="Validación">
         <p class="kicker">Automatizado</p>
         <h2 class="h2">validate-deps detecta el error</h2>
@@ -641,11 +728,11 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="14"></span>
+          <span class="slide-number" data-current="1" data-total="15"></span>
         </div>
       </section>
 
-      <!-- 9. Manual Controls -->
+      <!-- 10. Manual Controls -->
       <section class="slide" data-title="Controles Manuales">
         <p class="kicker">Intervención humana</p>
         <h2 class="h2">Puntos de control obligatorios</h2>
@@ -723,11 +810,11 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="14"></span>
+          <span class="slide-number" data-current="1" data-total="15"></span>
         </div>
       </section>
 
-      <!-- 10. Options Comparison -->
+      <!-- 11. Options Comparison -->
       <section class="slide" data-title="Herramientas">
         <p class="kicker">Opciones de validación visual</p>
         <h2 class="h2">Múltiples niveles, un solo pipeline</h2>
@@ -797,11 +884,11 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="14"></span>
+          <span class="slide-number" data-current="1" data-total="15"></span>
         </div>
       </section>
 
-      <!-- 11. Cost -->
+      <!-- 12. Cost -->
       <section class="slide center tc" data-title="Costo">
         <div>
           <p class="kicker">Inversión</p>
@@ -840,11 +927,11 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="14"></span>
+          <span class="slide-number" data-current="1" data-total="15"></span>
         </div>
       </section>
 
-      <!-- 12. Roadmap -->
+      <!-- 13. Roadmap -->
       <section class="slide" data-title="Roadmap">
         <p class="kicker">Plan de implementación</p>
         <h2 class="h2">3 semanas al piloto</h2>
@@ -929,38 +1016,48 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="14"></span>
+          <span class="slide-number" data-current="1" data-total="15"></span>
         </div>
       </section>
 
-      <!-- 13. CTA -->
+      <!-- 14. CTA -->
       <section class="slide center tc" data-title="CTA">
-        <div style="max-width: 700px">
+        <div style="max-width: 800px">
           <p class="kicker">Próximos pasos</p>
           <h1 class="h1 anim-rise-in" data-anim="rise-in">¿Empezamos?</h1>
           <p class="lede" style="margin: 16px auto">
-            Ya tenemos la evidencia, el plan, y el stack listo.<br />La única pregunta es
-            <strong>cuándo</strong>.
+            Tres caminos. Elegí el que mejor se adapte al momento.
           </p>
-          <div style="margin-top: 32px; display: flex; gap: 16px; justify-content: center">
+          <div
+            style="
+              margin-top: 28px;
+              display: flex;
+              gap: 16px;
+              justify-content: center;
+              flex-wrap: wrap;
+            "
+          >
             <div
               style="
                 background: var(--surface);
                 border-radius: var(--radius-lg);
                 padding: 20px;
                 flex: 1;
+                min-width: 180px;
                 text-align: left;
+                border: 2px solid var(--good);
               "
             >
-              <div style="font-size: 1.2em; margin-bottom: 8px">📋</div>
-              <h4>Revisar propuesta</h4>
+              <div style="font-size: 1.2em; margin-bottom: 8px">🆓</div>
+              <h4 style="color: var(--good)">Audit Gratis</h4>
               <p class="dim" style="font-size: 0.85em">
-                <a
-                  href="PROPUESTA-unc-course-kit.md"
-                  style="color: var(--accent); text-decoration: underline"
-                  >PROPUESTA-unc-course-kit.md</a
-                >
+                Elegí 1 curso. Lo auditoramos gratis.<br />
+                Recibís un heatmap: <strong>diseño vs técnico</strong>.<br />
+                Los pasantes ven qué arreglar. Nosotros vemos los gates rotos.
               </p>
+              <div style="margin-top: 8px; font-size: 0.75em; color: var(--good)">
+                ⏱ 48h · $0 · Sin compromiso
+              </div>
             </div>
             <div
               style="
@@ -968,13 +1065,16 @@
                 border-radius: var(--radius-lg);
                 padding: 20px;
                 flex: 1;
+                min-width: 180px;
                 text-align: left;
               "
             >
               <div style="font-size: 1.2em; margin-bottom: 8px">🔑</div>
-              <h4>Obtener admin Moodle</h4>
+              <h4>Admin Moodle</h4>
               <p class="dim" style="font-size: 0.85em">
-                Necesitamos acceso para validar contra cursos reales
+                Necesitamos acceso de administrador<br />
+                para validar validate-deps<br />
+                contra cursos reales.
               </p>
             </div>
             <div
@@ -983,30 +1083,38 @@
                 border-radius: var(--radius-lg);
                 padding: 20px;
                 flex: 1;
+                min-width: 180px;
                 text-align: left;
               "
             >
               <div style="font-size: 1.2em; margin-bottom: 8px">🚀</div>
-              <h4>Piloto</h4>
-              <p class="dim" style="font-size: 0.85em">1 curso real en 3 semanas</p>
+              <h4>Course Kit Piloto</h4>
+              <p class="dim" style="font-size: 0.85em">
+                1 curso real con validate-deps<br />
+                + peer review + pipeline.<br />
+                ~3 semanas, costo cero de herramientas.
+              </p>
             </div>
           </div>
+          <p style="margin-top: 20px; font-size: 0.85em; color: var(--text-2)">
+            Audit gratis es el entry point sin riesgo. Después del audit, el heatmap habla solo.
+          </p>
         </div>
         <div class="notes">
-          La propuesta está lista. Tenemos la evidencia del curso 269, el plan detallado, el stack
-          técnico validado, y todo es de costo cero. Los próximos pasos son: revisar esta propuesta,
-          obtener un usuario admin de Moodle para poder validar contra cursos reales, y tomar la
-          decisión de arrancar el piloto. En tres semanas podemos tener el primer curso funcionando
-          con el nuevo proceso.
+          Tenemos tres caminos. El Audit Gratis es la puerta de entrada sin riesgo: elegí un curso,
+          lo auditoramos en 48 horas, y recibís un heatmap que separa cada bug en diseño (lo
+          arreglan los pasantes) vs técnico (lo arreglamos nosotros). Después del audit, si ven
+          valor, pueden pedir admin Moodle para el siguiente paso, o directamente arrancar con el
+          piloto del Course Kit. Todo es incremental, sin presión.
         </div>
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="14"></span>
+          <span class="slide-number" data-current="1" data-total="15"></span>
         </div>
       </section>
 
-      <!-- 14. Thanks -->
+      <!-- 15. Thanks -->
       <section class="slide center tc" data-title="Thanks">
         <div>
           <h1 class="h1" style="font-size: 120px; line-height: 1; margin-bottom: 24px">
@@ -1033,7 +1141,7 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="14"></span>
+          <span class="slide-number" data-current="1" data-total="15"></span>
         </div>
       </section>
     </div>
