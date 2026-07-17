@@ -14,5 +14,11 @@ export default antfu({
     'node_modules',
     'dist',
     '.opencode/node_modules',
+    '.github',
+    'packages',
+    'reports',
+    'graphify-out',
+    'allure-results',
+    'allure-report',
   ],
-});
+})
