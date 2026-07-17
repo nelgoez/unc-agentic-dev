@@ -28,7 +28,7 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies
-        run: bun install --ignore-scripts
+        run: bun install --ignore-scripts && bun install --ignore-scripts --cwd packages/unc-course-kit
 
       - name: CI checks (types + lint + vars)
         run: bun run ci:check
