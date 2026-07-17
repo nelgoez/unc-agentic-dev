@@ -16,7 +16,12 @@ test.describe('Evidence: Course 269 — phantom activity proof — KATA', () => 
     await login.loginAsStudent()
     await course.goToCourse(courseId)
 
-    await page.screenshot({ path: resolve(evidenceDir, '01-course-landing.png'), fullPage: true })
+    await page
+      .locator('.course-content')
+      .first()
+      .scrollIntoViewIfNeeded()
+      .catch(() => {})
+    await page.screenshot({ path: resolve(evidenceDir, '01-course-landing.png'), fullPage: false })
 
     const restrictionDetails = await page.evaluate(() => {
       const infoDivs = document.querySelectorAll('[id^="format_onetopic_winfo_tab-"]')
@@ -53,9 +58,14 @@ test.describe('Evidence: Course 269 — phantom activity proof — KATA', () => 
       .locator('#section-3')
       .waitFor({ state: 'attached', timeout: 10000 })
       .catch(() => {})
+    await page
+      .locator('#section-3')
+      .first()
+      .scrollIntoViewIfNeeded()
+      .catch(() => {})
     await page.screenshot({
       path: resolve(evidenceDir, '02-mod3-forced-click.png'),
-      fullPage: true,
+      fullPage: false,
     })
 
     const afterClick = await page.evaluate(() => {
@@ -121,9 +131,14 @@ test.describe('Evidence: Course 269 — phantom activity proof — KATA', () => 
       .first()
       .waitFor({ state: 'visible', timeout: 15000 })
       .catch(() => {})
+    await page
+      .locator('.course-content')
+      .first()
+      .scrollIntoViewIfNeeded()
+      .catch(() => {})
     await page.screenshot({
       path: resolve(evidenceDir, '07-after-pdf-still-locked.png'),
-      fullPage: true,
+      fullPage: false,
     })
 
     const mod3StillLocked = await page.evaluate(() => {

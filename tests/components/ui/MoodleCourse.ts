@@ -175,7 +175,12 @@ export class MoodleCourse {
 
   @atc('MC-6', { story: 'UNC-RE-1', feature: 'Course Scan' })
   async takeScreenshot(filename: string): Promise<void> {
-    await this.page.screenshot({ path: filename, fullPage: true })
+    await this.page
+      .locator('.course-content, #region-main')
+      .first()
+      .scrollIntoViewIfNeeded()
+      .catch(() => {})
+    await this.page.screenshot({ path: filename, fullPage: false })
   }
 
   @atc('MC-7', { story: 'UNC-RE-1', feature: 'Course Scan' })

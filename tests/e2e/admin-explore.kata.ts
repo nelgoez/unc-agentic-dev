@@ -42,8 +42,13 @@ test.describe('Admin Exploration — KATA', () => {
     }
     console.warn('Edit Mode enabled')
 
-    // 4. Screenshot: full course in edit mode
-    await page.screenshot({ path: `${outDir}/01-course-edit-mode.png`, fullPage: true })
+    // 4. Screenshot: course in edit mode (viewport only)
+    await page
+      .locator('.course-content')
+      .first()
+      .scrollIntoViewIfNeeded()
+      .catch(() => {})
+    await page.screenshot({ path: `${outDir}/01-course-edit-mode.png`, fullPage: false })
 
     // 5. Navigate to Módulo 3
     await course.navigateToSection(3)
@@ -102,8 +107,13 @@ test.describe('Admin Exploration — KATA', () => {
     console.warn(`\n=== Módulo 3 restriction ===`)
     console.warn(availabilityDetails?.text || 'none')
 
-    // 8. Full screenshot
-    await page.screenshot({ path: `${outDir}/02-mod3-admin-full.png`, fullPage: true })
+    // 8. Screenshot of Módulo 3 (viewport only)
+    await page
+      .locator('#section-3')
+      .first()
+      .scrollIntoViewIfNeeded()
+      .catch(() => {})
+    await page.screenshot({ path: `${outDir}/02-mod3-admin-full.png`, fullPage: false })
     console.warn(`\nScreenshots in: ${outDir}/`)
   })
 })
