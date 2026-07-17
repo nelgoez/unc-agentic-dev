@@ -2,7 +2,7 @@ name: Course Audit CI
 
 on:
   push:
-    branches: [main, staging]
+    branches: [master]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -73,7 +73,7 @@ jobs:
           path: reports/
 
   deploy-report:
-    if: github.ref == 'refs/heads/main' && success()
+    if: github.ref == 'refs/heads/master'
     needs: audit
     runs-on: ubuntu-latest
     permissions:
