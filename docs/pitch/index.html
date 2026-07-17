@@ -173,7 +173,7 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="15"></span>
+          <span class="slide-number" data-current="1" data-total="16"></span>
         </div>
       </section>
 
@@ -232,7 +232,7 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="15"></span>
+          <span class="slide-number" data-current="1" data-total="16"></span>
         </div>
       </section>
 
@@ -285,7 +285,7 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="15"></span>
+          <span class="slide-number" data-current="1" data-total="16"></span>
         </div>
       </section>
 
@@ -372,7 +372,7 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="15"></span>
+          <span class="slide-number" data-current="1" data-total="16"></span>
         </div>
       </section>
 
@@ -427,7 +427,7 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="15"></span>
+          <span class="slide-number" data-current="1" data-total="16"></span>
         </div>
       </section>
 
@@ -503,7 +503,7 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="15"></span>
+          <span class="slide-number" data-current="1" data-total="16"></span>
         </div>
       </section>
 
@@ -617,7 +617,7 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="15"></span>
+          <span class="slide-number" data-current="1" data-total="16"></span>
         </div>
       </section>
 
@@ -677,7 +677,7 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="15"></span>
+          <span class="slide-number" data-current="1" data-total="16"></span>
         </div>
       </section>
 
@@ -728,7 +728,7 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="15"></span>
+          <span class="slide-number" data-current="1" data-total="16"></span>
         </div>
       </section>
 
@@ -810,11 +810,116 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="15"></span>
+          <span class="slide-number" data-current="1" data-total="16"></span>
         </div>
       </section>
 
-      <!-- 11. Options Comparison -->
+      <!-- 11. Test Drive: Post-Publish Monitoring -->
+      <section class="slide" data-title="Test Drive">
+        <p class="kicker">Monitoreo Post-Publicación</p>
+        <h2 class="h2">Auditoría automática en cada push</h2>
+        <p class="lede" style="margin: 8px 0">
+          El pipeline ya está corriendo. Cada push analiza un curso real, detecta bloqueos, y genera
+          un reporte público.
+        </p>
+        <div style="margin-top: 16px; display: flex; gap: 16px; align-items: stretch">
+          <div
+            style="
+              flex: 1.4;
+              background: var(--surface);
+              border-radius: var(--radius-lg);
+              padding: 20px;
+            "
+          >
+            <h4 style="margin-bottom: 8px">🔁 CI Pipeline</h4>
+            <div style="font-size: 0.8em; line-height: 1.8">
+              <div><span style="color: var(--good)">✓</span> CI checks (types + vars)</div>
+              <div><span style="color: var(--good)">✓</span> Playwright: login multi-rol</div>
+              <div>
+                <span style="color: var(--good)">✓</span> Scannea secciones como
+                admin/student/teacher
+              </div>
+              <div>
+                <span style="color: var(--good)">✓</span> Detecta actividades fantasma (gates rotos)
+              </div>
+              <div>
+                <span style="color: var(--good)">✓</span> Toma screenshots de secciones bloqueadas
+              </div>
+              <div><span style="color: var(--good)">✓</span> Genera reporte Allure</div>
+              <div><span style="color: var(--good)">✓</span> Deploy a GitHub Pages</div>
+            </div>
+          </div>
+          <div
+            style="
+              flex: 1;
+              background: var(--bg-soft);
+              border-radius: var(--radius-lg);
+              padding: 20px;
+            "
+          >
+            <h4 style="margin-bottom: 8px">📊 KPIs que mide</h4>
+            <div style="font-size: 0.8em; line-height: 1.8">
+              <div>🔴 Actividades fantasma (gates a nada)</div>
+              <div>🔴 Gates sin completion tracking</div>
+              <div>🟡 Secciones bloqueadas en cascada</div>
+              <div>🟢 Actividades completadas vs esperadas</div>
+              <div>📸 Screenshots por sección bloqueada</div>
+              <div>📈 Diferencia visibilidad admin vs student</div>
+            </div>
+          </div>
+        </div>
+        <div
+          style="
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            border: 2px solid var(--accent);
+          "
+        >
+          <p style="font-size: 1.1em; font-weight: 600">🚀 Test drive en vivo</p>
+          <p class="dim" style="font-size: 0.85em; max-width: 500px; margin: 8px auto">
+            El pipeline audita el curso 269 automáticamente. El reporte se actualiza solo con cada
+            push. Sin configuración, sin deploy manual.
+          </p>
+          <a
+            href="https://nelgoez.github.io/unc-agentic-dev/"
+            target="_blank"
+            rel="noopener"
+            style="
+              display: inline-block;
+              margin-top: 12px;
+              padding: 12px 28px;
+              background: var(--accent);
+              color: var(--bg);
+              font-weight: 700;
+              border-radius: var(--radius);
+              text-decoration: none;
+              transition: opacity 0.2s;
+            "
+            onmouseover="this.style.opacity = '0.8'"
+            onmouseout="this.style.opacity = '1'"
+          >
+            🔍 Ver reporte en vivo →
+          </a>
+        </div>
+        <div class="notes">
+          Esto ya está funcionando. El CI de este mismo repo corre el pipeline de auditoría sobre el
+          curso 269 cada vez que hacemos push. El reporte Allure se despliega automáticamente a
+          GitHub Pages. Cualquiera con el link puede ver los resultados: cuántas secciones están
+          bloqueadas, qué actividades fantasma se detectaron, y screenshots del estado actual del
+          curso desde la perspectiva del estudiante. Es el "test drive" de la propuesta: pueden
+          verlo funcionando hoy, con datos reales, sin instalar nada.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC Course Kit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="16"></span>
+        </div>
+      </section>
+
+      <!-- 12. Options Comparison -->
       <section class="slide" data-title="Herramientas">
         <p class="kicker">Opciones de validación visual</p>
         <h2 class="h2">Múltiples niveles, un solo pipeline</h2>
@@ -884,11 +989,11 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="15"></span>
+          <span class="slide-number" data-current="1" data-total="16"></span>
         </div>
       </section>
 
-      <!-- 12. Cost -->
+      <!-- 13. Cost -->
       <section class="slide center tc" data-title="Costo">
         <div>
           <p class="kicker">Inversión</p>
@@ -927,11 +1032,11 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="15"></span>
+          <span class="slide-number" data-current="1" data-total="16"></span>
         </div>
       </section>
 
-      <!-- 13. Roadmap -->
+      <!-- 14. Roadmap -->
       <section class="slide" data-title="Roadmap">
         <p class="kicker">Plan de implementación</p>
         <h2 class="h2">3 semanas al piloto</h2>
@@ -1016,11 +1121,11 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="15"></span>
+          <span class="slide-number" data-current="1" data-total="16"></span>
         </div>
       </section>
 
-      <!-- 14. CTA -->
+      <!-- 15. CTA -->
       <section class="slide center tc" data-title="CTA">
         <div style="max-width: 800px">
           <p class="kicker">Próximos pasos</p>
@@ -1110,11 +1215,11 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="15"></span>
+          <span class="slide-number" data-current="1" data-total="16"></span>
         </div>
       </section>
 
-      <!-- 15. Thanks -->
+      <!-- 16. Thanks -->
       <section class="slide center tc" data-title="Thanks">
         <div>
           <h1 class="h1" style="font-size: 120px; line-height: 1; margin-bottom: 24px">
@@ -1141,7 +1246,7 @@
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>
           <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <span class="slide-number" data-current="1" data-total="15"></span>
+          <span class="slide-number" data-current="1" data-total="16"></span>
         </div>
       </section>
     </div>

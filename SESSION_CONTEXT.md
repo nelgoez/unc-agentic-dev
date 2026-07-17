@@ -9,6 +9,7 @@ Awaiting UNC answers to onboarding checklist (access, credentials, point of cont
 ### 2026-06-02
 
 **Setup:**
+
 - Created `unc-agentic-dev/` — agentic dev infrastructure based on `agentic-diplo-track-sys` patterns
 - `bun opencode` command using `dotenv-cli` to load `.env` before launching OpenCode
 - `opencode.jsonc` with MCP servers (context7, tavily, playwright, supabase), permissions, custom commands
@@ -19,10 +20,12 @@ Awaiting UNC answers to onboarding checklist (access, credentials, point of cont
 - Dependencies installed (`bun install` passed, doctor reports OK)
 
 **PDF analysis:**
+
 - PDF #1 "Plan de implementación Reengagement" — sub-project of PDF #2, detailed Moodle plugin config plan
 - PDF #2 "Proyecto Automatización" — umbrella project with 4 workstreams
 
 **Deliverable estimates for UNC:**
+
 - 8 email templates: 4 weeks
 - Reengagement plugin DEV+PROD: 5 weeks
 - Activity dashboard: 3 weeks
@@ -30,11 +33,13 @@ Awaiting UNC answers to onboarding checklist (access, credentials, point of cont
 - **Total: 14 weeks (~3.5 months)** — finishes mid-August 2026
 
 **Comparison with UNC schedule:**
+
 - UNC original plan targeted May 2026 completion (already passed)
 - All dates in PDFs are behind schedule before developer joined
 - August delivery is realistic given current June baseline
 
 **Pending from UNC (onboarding checklist):**
+
 1. Code repository URL + access
 2. Moodle URL (dev/staging) + API token
 3. PostgreSQL credentials (dev)
@@ -47,8 +52,10 @@ Awaiting UNC answers to onboarding checklist (access, credentials, point of cont
 Tadeo Otaola, Ignacio Acuña, Melisa Caffaratti (dashboard), Verónica Gonzalez, Laura Carpio, Matías Salvatierra (induction), Fernando Acosta (Module 0)
 
 ## Project files
+
 - `.context/onboarding-checklist.html` — clean checklist for UNC (without contact names)
 - `.context/entregables-tiempos.html` — deliverable timeline for UNC
 
 ## Next session
+
 When UNC responds: pick up with `/start` or `/resume`, load relevant context, begin Sprint 1.

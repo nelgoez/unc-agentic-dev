@@ -9,6 +9,7 @@ Load the Activity Analysis Dashboard context:
 2. Read @.context/dashboard/PROGRESS.md
 
 Report:
+
 - Current dashboard features and status
 - Next features to implement
 - Any blockers or pending decisions

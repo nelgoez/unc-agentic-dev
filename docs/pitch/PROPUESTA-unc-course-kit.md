@@ -226,7 +226,53 @@ Cada fase del kit tiene un checklist que **alguien debe firmar** antes de avanza
 
 ---
 
-## 7. Stack Tecnológico y Costos
+## 7. Monitoreo Automático Post-Publicación (Test Drive)
+
+La Fase 06 de Mantenimiento puede ser **automática**. Ya implementamos un pipeline CI que audita cursos en cada push y genera reportes públicos.
+
+### Cómo funciona
+
+Cada vez que se hace push al repositorio:
+
+```
+push → CI checks → Playwright audita curso → detecta bloqueos → genera Allure report → deploys a GitHub Pages
+```
+
+El auditor se loguea como admin, escanea el curso completo, luego cambia a rol estudiante y vuelve a escanear. Compara ambas vistas y reporta:
+
+| Hallazgo                   | Severidad | Ejemplo                                        |
+| -------------------------- | --------- | ---------------------------------------------- |
+| Actividad fantasma         | 🔴        | Gate a "Notebook Funcion-Lambda" que no existe |
+| Gate sin completion        | 🔴        | PDF usado como condición de avance             |
+| Bloqueo en cascada         | 🟡        | Módulo 3 bloqueado → Cierre bloqueado          |
+| Diferencia admin vs alumno | 🟢        | Admin ve 5 secciones, alumno ve 3              |
+
+### Test drive en vivo
+
+> **👉 [Ver reporte de auditoría en vivo](https://nelgoez.github.io/unc-agentic-dev/)**
+
+El pipeline ya está corriendo sobre el curso 269. El reporte Allure se actualiza automáticamente con cada push. Cualquiera con el link puede ver:
+
+- Cuántas secciones están bloqueadas
+- Qué actividades fantasma se detectaron
+- Screenshots del curso desde perspectiva del estudiante
+- KPIs de la auditoría (cantidad de hallazgos por severidad)
+
+### Stack adicional (todo $0)
+
+| Componente         | Herramienta              | Costo |
+| ------------------ | ------------------------ | ----- |
+| CI runner          | GitHub Actions (público) | $0    |
+| Browser automation | Playwright               | $0    |
+| Test reports       | Allure Framework         | $0    |
+| Report hosting     | GitHub Pages             | $0    |
+| Screen recording   | Playwright screenshot    | $0    |
+
+El pipeline es **opt-in**: los cursos que no están en el repo simplemente no se auditan. Y es incremental: arranca con 1 curso, se extiende a todos sin cambiar la infraestructura.
+
+---
+
+## 8. Stack Tecnológico y Costos
 
 | Componente                 | Tecnología                 | Costo                                                  |
 | -------------------------- | -------------------------- | ------------------------------------------------------ |
@@ -247,7 +293,7 @@ El proyecto ya usa `.env` para claves compartidas. Graphify lee `GEMINI_API_KEY`
 
 ---
 
-## 8. Roadmap de Implementación
+## 9. Roadmap de Implementación
 
 | Fase                 | Duración  | Qué incluye                                                                                                    |
 | -------------------- | --------- | -------------------------------------------------------------------------------------------------------------- |
@@ -266,7 +312,7 @@ El proyecto ya usa `.env` para claves compartidas. Graphify lee `GEMINI_API_KEY`
 
 ---
 
-## 9. Por qué ahora
+## 10. Por qué ahora
 
 1. **Ya tenemos evidencia concreta** — el curso 269 es un caso documentado con screenshots y audit
 2. **El equipo ya usa Gemini** — el salto a Gemini CLI es mínimo (misma interfaz, más herramientas)
@@ -276,7 +322,7 @@ El proyecto ya usa `.env` para claves compartidas. Graphify lee `GEMINI_API_KEY`
 
 ---
 
-## 10. Principio de Diseño: Non-Dev First
+## 11. Principio de Diseño: Non-Dev First
 
 El pipeline está pensado para **prompters no-desarrolladores**. Toda decisión técnica se filtra por esta regla:
 
@@ -298,7 +344,7 @@ El pipeline está pensado para **prompters no-desarrolladores**. Toda decisión 
 
 ---
 
-## 11. Próximos Pasos
+## 12. Próximos Pasos
 
 1. ✅ Esta propuesta está lista para revisión
 2. ⬜ **Decisión:** ¿Seguimos con la implementación?

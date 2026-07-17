@@ -9,6 +9,7 @@ Load and analyze the Reengagement implementation context:
 2. Read @.context/reengagement/cursos-config.md
 
 Report:
+
 - Current phase and status (content dev, production config, launch, analytics)
 - Pending actions per course (IA, Python, Yoga)
 - Next deadline or milestone
