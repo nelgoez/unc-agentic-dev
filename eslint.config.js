@@ -10,15 +10,5 @@ export default antfu({
   typescript: {
     tsconfigPath: 'tsconfig.json',
   },
-  ignores: [
-    'node_modules',
-    'dist',
-    '.opencode/node_modules',
-    '.github',
-    'packages',
-    'reports',
-    'graphify-out',
-    'allure-results',
-    'allure-report',
-  ],
+  ignores: ['node_modules', 'dist', '.opencode/node_modules'],
 })
