@@ -1,0 +1,5 @@
+bunx lint-staged
+
+# TypeScript + variables check on every commit
+bun run types:check
+bun run vars:check

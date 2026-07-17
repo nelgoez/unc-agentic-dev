@@ -50,3 +50,17 @@ test-results/
 
 # Local Netlify folder
 .netlify
+
+# Allure reports
+allure-results/
+allure-report/
+
+# Graphify knowledge graph
+graphify-out/
+
+# Generated reports (audits, evidence, screenshots)
+/reports/
+
+# Playwright cache
+playwright/.cache/
+playwright/.auth/

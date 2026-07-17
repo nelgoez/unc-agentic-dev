@@ -84,6 +84,30 @@ Courses and their rescue/maintenance trigger points:
 - Follow existing patterns in `../diploma-tracking-system/`
 - **Non-Dev First** — toda optimización debe requerir cero configuración del prompter. Split de prompts, compresión, y validación deben ser automágicas.
 
+## Testing Conventions (KATA)
+
+Tests follow the **Komponent Action Test Architecture** (KATA):
+
+```
+tests/
+├── components/
+│   ├── TestContext.ts     # Layer 1: config, env, data generation
+│   ├── UiFixture.ts       # Layer 4: Playwright + TestContext DI
+│   └── ui/                # Layer 3: UI ATCs with @atc decorators
+├── e2e/                   # E2E tests using KATA components
+└── utils/
+    └── decorators.ts      # @atc, @step decorators
+```
+
+### KATA rules:
+
+- **No `waitForTimeout`** — ever. Use `waitForSelector`, `waitForURL`, `waitForResponse`, or `locator.waitFor({ state: 'visible' })`.
+- **No `waitForLoadState('networkidle')`** — prefer `'load'` or `'domcontentloaded'`. `networkidle` hangs when there's polling.
+- **Each ATC = one unique expected outcome** — test methods decorated with `@atc('ID', { story, feature })`.
+- **Inline locators** — no separate locator files. Selectors live with the component.
+- **No ATC calls another ATC** — components are independent.
+- **Fixtures via `createFixture()`** — never instantiate components manually in tests.
+
 ## Session Rules
 
 ### Clean up after yourself
@@ -116,3 +140,4 @@ On "by" or any termination signal from me, the agent MUST:
 - [ ] `.env` entries match `.env.example` structure
 - [ ] Context files updated for current sprint
 - [ ] Temp files cleaned, repo is clean
+- [ ] KATA conventions followed (no `waitForTimeout`, no `networkidle`)
