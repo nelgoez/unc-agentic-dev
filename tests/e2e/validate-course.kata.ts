@@ -16,33 +16,63 @@ test.describe('Course Validation — Multi-Role Audit', () => {
     const course = new MoodleCourse(page, ctx.env.baseUrl)
     const roles = new MoodleRoleSwitch(page, ctx.env.baseUrl)
 
-    // 1. Login as admin (needed for role switching)
+    const screenshotDir = resolve('reports/audit')
+    mkdirSync(screenshotDir, { recursive: true })
+
+    // 1. Login as admin (source of truth)
     await login.loginAsAdmin()
     await course.goToCourse(courseId)
 
-    // 2. Scan as admin (full visibility)
-    console.log('\n=== ADMIN VIEW ===')
+    // 2. Scan as admin + take screenshots of ALL sections
+    console.log('\n=== ADMIN VIEW (source of truth) ===')
     const adminView = await course.analyze(courseId)
-    console.log(`Sections: ${adminView.sections.length}`)
-    console.log(`Tabs: ${adminView.tabs.length}`)
+    console.log(`Sections: ${adminView.sections.length}, Tabs: ${adminView.tabs.length}`)
+    for (const section of adminView.sections) {
+      await course.navigateToSection(section.number)
+      await course.takeScreenshot(
+        resolve(screenshotDir, `course-${courseId}-admin-section-${section.number}.png`),
+      )
+    }
+    console.log(`Admin screenshots: ${adminView.sections.length}`)
 
-    // 3. Switch to student and scan
+    // 3. Switch to teacher + scan + screenshots
+    console.log('\n=== TEACHER VIEW ===')
+    await roles.revertToAdmin(courseId)
+    await roles.switchToTeacher(courseId)
+    const teacherView = await course.analyze(courseId)
+    for (const section of teacherView.sections) {
+      await course.navigateToSection(section.number)
+      await course.takeScreenshot(
+        resolve(screenshotDir, `course-${courseId}-teacher-section-${section.number}.png`),
+      )
+    }
+    console.log(`Teacher screenshots: ${teacherView.sections.length}`)
+
+    // 4. Switch to student + scan + screenshots
     console.log('\n=== STUDENT VIEW ===')
-    await roles.switchToStudent(courseId)
+    await roles.revertToAdmin(courseId)
+    const studentOk = await roles.switchToStudent(courseId)
     const studentView = await course.analyze(courseId)
-    console.log(`Sections: ${studentView.sections.length}`)
+    console.log(`Sections: ${studentView.sections.length} (switch OK: ${studentOk})`)
     for (const tab of studentView.tabs) {
       console.log(
         `  ${tab.title} section=${tab.sectionNumber} locked=${tab.isDisabled}${tab.restrictionText ? ` restriction="${tab.restrictionText}"` : ''}`,
       )
     }
+    for (const section of studentView.sections) {
+      await course.navigateToSection(section.number)
+      await course.takeScreenshot(
+        resolve(screenshotDir, `course-${courseId}-student-section-${section.number}.png`),
+      )
+    }
+    console.log(`Student screenshots: ${studentView.sections.length}`)
 
-    // 4. Phantom detection from student perspective
+    // 5. Phantom detection
     const findings = course.findPhantoms(studentView)
     const criticalFindings = findings.filter((f) => f.severity === 'critical')
     const warningFindings = findings.filter((f) => f.severity === 'warning')
 
-    console.log(`\n=== PHANTOM FINDINGS ===`)
+    console.log(`\n=== FINDINGS ===`)
     console.log(
       `Total: ${findings.length} | CRITICAL: ${criticalFindings.length} | WARNING: ${warningFindings.length}`,
     )
@@ -50,62 +80,7 @@ test.describe('Course Validation — Multi-Role Audit', () => {
       console.log(`  [${f.severity.toUpperCase()}] ${f.sectionTitle}: ${f.message}`)
     }
 
-    // 5. Switch to teacher and scan
-    console.log('\n=== TEACHER VIEW ===')
-    await roles.revertToAdmin(courseId)
-    await roles.switchToTeacher(courseId)
-    const teacherView = await course.analyze(courseId)
-    console.log(`Sections: ${teacherView.sections.length}`)
-
-    // 6. Take screenshots from ALL roles for each section with differences
-    const screenshotDir = resolve('reports/audit')
-    const sectionsToCapture = studentView.sections.filter((s) => {
-      const adminSection = adminView.sections.find((as) => as.number === s.number)
-      return (
-        adminSection &&
-        (adminSection.activities.length !== s.activities.length ||
-          s.isLocked !== adminSection.isLocked)
-      )
-    })
-    console.log(`Sections to capture (with differences): ${sectionsToCapture.length}`)
-
-    // Admin screenshots (source of truth)
-    console.log('\n=== CAPTURING ADMIN VIEW ===')
-    await roles.revertToAdmin(courseId)
-    console.log(`Role: ${await roles.getCurrentRoleLabel()}`)
-    for (const section of sectionsToCapture) {
-      await course.navigateToSection(section.number)
-      await course.takeScreenshot(
-        resolve(screenshotDir, `course-${courseId}-admin-section-${section.number}.png`),
-      )
-    }
-
-    // Student screenshots (what the student actually sees)
-    console.log('\n=== CAPTURING STUDENT VIEW ===')
-    const studentOk = await roles.switchToStudentAndVerify(courseId)
-    console.log(
-      `Student switch OK: ${studentOk} | Role label: ${await roles.getCurrentRoleLabel()}`,
-    )
-    for (const section of sectionsToCapture) {
-      await course.navigateToSection(section.number)
-      await course.takeScreenshot(
-        resolve(screenshotDir, `course-${courseId}-student-section-${section.number}.png`),
-      )
-    }
-
-    // Teacher screenshots (what the non-editing teacher sees)
-    console.log('\n=== CAPTURING TEACHER VIEW ===')
-    await roles.revertToAdmin(courseId)
-    await roles.switchToTeacher(courseId)
-    console.log(`Role: ${await roles.getCurrentRoleLabel()}`)
-    for (const section of sectionsToCapture) {
-      await course.navigateToSection(section.number)
-      await course.takeScreenshot(
-        resolve(screenshotDir, `course-${courseId}-teacher-section-${section.number}.png`),
-      )
-    }
-
-    // 7. Annotate test with findings
+    // 6. Annotations
     if (criticalFindings.length > 0) {
       test.info().annotations.push({
         type: 'critical-findings',
@@ -114,25 +89,21 @@ test.describe('Course Validation — Multi-Role Audit', () => {
           .join('\n'),
       })
     }
-
-    // 8. Compare admin vs student section counts (admin sees hidden content)
     if (adminView.sections.length !== studentView.sections.length) {
       test.info().annotations.push({
         type: 'visibility-gap',
-        description: `Admin sees ${adminView.sections.length} sections, student sees ${studentView.sections.length} — ${adminView.sections.length - studentView.sections.length} sections hidden from students`,
+        description: `Admin sees ${adminView.sections.length} sections, student sees ${studentView.sections.length} — ${adminView.sections.length - studentView.sections.length} hidden`,
       })
     }
 
     console.log(`\n=== AUDIT COMPLETE ===`)
-    console.log(`Admin sections: ${adminView.sections.length}`)
-    console.log(`Student sections: ${studentView.sections.length}`)
-    console.log(`Teacher sections: ${teacherView.sections.length}`)
+    console.log(
+      `Admin: ${adminView.sections.length} | Teacher: ${teacherView.sections.length} | Student: ${studentView.sections.length} | Findings: ${findings.length}`,
+    )
 
-    // Save audit results for the custom HTML report generator
-    const auditDir = resolve('reports/audit')
-    mkdirSync(auditDir, { recursive: true })
+    // Save results
     writeFileSync(
-      resolve(auditDir, 'audit-results.json'),
+      resolve(screenshotDir, 'audit-results.json'),
       JSON.stringify(
         {
           courseId,
@@ -141,8 +112,8 @@ test.describe('Course Validation — Multi-Role Audit', () => {
           runUrl: '',
           allureUrl: '/allure/',
           adminView,
-          studentView,
           teacherView,
+          studentView,
           findings,
         },
         null,
@@ -150,6 +121,6 @@ test.describe('Course Validation — Multi-Role Audit', () => {
       ),
       'utf-8',
     )
-    console.log(`📊 Audit results saved to reports/audit/audit-results.json`)
+    console.log(`📊 Data saved to reports/audit/audit-results.json`)
   })
 })

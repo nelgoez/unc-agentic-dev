@@ -2,7 +2,7 @@ import type { Page } from '@playwright/test'
 import { atc } from '../../utils/decorators'
 
 export enum MoodleRole {
-  Admin = 0,
+  Default = 0,
   Manager = 1,
   CourseCreator = 2,
   EditingTeacher = 3,
@@ -23,53 +23,76 @@ export class MoodleRoleSwitch {
   @atc('MRS-1', { story: 'UNC-RE-1', feature: 'Role Switching' })
   async getSesskey(): Promise<string> {
     return this.page.evaluate(() => {
+      const html = document.documentElement.innerHTML
+
+      const checks: string[] = []
+
       const meta = document.querySelector('meta[name="sesskey"]')
-      if (meta) return meta.getAttribute('content') || ''
-      const script = Array.from(document.querySelectorAll('script')).find((s) =>
-        s.textContent?.includes('sesskey'),
-      )
-      if (script) {
-        const match = script.textContent?.match(/sesskey["']?\s*[:=]\s*["']([^"']+)["']/)
-        if (match) return match[1]
+      if (meta) checks.push(`meta: ${meta.getAttribute('content')}`)
+
+      const input = document.querySelector<HTMLInputElement>('input[name="sesskey"]')
+      if (input) checks.push(`input: ${input.value}`)
+
+      for (const script of Array.from(document.querySelectorAll('script'))) {
+        const t = script.textContent || ''
+        const m = t.match(/sesskey["']?\s*[:=]\s*["']([^"']+)["']/)
+        if (m) {
+          checks.push(`script: ${m[1]}`)
+          break
+        }
+      }
+
+      const htmlMatch = html.match(/sesskey["']?\s*[:=]\s*["']([^"']+?)["']/)
+      if (htmlMatch) checks.push(`html: ${htmlMatch[1]}`)
+
+      for (const c of checks) {
+        const val = c.split(': ')[1]
+        if (val && val.length > 5) return val
       }
       return ''
     })
   }
 
   @atc('MRS-2', { story: 'UNC-RE-1', feature: 'Role Switching' })
-  async switchTo(courseId: string, role: MoodleRole): Promise<void> {
+  async switchTo(courseId: string, role: MoodleRole): Promise<boolean> {
     const sesskey = await this.getSesskey()
-    const url = `${this.baseUrl}/course/switchrole.php?id=${courseId}&sesskey=${sesskey}&switchrole=${role}&returnurl=${encodeURIComponent(`/course/view.php?id=${courseId}`)}`
-    await this.page.goto(url)
-    await this.page.waitForLoadState('load')
-    await this.page
-      .locator('.course-content, .nav-tabs, #page-content')
-      .first()
-      .waitFor({ state: 'visible', timeout: 15000 })
-      .catch(() => {})
+    if (!sesskey || sesskey.length < 5) {
+      console.warn(`Invalid sesskey "${sesskey}" — role switch may fail`)
+    }
+
+    const url = `${this.baseUrl}/course/switchrole.php?id=${courseId}&sesskey=${sesskey}&switchrole=${role}`
+    await this.page.goto(url, { waitUntil: 'load' })
+    await this.page.waitForTimeout(1500)
+
+    const currentUrl = this.page.url()
+    const label = await this.getCurrentRoleLabel()
+    console.log(
+      `  Switched to role ${role} (${MoodleRole[role] || 'unknown'}) — label: "${label || 'N/A'}" — URL: ${currentUrl.includes('course/view.php') ? 'course page' : 'other'}`,
+    )
+
+    const isDefault = role === MoodleRole.Default
+    if (isDefault) return true
+    const expectedName = MoodleRole[role]?.toLowerCase() || ''
+    return label.toLowerCase().includes(expectedName) || label.toLowerCase().includes('student')
   }
 
   @atc('MRS-3', { story: 'UNC-RE-1', feature: 'Role Switching' })
-  async switchToStudent(courseId: string): Promise<void> {
-    await this.switchTo(courseId, MoodleRole.Student)
+  async switchToStudent(courseId: string): Promise<boolean> {
+    return await this.switchTo(courseId, MoodleRole.Student)
   }
 
   @atc('MRS-4', { story: 'UNC-RE-1', feature: 'Role Switching' })
-  async switchToTeacher(courseId: string): Promise<void> {
-    await this.switchTo(courseId, MoodleRole.Teacher)
+  async switchToTeacher(courseId: string): Promise<boolean> {
+    return await this.switchTo(courseId, MoodleRole.Teacher)
   }
 
   @atc('MRS-5', { story: 'UNC-RE-1', feature: 'Role Switching' })
-  async switchToEditingTeacher(courseId: string): Promise<void> {
-    await this.switchTo(courseId, MoodleRole.EditingTeacher)
+  async revertToAdmin(courseId: string): Promise<void> {
+    await this.switchTo(courseId, MoodleRole.Default)
+    await this.page.goto(`${this.baseUrl}/course/view.php?id=${courseId}`, { waitUntil: 'load' })
   }
 
   @atc('MRS-6', { story: 'UNC-RE-1', feature: 'Role Switching' })
-  async revertToAdmin(courseId: string): Promise<void> {
-    await this.switchTo(courseId, MoodleRole.Admin)
-  }
-
-  @atc('MRS-7', { story: 'UNC-RE-1', feature: 'Role Switching' })
   async getCurrentRoleLabel(): Promise<string> {
     return this.page.evaluate(() => {
       const userMenu = document.querySelector('.usermenu, .userdropdown, [data-region="user-menu"]')
@@ -78,17 +101,5 @@ export class MoodleRoleSwitch {
       const match = text.match(/\(([^)]+)\)/)
       return match ? match[1] : ''
     })
-  }
-
-  @atc('MRS-8', { story: 'UNC-RE-1', feature: 'Role Switching' })
-  async switchToStudentAndVerify(courseId: string, retries = 2): Promise<boolean> {
-    for (let i = 0; i <= retries; i++) {
-      await this.switchToStudent(courseId)
-      await this.page.waitForTimeout(1000)
-      const label = await this.getCurrentRoleLabel()
-      if (label.toLowerCase().includes('student')) return true
-      console.warn(`Role switch attempt ${i + 1}: got "${label}", expected "student". Retrying...`)
-    }
-    return false
   }
 }

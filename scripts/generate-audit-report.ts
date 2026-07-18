@@ -45,35 +45,24 @@ interface AuditResults {
   studentView: CourseStructure
   teacherView: CourseStructure
   findings: AuditFinding[]
-  screenshots: { sectionNumber: number; role: 'admin' | 'teacher' | 'student'; data: string }[]
+  screenshots: { role: string; sectionNumber: number; data: string }[]
 }
 
 function loadJson<T>(filePath: string): T {
   return JSON.parse(readFileSync(filePath, 'utf-8')) as T
 }
 
-function loadScreenshots(
-  dir: string,
-): { sectionNumber: number; role: 'admin' | 'teacher' | 'student'; data: string }[] {
+function loadScreenshots(dir: string): { role: string; sectionNumber: number; data: string }[] {
   if (!existsSync(dir)) return []
-  const results: { sectionNumber: number; role: 'admin' | 'teacher' | 'student'; data: string }[] =
-    []
-  for (const role of ['admin', 'teacher', 'student'] as const) {
-    const files = readdirSync(dir).filter((f) =>
-      new RegExp(`course-\\d+-${role}-section-\\d+\\.png`).test(f),
-    )
-    for (const f of files) {
-      const match = f.match(new RegExp(`course-\\d+-${role}-section-(\\d+)\\.png`))
-      if (match) {
-        results.push({
-          sectionNumber: Number.parseInt(match[1], 10),
-          role,
-          data: readFileSync(resolve(dir, f)).toString('base64'),
-        })
-      }
-    }
-  }
-  return results
+  return readdirSync(dir)
+    .filter((f) => /course-\d+-(admin|teacher|student)-section-\d+\.png/.test(f))
+    .map((f) => {
+      const match = f.match(/course-\d+-(\w+)-section-(\d+)\.png/)
+      const role = match ? match[1] : 'unknown'
+      const sectionNumber = match ? Number.parseInt(match[2], 10) : 0
+      const data = readFileSync(resolve(dir, f)).toString('base64')
+      return { role, sectionNumber, data }
+    })
 }
 
 function severityInfo(severity: string): { icon: string; label: string } {
@@ -97,6 +86,7 @@ function buildHTML(results: AuditResults): string {
     allureUrl,
     findings,
     adminView,
+    teacherView,
     studentView,
     screenshots,
   } = results
@@ -109,7 +99,7 @@ function buildHTML(results: AuditResults): string {
 
   const screenshotMap = new Map<string, string>()
   for (const s of screenshots) {
-    screenshotMap.set(`${s.sectionNumber}-${s.role}`, s.data)
+    screenshotMap.set(`${s.role}|${s.sectionNumber}`, s.data)
   }
 
   const triggerUrl = 'https://github.com/nelgoez/unc-agentic-dev/actions/workflows/audit-ci.yml'
@@ -129,7 +119,7 @@ function buildHTML(results: AuditResults): string {
     findingsHTML = `<h2 class="section-title">Hallazgos de la auditoría</h2>`
     for (const f of findings) {
       const si = severityInfo(f.severity)
-      const screenshot = screenshotMap.get(`${f.sectionNumber}-student`)
+      const stuScreenshot = screenshotMap.get(`student|${f.sectionNumber}`)
       findingsHTML += `
     <div class="finding ${f.severity}" onclick="this.classList.toggle('open')">
       <div class="finding-header">
@@ -138,77 +128,61 @@ function buildHTML(results: AuditResults): string {
         <span class="chevron">▶</span>
       </div>
       <div class="finding-detail">${esc(f.detail)}</div>`
-      const fAdminScreenshot = screenshotMap.get(`${f.sectionNumber}-admin`)
-      const fTeacherScreenshot = screenshotMap.get(`${f.sectionNumber}-teacher`)
-      const fStudentScreenshot = screenshotMap.get(`${f.sectionNumber}-student`)
-      if (fAdminScreenshot || fTeacherScreenshot || fStudentScreenshot) {
+      if (stuScreenshot != null && stuScreenshot !== '') {
         findingsHTML += `
-        <div style="display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 12px">
-          ${fAdminScreenshot ? `<div style="flex:1;min-width:200px"><div class="screenshot" style="margin:0"><img src="data:image/png;base64,${fAdminScreenshot}" alt="Admin sección ${f.sectionNumber}"><div class="caption">👤 Admin - ${esc(f.sectionTitle)}</div></div></div>` : ''}
-          ${fTeacherScreenshot ? `<div style="flex:1;min-width:200px"><div class="screenshot" style="margin:0"><img src="data:image/png;base64,${fTeacherScreenshot}" alt="Teacher sección ${f.sectionNumber}"><div class="caption">👩‍🏫 Teacher - ${esc(f.sectionTitle)}</div></div></div>` : ''}
-          ${fStudentScreenshot ? `<div style="flex:1;min-width:200px"><div class="screenshot" style="margin:0"><img src="data:image/png;base64,${fStudentScreenshot}" alt="Student sección ${f.sectionNumber}"><div class="caption">🎓 Estudiante - ${esc(f.sectionTitle)}</div></div></div>` : ''}
-        </div>`
+      <div class="screenshot">
+        <img src="data:image/png;base64,${stuScreenshot}" alt="Captura sección ${f.sectionNumber}">
+        <div class="caption">📸 Vista como estudiante - Sección ${f.sectionNumber}: ${esc(f.sectionTitle)}</div>
+      </div>`
       }
       findingsHTML += `\n    </div>`
     }
-    findingsHTML += `\n    <p style="margin-top:8px;font-size:0.8em;color:var(--text-2)">💡 Hacé clic en cada hallazgo para ver detalle y captura de pantalla.</p>`
+    findingsHTML += `\n    <p style="margin-top:8px;font-size:0.8em;color:var(--text-2)">💡 Hacé clic en cada hallazgo para ver detalle y captura.</p>`
   }
 
-  let compareHTML = ''
-  const sectionsWithDiff = studentView.sections.filter((s) => {
-    const adminSection = adminView.sections.find((as) => as.number === s.number)
-    return (
-      adminSection &&
-      (adminSection.activities.length !== s.activities.length ||
-        s.isLocked !== adminSection.isLocked)
-    )
-  })
-  if (sectionsWithDiff.length > 0) {
-    compareHTML = `<h2 class="section-title">Vista lado a lado: Admin vs Estudiante</h2>
-    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Cada sección donde lo que ve el admin difiere de lo que ve el estudiante. Esto ayuda a identificar contenidos ocultos o bloqueados sin depender de reportes técnicos.</p>`
-    for (const s of sectionsWithDiff) {
-      const adminSection = adminView.sections.find((as) => as.number === s.number)
-      const adminActs = adminSection?.activities.length ?? 0
-      const studentActs = s.activities.length
-      const diff = adminActs - studentActs
-      const adminScreenshot = screenshotMap.get(`${s.number}-admin`)
-      const teacherScreenshot = screenshotMap.get(`${s.number}-teacher`)
-      const studentScreenshot = screenshotMap.get(`${s.number}-student`)
-      compareHTML += `
-    <div class="finding ${s.isLocked ? 'critical' : 'warning'}">
-      <div class="finding-header" onclick="this.parentElement.classList.toggle('open')">
-        <span class="icon">${s.isLocked ? '🔒' : '👁️'}</span>
-        <span class="msg"><strong>${esc(s.title)}</strong> — Admin: ${adminActs} act. | Estudiante: ${studentActs} act. ${diff > 0 ? `<span style="color:var(--bad)">(${diff} oculta(s))</span>` : ''} | ${s.isLocked ? '🔒 Bloqueado para estudiantes' : '✅ Accesible'}</span>
-        <span class="chevron">▶</span>
-      </div>
-      <div class="finding-detail">
-        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
-          <div style="flex:1;min-width:200px;background:var(--bg);border-radius:var(--radius);padding:10px">
-            <strong style="color:var(--accent)">👤 Admin ve:</strong>
-            <ul style="margin:6px 0 0 16px;font-size:0.9em">
-              ${adminSection?.activities.map((a) => `<li>${a.isVisible ? '✅' : '👻'} ${esc(a.name)} <span class="dim">(${a.type})</span></li>`).join('') || '<li>Sin actividades</li>'}
-            </ul>
-          </div>
-          <div style="flex:1;min-width:200px;background:var(--bg);border-radius:var(--radius);padding:10px">
-            <strong style="color:${s.isLocked ? 'var(--bad)' : 'var(--good)'}">🎓 Estudiante ve:</strong>
-            <ul style="margin:6px 0 0 16px;font-size:0.9em">
-              ${s.activities.map((a) => `<li>${a.isVisible ? '✅' : '👻'} ${esc(a.name)} <span class="dim">(${a.type})</span></li>`).join('') || '<li>Sin actividades</li>'}
-            </ul>
-          </div>
+  // Side-by-side: all sections from all 3 roles
+  let compareHTML = `<h2 class="section-title">Comparación visual: Admin · Teacher · Student</h2>
+  <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Cada sección del curso vista desde los tres roles. El admin es la fuente de verdad — lo que el estudiante NO ve está destacado.</p>`
+  for (const section of adminView.sections) {
+    const teacherSection = teacherView.sections.find((s) => s.number === section.number)
+    const studentSection = studentView.sections.find((s) => s.number === section.number)
+    const tActs = teacherSection?.activities.length ?? 0
+    const sActs = studentSection?.activities.length ?? 0
+    const diffT = section.activities.length - tActs
+    const diffS = section.activities.length - sActs
+    const isLocked = studentSection?.isLocked ?? false
+
+    const adminScreenshot = screenshotMap.get(`admin|${section.number}`)
+    const teacherScreenshot = screenshotMap.get(`teacher|${section.number}`)
+    const studentScreenshot = screenshotMap.get(`student|${section.number}`)
+
+    compareHTML += `
+  <div class="finding ${isLocked ? 'critical' : diffS > 0 ? 'warning' : 'good'}">
+    <div class="finding-header" onclick="this.parentElement.classList.toggle('open')">
+      <span class="icon">${isLocked ? '🔒' : '👁️'}</span>
+      <span class="msg"><strong>${esc(section.title)}</strong> — Admin: ${section.activities.length} | Teacher: ${tActs} ${diffT > 0 ? `<span style="color:var(--warn)">(-${diffT})</span>` : ''} | Student: ${sActs} ${diffS > 0 ? `<span style="color:var(--bad)">(-${diffS})</span>` : ''} ${isLocked ? '🔒 Bloqueado' : ''}</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="finding-detail">
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+        <div style="flex:1;min-width:180px;background:var(--bg);border-radius:var(--radius);padding:10px">
+          <div style="font-weight:700;color:var(--accent);margin-bottom:4px">👤 Admin (${section.activities.length} act.)</div>
+          ${adminScreenshot ? `<div class="screenshot" style="margin:0 0 4px"><img src="data:image/png;base64,${adminScreenshot}" alt="Admin sección ${section.number}"></div>` : ''}
+          <ul style="margin:4px 0 0 14px;font-size:0.8em">${section.activities.map((a) => `<li>${a.isVisible ? '✅' : '👻'} ${esc(a.name)}</li>`).join('') || '<li>Sin actividades</li>'}</ul>
         </div>
-        ${
-          adminScreenshot || teacherScreenshot || studentScreenshot
-            ? `
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;padding:0 16px 12px">
-          ${adminScreenshot ? `<div style="flex:1;min-width:240px"><div class="screenshot" style="margin:0"><img src="data:image/png;base64,${adminScreenshot}" alt="Admin sección ${s.number}"><div class="caption">👤 Admin - Sección ${s.number}</div></div></div>` : ''}
-          ${teacherScreenshot ? `<div style="flex:1;min-width:240px"><div class="screenshot" style="margin:0"><img src="data:image/png;base64,${teacherScreenshot}" alt="Teacher sección ${s.number}"><div class="caption">👩‍🏫 Teacher - Sección ${s.number}</div></div></div>` : ''}
-          ${studentScreenshot ? `<div style="flex:1;min-width:240px"><div class="screenshot" style="margin:0"><img src="data:image/png;base64,${studentScreenshot}" alt="Student sección ${s.number}"><div class="caption">🎓 Estudiante - Sección ${s.number}</div></div></div>` : ''}
-        </div>`
-            : ''
-        }
+        <div style="flex:1;min-width:180px;background:var(--bg);border-radius:var(--radius);padding:10px">
+          <div style="font-weight:700;color:var(--warn);margin-bottom:4px">👩‍🏫 Teacher (${tActs} act.)</div>
+          ${teacherScreenshot ? `<div class="screenshot" style="margin:0 0 4px"><img src="data:image/png;base64,${teacherScreenshot}" alt="Teacher sección ${section.number}"></div>` : ''}
+          <ul style="margin:4px 0 0 14px;font-size:0.8em">${(teacherSection?.activities ?? []).map((a) => `<li>${a.isVisible ? '✅' : '👻'} ${esc(a.name)}</li>`).join('') || '<li>Sin actividades</li>'}</ul>
+        </div>
+        <div style="flex:1;min-width:180px;background:var(--bg);border-radius:var(--radius);padding:10px">
+          <div style="font-weight:700;color:${isLocked ? 'var(--bad)' : 'var(--good)'};margin-bottom:4px">🎓 Student (${sActs} act.)${isLocked ? ' 🔒' : ''}</div>
+          ${studentScreenshot ? `<div class="screenshot" style="margin:0 0 4px"><img src="data:image/png;base64,${studentScreenshot}" alt="Student sección ${section.number}"></div>` : ''}
+          <ul style="margin:4px 0 0 14px;font-size:0.8em">${(studentSection?.activities ?? []).map((a) => `<li>${a.isVisible ? '✅' : '👻'} ${esc(a.name)}</li>`).join('') || '<li>Sin actividades</li>'}</ul>
+        </div>
       </div>
-    </div>`
-    }
+    </div>
+  </div>`
   }
 
   let devNote = ''
