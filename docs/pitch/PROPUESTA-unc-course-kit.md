@@ -284,6 +284,20 @@ Con el usuario administrador activo, el alcance se expande mucho más allá de a
 
 El límite no es técnico — es cuántos casos de prueba vale la pena diseñar. El pipeline escala horizontalmente: más cursos = más workers en el CI.
 
+### Cómo verlo vos mismo (para admins de Moodle)
+
+Ignacio preguntó: _"¿A dónde puedo ver eso yo, con mi usuario admin?"_
+
+Hay tres formas:
+
+1. **El reporte en vivo** — Abrí [`https://nelgoez.github.io/unc-agentic-dev/`](https://nelgoez.github.io/unc-agentic-dev/). Ahí está la auditoría del curso 269 con hallazgos, screenshots y comparación lado a lado de lo que ve el admin vs el estudiante. No necesitás nada más que el link.
+
+2. **Verificá en Moodle vos mismo** — Entrá al curso, usá el menú de usuario → "Cambiar rol a..." → Estudiante. Vas a ver exactamente las mismas secciones bloqueadas que muestra el reporte. Los screenshots del reporte coinciden con lo que ves.
+
+3. **Agregá tus cursos al pipeline** — Si querés que auditemos tus cursos, decinos el ID del curso y lo agregamos. El pipeline se encarga del resto. Podés tener auditoría automática en cada actualización del curso.
+
+> El reporte está diseñado para que **lo vea un no-desarrollador**. No hay código, no hay terminal, no hay tests. Es una página web con colores, capturas de pantalla y explicaciones en español.
+
 ---
 
 ## 8. Stack Tecnológico y Costos

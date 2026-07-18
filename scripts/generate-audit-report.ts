@@ -148,18 +148,40 @@ function buildHTML(results: AuditResults): string {
     )
   })
   if (sectionsWithDiff.length > 0) {
-    compareHTML = `<h2 class="section-title">Comparación: Admin vs Estudiante</h2>
-    <table class="compact">
-      <thead><tr><th>Sección</th><th>Admin</th><th>Estudiante</th><th>Estado</th></tr></thead>
-      <tbody>`
+    compareHTML = `<h2 class="section-title">Vista lado a lado: Admin vs Estudiante</h2>
+    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Cada sección donde lo que ve el admin difiere de lo que ve el estudiante. Esto ayuda a identificar contenidos ocultos o bloqueados sin depender de reportes técnicos.</p>`
     for (const s of sectionsWithDiff) {
       const adminSection = adminView.sections.find((as) => as.number === s.number)
       const adminActs = adminSection?.activities.length ?? 0
-      const statusIcon = s.isLocked ? '🔒' : '✅'
-      const statusText = s.isLocked ? 'Bloqueada' : 'Disponible'
-      compareHTML += `<tr><td><strong>${esc(s.title)}</strong></td><td>${adminActs} actividades</td><td>${s.activities.length} actividades</td><td>${statusIcon} ${statusText}</td></tr>`
+      const studentActs = s.activities.length
+      const diff = adminActs - studentActs
+      const screenshot = screenshotMap.get(s.number)
+      compareHTML += `
+    <div class="finding ${s.isLocked ? 'critical' : 'warning'}">
+      <div class="finding-header" onclick="this.parentElement.classList.toggle('open')">
+        <span class="icon">${s.isLocked ? '🔒' : '👁️'}</span>
+        <span class="msg"><strong>${esc(s.title)}</strong> — Admin: ${adminActs} act. | Estudiante: ${studentActs} act. ${diff > 0 ? `<span style="color:var(--bad)">(${diff} oculta(s))</span>` : ''} | ${s.isLocked ? '🔒 Bloqueado para estudiantes' : '✅ Accesible'}</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="finding-detail">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:8px">
+          <div style="flex:1;min-width:200px;background:var(--bg);border-radius:var(--radius);padding:10px">
+            <strong style="color:var(--accent)">👤 Admin ve:</strong>
+            <ul style="margin:6px 0 0 16px;font-size:0.9em">
+              ${adminSection?.activities.map((a) => `<li>${a.isVisible ? '✅' : '👻'} ${esc(a.name)} <span class="dim">(${a.type})</span></li>`).join('') || '<li>Sin actividades</li>'}
+            </ul>
+          </div>
+          <div style="flex:1;min-width:200px;background:var(--bg);border-radius:var(--radius);padding:10px">
+            <strong style="color:${s.isLocked ? 'var(--bad)' : 'var(--good)'}">🎓 Estudiante ve:</strong>
+            <ul style="margin:6px 0 0 16px;font-size:0.9em">
+              ${s.activities.map((a) => `<li>${a.isVisible ? '✅' : '👻'} ${esc(a.name)} <span class="dim">(${a.type})</span></li>`).join('') || '<li>Sin actividades</li>'}
+            </ul>
+          </div>
+        </div>
+        ${screenshot ? `<div class="screenshot"><img src="data:image/png;base64,${screenshot}" alt="Captura sección ${s.number} como estudiante"><div class="caption">📸 Vista como estudiante - Sección ${s.number}: ${esc(s.title)}</div></div>` : ''}
+      </div>
+    </div>`
     }
-    compareHTML += `</tbody></table>`
   }
 
   let devNote = ''
@@ -167,8 +189,12 @@ function buildHTML(results: AuditResults): string {
     devNote = `
     <div class="dev-note">
       <strong>⚠️ Entorno de pruebas en producción</strong><br>
-      Esta auditoría se ejecuta sobre el entorno productivo de Moodle. Para auditar correcciones y cursos en desarrollo, necesitamos acceso a un entorno de pruebas (dev/staging). Los resultados pueden incluir hallazgos ya conocidos o en proceso de corrección.<br><br>
-      <strong>¿Cómo corregir los hallazgos?</strong> Si encontrás actividades fantasma o gates rotos, contactá al equipo de desarrollo del Campus Virtual para coordinar las correcciones en el entorno productivo.
+      Esta auditoría se ejecuta sobre el entorno productivo de Moodle. Para auditar correcciones y cursos en desarrollo, necesitamos acceso a un entorno de pruebas (dev/staging).<br><br>
+      <strong>🔍 ¿Querés verificar con tu propio usuario admin?</strong><br>
+      Entrá al curso, usá el menú de usuario → "Cambiar rol a..." → Estudiante. Comprarás que las secciones marcadas como bloqueadas son las que el estudiante no ve. Los screenshots en este reporte muestran exactamente lo que ellos ven.
+      <br><br>
+      <strong>¿Y si querés auditar tus propios cursos?</strong><br>
+      El pipeline puede apuntar a cualquier curso cambiando el ID. Hablá con el equipo para que agregue tu curso al repositorio de auditoría.
     </div>`
   }
 
