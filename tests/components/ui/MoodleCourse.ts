@@ -225,86 +225,92 @@ export class MoodleCourse {
     return { courseName, courseUrl, tabs, sections }
   }
 
-  findPhantoms(student: CourseStructure): AuditFinding[] {
+  findPhantoms(admin: CourseStructure): AuditFinding[] {
     const findings: AuditFinding[] = []
 
-    const lockedSections = student.sections.filter((s) => s.isLocked)
-    const firstLocked = lockedSections[0] || null
+    // Parse restriction text from ADMIN view — admins can see availability conditions
+    // even though they're not blocked by them. This works regardless of role switch.
+    const sectionsWithRestrictions = admin.sections.filter(
+      (s) => s.restrictionText && s.restrictionText.trim().length > 3,
+    )
 
-    if (!firstLocked) return findings
+    if (sectionsWithRestrictions.length === 0) return findings
 
-    // Analyze only the first locked section in detail (root cause)
-    const cleanRestriction = firstLocked.restrictionText
+    const firstRestricted = sectionsWithRestrictions[0]
+    const cleanText = firstRestricted.restrictionText
       .replace(/Show\s+more\s*Show\s+less/gi, '')
       .replace(/\s+/g, ' ')
       .trim()
 
-    if (cleanRestriction.length > 0) {
-      const seen = new Set<string>()
-      const regex = /the activity[\x20\t]+([^\n,]+?)[\x20\t]+is marked complete/gi
-      for (const m of cleanRestriction.matchAll(regex)) {
-        const name = m[1].trim()
-        if (!seen.has(name)) {
-          seen.add(name)
-          const normalized = name.toLowerCase()
-          const matchingActivity = student.sections
-            .flatMap((s) => s.activities)
-            .find(
-              (a) =>
-                a.name.toLowerCase().includes(normalized) ||
-                normalized.includes(a.name.toLowerCase()),
-            )
+    // Bilingual extraction: match activity names in both English and Spanish.
+    // Patterns in the restriction text:
+    //   EN: "the activity Activity Name is marked complete"
+    //   ES: "la actividad Nombre de Actividad esté marcada como completada"
+    // Also match anything in quotes: "Activity Name"
+    const activityNames = new Set<string>()
 
-          if (!matchingActivity) {
-            findings.push({
-              severity: 'critical',
-              sectionNumber: firstLocked.number,
-              sectionTitle: firstLocked.title,
-              message: `Actividad requerida "${name}" no encontrada en el curso`,
-              detail: `El módulo "${firstLocked.title}" está bloqueado y requiere "${name}" para desbloquearse, pero no existe ninguna actividad con ese nombre. Causa probable: condición de finalización configurada sobre un recurso (PDF, video) que no es una actividad de Moodle, o la actividad fue eliminada pero la condición persiste.`,
-            })
-          } else if (!matchingActivity.hasCompletionTracking) {
-            findings.push({
-              severity: 'critical',
-              sectionNumber: firstLocked.number,
-              sectionTitle: firstLocked.title,
-              message: `Actividad "${name}" no tiene seguimiento de finalización`,
-              detail: `"${firstLocked.title}" requiere "${name}" como condición de avance, pero esta actividad no tiene habilitado el seguimiento de finalización. Moodle nunca podrá marcarlo como completado. Solución: habilitar seguimiento de finalización en la configuración de "${name}".`,
-            })
-          }
-        }
+    const enPattern = /the activity\s+([^,\."]+?)\s+is marked complete/gi
+    for (const m of cleanText.matchAll(enPattern)) {
+      activityNames.add(m[1].trim())
+    }
+
+    const esPattern =
+      /[Ll]a actividad\s+([^,\."]+?)\s+(est[ée] marcada como completada|debe marcarse como completada|este[ée] completada)/gi
+    for (const m of cleanText.matchAll(esPattern)) {
+      activityNames.add(m[1].trim())
+    }
+
+    // Also extract anything in quotes (both languages use quotes for activity names)
+    const quotePattern = /["""]([^"""]+?)["""]/g
+    for (const m of cleanText.matchAll(quotePattern)) {
+      const name = m[1].trim()
+      if (name.length > 2 && name.length < 120) activityNames.add(name)
+    }
+
+    // Cascade count: modules after the first restricted one
+    const cascadeCount = sectionsWithRestrictions.length - 1
+
+    for (const required of activityNames) {
+      const normalized = required.toLowerCase()
+      const matchingActivity = admin.sections
+        .flatMap((s) => s.activities)
+        .find(
+          (a) =>
+            a.name.toLowerCase().includes(normalized) || normalized.includes(a.name.toLowerCase()),
+        )
+
+      if (!matchingActivity) {
+        findings.push({
+          severity: 'critical',
+          sectionNumber: firstRestricted.number,
+          sectionTitle: firstRestricted.title,
+          message: `Actividad requerida "${required}" no encontrada en el curso`,
+          detail: `El módulo "${firstRestricted.title}" está bloqueado por "${required}" según su condición de disponibilidad, pero no existe ninguna actividad con ese nombre. Causa probable: la condición apunta a un recurso (PDF, URL) que no tiene seguimiento de finalización, o la actividad fue eliminada pero la condición persiste.${cascadeCount > 0 ? ` Además, ${cascadeCount} módulo(s) más están bloqueados en cascada.` : ''}`,
+        })
+      } else if (!matchingActivity.hasCompletionTracking) {
+        findings.push({
+          severity: 'critical',
+          sectionNumber: firstRestricted.number,
+          sectionTitle: firstRestricted.title,
+          message: `Actividad "${required}" no tiene seguimiento de finalización`,
+          detail: `"${firstRestricted.title}" requiere "${required}" como condición de avance, pero esta actividad no tiene habilitado el seguimiento de finalización. Moodle nunca podrá marcarlo como completado aunque el estudiante la visite. Solución: habilitar seguimiento de finalización en la configuración de "${required}".${cascadeCount > 0 ? ` Al resolver esto, los ${cascadeCount} módulo(s) en cascada también se desbloquean.` : ''}`,
+        })
       }
     }
 
-    // Cascade: single consolidated note for all subsequent locked modules
-    const cascadeCount = lockedSections.length - 1
+    // Cascade note
     if (cascadeCount > 0) {
-      const cascadeNames = lockedSections
+      const cascadeNames = sectionsWithRestrictions
         .slice(1)
         .map((s) => `"${s.title}"`)
         .join(', ')
       findings.push({
         severity: 'info',
-        sectionNumber: firstLocked.number,
-        sectionTitle: firstLocked.title,
-        message: `${cascadeCount} módulo(s) bloqueado(s) en cascada tras "${firstLocked.title}"`,
-        detail: `Los siguientes módulos están bloqueados en cascada: ${cascadeNames}. No es un error adicional — es consecuencia directa del bloqueo en "${firstLocked.title}". Al resolver la causa raíz, todos se desbloquean automáticamente.`,
+        sectionNumber: firstRestricted.number,
+        sectionTitle: firstRestricted.title,
+        message: `${cascadeCount} módulo(s) bloqueado(s) en cascada tras "${firstRestricted.title}"`,
+        detail: `Los siguientes módulos están bloqueados en cascada: ${cascadeNames}. No es un error adicional — es consecuencia directa de la restricción en "${firstRestricted.title}". Al resolver la causa raíz, todos se desbloquean.`,
       })
-    }
-
-    // Bonus: check for sections accessible despite previous lock (actual structural bug)
-    if (firstLocked) {
-      const firstIdx = student.sections.indexOf(firstLocked)
-      const accessibleAfterLock = student.sections.slice(firstIdx + 1).filter((s) => !s.isLocked)
-      if (accessibleAfterLock.length > 0) {
-        findings.push({
-          severity: 'warning',
-          sectionNumber: accessibleAfterLock[0].number,
-          sectionTitle: accessibleAfterLock[0].title,
-          message: `Módulo accesible a pesar de tener módulos anteriores bloqueados`,
-          detail: `"${accessibleAfterLock[0].title}" está accesible para estudiantes aunque "${firstLocked.title}" está bloqueado. Esto puede indicar una configuración incorrecta de dependencias o un error en las condiciones de acceso.`,
-        })
-      }
     }
 
     return findings

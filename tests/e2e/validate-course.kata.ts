@@ -67,8 +67,8 @@ test.describe('Course Validation — Multi-Role Audit', () => {
     }
     console.log(`Student screenshots: ${studentView.sections.length}`)
 
-    // 5. Phantom detection
-    const findings = course.findPhantoms(studentView)
+    // 5. Phantom detection (use admin view — admins see restrictions as info)
+    const findings = course.findPhantoms(adminView)
     const criticalFindings = findings.filter((f) => f.severity === 'critical')
     const warningFindings = findings.filter((f) => f.severity === 'warning')
 
