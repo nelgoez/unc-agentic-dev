@@ -845,7 +845,7 @@
               <div>
                 <span style="color: var(--good)">✓</span> Toma screenshots de secciones bloqueadas
               </div>
-              <div><span style="color: var(--good)">✓</span> Genera reporte Allure</div>
+              <div><span style="color: var(--good)">✓</span> Genera reporte custom no-IT</div>
               <div><span style="color: var(--good)">✓</span> Deploy a GitHub Pages</div>
             </div>
           </div>
@@ -861,13 +861,14 @@
             <div style="font-size: 0.8em; line-height: 1.8">
               <div>🔴 Actividades fantasma (gates a nada)</div>
               <div>🔴 Gates sin completion tracking</div>
-              <div>🟡 Secciones bloqueadas en cascada</div>
-              <div>🟢 Actividades completadas vs esperadas</div>
+              <div>🟡 Módulos accesibles pese a bloqueo anterior</div>
+              <div>🔵 Módulos en cascada (consecuencia, no error)</div>
               <div>📸 Screenshots por sección bloqueada</div>
               <div>📈 Diferencia visibilidad admin vs student</div>
             </div>
           </div>
         </div>
+
         <div
           style="
             margin-top: 16px;
@@ -904,13 +905,82 @@
             🔍 Ver reporte en vivo →
           </a>
         </div>
+
+        <h2 class="h2" style="margin-top: 24px; font-size: 1.1em">
+          Escalá: lo que podemos testear ahora
+        </h2>
+        <div
+          style="margin-top: 8px; display: flex; gap: 12px; align-items: stretch; flex-wrap: wrap"
+        >
+          <div
+            style="
+              flex: 1;
+              min-width: 200px;
+              background: var(--surface);
+              border-radius: var(--radius);
+              padding: 14px;
+            "
+          >
+            <h4 style="margin-bottom: 4px">📚 <strong>Crear cursos de prueba</strong></h4>
+            <p class="dim" style="font-size: 0.78em">
+              Con el admin de Moodle podemos generar cursos con naming
+              <code>ng_test_course_01</code> con estructuras controladas para validar el pipeline
+              contra escenarios conocidos (gates rotos, dependencias correctas, etc.)
+            </p>
+          </div>
+          <div
+            style="
+              flex: 1;
+              min-width: 200px;
+              background: var(--surface);
+              border-radius: var(--radius);
+              padding: 14px;
+            "
+          >
+            <h4 style="margin-bottom: 4px">👥 <strong>Crear usuarios de prueba</strong></h4>
+            <p class="dim" style="font-size: 0.78em">
+              Generar cohortes de estudiantes virtuales para testear comportamiento multi-usuario,
+              rendimiento con N alumnos simultáneos, y visibilidad por rol.
+            </p>
+          </div>
+          <div
+            style="
+              flex: 1;
+              min-width: 200px;
+              background: var(--surface);
+              border-radius: var(--radius);
+              padding: 14px;
+            "
+          >
+            <h4 style="margin-bottom: 4px">🔧 <strong>Site Administration</strong></h4>
+            <p class="dim" style="font-size: 0.78em">
+              Acceso completo a configuración global de Moodle. Podemos auditar plugins, roles,
+              políticas de matriculación, y consistencia entre cursos.
+            </p>
+          </div>
+        </div>
+
+        <div
+          style="
+            margin-top: 12px;
+            padding: 12px;
+            background: var(--bg-soft);
+            border-radius: var(--radius);
+            font-size: 0.8em;
+          "
+        >
+          <strong>💡 Lo que sigue:</strong> Con el usuario administrador activo, pasamos de auditar
+          1 curso a poder testear <strong>X cursos con X usuarios</strong> en simultáneo. El límite
+          no es técnico — es cuántos casos de prueba vale la pena correr. Todo corre en el pipeline
+          actual sin cambios de infraestructura.
+        </div>
+
         <div class="notes">
           Esto ya está funcionando. El CI de este mismo repo corre el pipeline de auditoría sobre el
-          curso 269 cada vez que hacemos push. El reporte Allure se despliega automáticamente a
-          GitHub Pages. Cualquiera con el link puede ver los resultados: cuántas secciones están
-          bloqueadas, qué actividades fantasma se detectaron, y screenshots del estado actual del
-          curso desde la perspectiva del estudiante. Es el "test drive" de la propuesta: pueden
-          verlo funcionando hoy, con datos reales, sin instalar nada.
+          curso 269. Y ahora que tenemos el admin, podemos escalar: crear cursos de prueba con
+          nombres tipo ng_test_course_01 para validar escenarios controlados, generar usuarios para
+          tests multi-rol, y explorar toda la configuración de Site Administration. El pipeline no
+          cambia — solo agregamos más casos de prueba al mismo CI.
         </div>
         <div class="deck-footer">
           <span class="dim2">UNC Course Kit · Propuesta</span>

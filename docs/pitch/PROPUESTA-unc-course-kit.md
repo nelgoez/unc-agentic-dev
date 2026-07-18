@@ -270,6 +270,20 @@ El pipeline ya está corriendo sobre el curso 269. El reporte Allure se actualiz
 
 El pipeline es **opt-in**: los cursos que no están en el repo simplemente no se auditan. Y es incremental: arranca con 1 curso, se extiende a todos sin cambiar la infraestructura.
 
+### Lo que podemos testear ahora (con admin)
+
+Con el usuario administrador activo, el alcance se expande mucho más allá de auditar un curso existente:
+
+| Capacidad                        | Descripción                                                                                                                                                                    | Ejemplo                                           |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
+| **Crear cursos de prueba**       | Generar cursos con estructura controlada para validar el pipeline contra escenarios conocidos                                                                                  | `ng_test_course_01` con gates rotos intencionales |
+| **Crear usuarios de prueba**     | Cohortes de estudiantes virtuales para test multi-usuario y visibilidad por rol                                                                                                | 50 alumnos simulados en un curso                  |
+| **Site Administration**          | Acceso a configuración global: plugins, roles, políticas de matriculación                                                                                                      | Auditoría de consistencia entre cursos            |
+| **Múltiples cursos en paralelo** | El mismo pipeline corre para N cursos sin cambios de infraestructura                                                                                                           | `TEST_COURSE_ID: 269, 270, 271`                   |
+| **Dev vs Prod**                  | El pipeline está diseñado para apuntar a cualquier entorno de Moodle. Hoy probamos en producción; para correcciones y cursos en desarrollo necesitamos un entorno dev/staging. | `MOODLE_BASE_URL` configurable por entorno        |
+
+El límite no es técnico — es cuántos casos de prueba vale la pena diseñar. El pipeline escala horizontalmente: más cursos = más workers en el CI.
+
 ---
 
 ## 8. Stack Tecnológico y Costos

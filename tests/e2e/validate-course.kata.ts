@@ -59,7 +59,8 @@ test.describe('Course Validation — Multi-Role Audit', () => {
 
     // 6. Take screenshots from each locked section as student
     const screenshotDir = resolve('reports/audit')
-    await roles.switchToStudent(courseId)
+    await roles.switchToStudentAndVerify(courseId)
+    console.log(`Role after student switch: ${await roles.getCurrentRoleLabel()}`)
     for (const section of studentView.sections) {
       if (section.isLocked) {
         await course.navigateToSection(section.number)

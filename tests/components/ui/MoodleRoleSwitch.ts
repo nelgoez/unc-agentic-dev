@@ -79,4 +79,16 @@ export class MoodleRoleSwitch {
       return match ? match[1] : ''
     })
   }
+
+  @atc('MRS-8', { story: 'UNC-RE-1', feature: 'Role Switching' })
+  async switchToStudentAndVerify(courseId: string, retries = 2): Promise<boolean> {
+    for (let i = 0; i <= retries; i++) {
+      await this.switchToStudent(courseId)
+      await this.page.waitForTimeout(1000)
+      const label = await this.getCurrentRoleLabel()
+      if (label.toLowerCase().includes('student')) return true
+      console.warn(`Role switch attempt ${i + 1}: got "${label}", expected "student". Retrying...`)
+    }
+    return false
+  }
 }
