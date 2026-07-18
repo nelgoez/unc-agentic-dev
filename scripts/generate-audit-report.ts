@@ -1,0 +1,431 @@
+import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from 'node:fs'
+import { resolve } from 'node:path'
+import process from 'node:process'
+
+interface ActivityData {
+  name: string
+  type: string
+  href: string
+  isVisible: boolean
+  hasCompletionTracking: boolean
+  isComplete: boolean
+}
+
+interface SectionData {
+  number: number
+  title: string
+  isLocked: boolean
+  restrictionText: string
+  activities: ActivityData[]
+  allVisibleComplete: boolean
+}
+
+interface CourseStructure {
+  courseName: string
+  courseUrl: string
+  tabs: { title: string; sectionNumber: number; isDisabled: boolean; restrictionText: string }[]
+  sections: SectionData[]
+}
+
+interface AuditFinding {
+  severity: 'critical' | 'warning' | 'info'
+  sectionNumber: number
+  sectionTitle: string
+  message: string
+  detail: string
+}
+
+interface AuditResults {
+  courseId: string
+  courseName: string
+  timestamp: string
+  runUrl: string
+  allureUrl: string
+  adminView: CourseStructure
+  studentView: CourseStructure
+  teacherView: CourseStructure
+  findings: AuditFinding[]
+  screenshots: { sectionNumber: number; data: string }[]
+}
+
+function loadJson<T>(filePath: string): T {
+  return JSON.parse(readFileSync(filePath, 'utf-8')) as T
+}
+
+function loadScreenshots(dir: string): { sectionNumber: number; data: string }[] {
+  if (!existsSync(dir)) return []
+  return readdirSync(dir)
+    .filter((f) => /course-\d+-student-section-\d+\.png/.test(f))
+    .map((f) => {
+      const match = f.match(/course-\d+-student-section-(\d+)\.png/)
+      const sectionNumber = match ? Number.parseInt(match[1], 10) : 0
+      const data = readFileSync(resolve(dir, f)).toString('base64')
+      return { sectionNumber, data }
+    })
+}
+
+function severityInfo(severity: string): { icon: string; label: string } {
+  switch (severity) {
+    case 'critical':
+      return { icon: '🔴', label: 'Crítico' }
+    case 'warning':
+      return { icon: '🟡', label: 'Advertencia' }
+    case 'info':
+      return { icon: '🔵', label: 'Informativo' }
+    default:
+      return { icon: '⚪', label: 'Desconocido' }
+  }
+}
+
+function buildHTML(results: AuditResults): string {
+  const {
+    courseId,
+    courseName,
+    timestamp,
+    allureUrl,
+    findings,
+    adminView,
+    studentView,
+    screenshots,
+  } = results
+
+  const criticalCount = findings.filter((f) => f.severity === 'critical').length
+  const warningCount = findings.filter((f) => f.severity === 'warning').length
+  const infoCount = findings.filter((f) => f.severity === 'info').length
+  const lockedSections = studentView.sections.filter((s) => s.isLocked).length
+  const totalSections = studentView.sections.length
+
+  const screenshotMap = new Map<number, string>()
+  for (const s of screenshots) {
+    screenshotMap.set(s.sectionNumber, s.data)
+  }
+
+  const triggerUrl = 'https://github.com/nelgoez/unc-agentic-dev/actions/workflows/audit-ci.yml'
+  const date = new Date(timestamp).toLocaleString('es-AR', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+
+  let findingsHTML = ''
+  if (findings.length === 0) {
+    findingsHTML = `<div class="no-findings"><div class="emoji">✅</div><h3>No se encontraron incidencias</h3><p class="dim">El curso supera la auditoría sin hallazgos críticos ni advertencias.</p></div>`
+  } else {
+    findingsHTML = `<h2 class="section-title">Hallazgos de la auditoría</h2>`
+    for (const f of findings) {
+      const si = severityInfo(f.severity)
+      const screenshot = screenshotMap.get(f.sectionNumber)
+      findingsHTML += `
+    <div class="finding ${f.severity}" onclick="this.classList.toggle('open')">
+      <div class="finding-header">
+        <span class="icon">${si.icon}</span>
+        <span class="msg"><strong>${esc(f.sectionTitle)}:</strong> ${esc(f.message)}</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="finding-detail">${esc(f.detail)}</div>`
+      if (screenshot != null && screenshot !== '') {
+        findingsHTML += `
+      <div class="screenshot">
+        <img src="data:image/png;base64,${screenshot}" alt="Captura sección ${f.sectionNumber}">
+        <div class="caption">Vista como estudiante - Sección ${f.sectionNumber}: ${esc(f.sectionTitle)}</div>
+      </div>`
+      }
+      findingsHTML += `\n    </div>`
+    }
+    findingsHTML += `\n    <p style="margin-top:8px;font-size:0.8em;color:var(--text-2)">💡 Hacé clic en cada hallazgo para ver detalle y captura de pantalla.</p>`
+  }
+
+  let compareHTML = ''
+  const sectionsWithDiff = studentView.sections.filter((s) => {
+    const adminSection = adminView.sections.find((as) => as.number === s.number)
+    return (
+      adminSection &&
+      (adminSection.activities.length !== s.activities.length ||
+        s.isLocked !== adminSection.isLocked)
+    )
+  })
+  if (sectionsWithDiff.length > 0) {
+    compareHTML = `<h2 class="section-title">Comparación: Admin vs Estudiante</h2>
+    <table class="compact">
+      <thead><tr><th>Sección</th><th>Admin</th><th>Estudiante</th><th>Estado</th></tr></thead>
+      <tbody>`
+    for (const s of sectionsWithDiff) {
+      const adminSection = adminView.sections.find((as) => as.number === s.number)
+      const adminActs = adminSection?.activities.length ?? 0
+      const statusIcon = s.isLocked ? '🔒' : '✅'
+      const statusText = s.isLocked ? 'Bloqueada' : 'Disponible'
+      compareHTML += `<tr><td><strong>${esc(s.title)}</strong></td><td>${adminActs} actividades</td><td>${s.activities.length} actividades</td><td>${statusIcon} ${statusText}</td></tr>`
+    }
+    compareHTML += `</tbody></table>`
+  }
+
+  let devNote = ''
+  if (findings.length > 0) {
+    devNote = `
+    <div class="dev-note">
+      <strong>⚠️ Entorno de pruebas en producción</strong><br>
+      Esta auditoría se ejecuta sobre el entorno productivo de Moodle. Para auditar correcciones y cursos en desarrollo, necesitamos acceso a un entorno de pruebas (dev/staging). Los resultados pueden incluir hallazgos ya conocidos o en proceso de corrección.<br><br>
+      <strong>¿Cómo corregir los hallazgos?</strong> Si encontrás actividades fantasma o gates rotos, contactá al equipo de desarrollo del Campus Virtual para coordinar las correcciones en el entorno productivo.
+    </div>`
+  }
+
+  return `<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Campus Virtual - ${esc(courseName)}</title>
+  <style>
+    :root {
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --border: #dee2e6;
+      --text: #212529;
+      --text-2: #6c757d;
+      --accent: #0d6efd;
+      --good: #198754;
+      --warn: #ffc107;
+      --bad: #dc3545;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --shadow: 0 1px 3px rgba(0,0,0,.12);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    .header {
+      background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+      color: #fff;
+      padding: 32px 24px;
+      text-align: center;
+    }
+    .header h1 { font-size: 1.6em; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { font-size: 0.9em; opacity: .8; }
+    .meta { font-size: 0.8em; opacity: .6; margin-top: 8px; }
+    .container { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    .card .num { font-size: 2.2em; font-weight: 800; line-height: 1.2; }
+    .card .label { font-size: 0.8em; color: var(--text-2); margin-top: 4px; }
+    .card.critical .num { color: var(--bad); }
+    .card.warning .num { color: var(--good); }
+    .card.accent .num { color: var(--accent); }
+    .section-title {
+      font-size: 1.15em;
+      font-weight: 700;
+      margin: 24px 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+    }
+    .finding {
+      background: var(--surface);
+      border-radius: var(--radius);
+      margin-bottom: 8px;
+      box-shadow: var(--shadow);
+      border-left: 4px solid var(--border);
+      overflow: hidden;
+    }
+    .finding.critical { border-left-color: var(--bad); }
+    .finding.warning { border-left-color: var(--warn); }
+    .finding.info { border-left-color: var(--accent); }
+    .finding-header {
+      padding: 12px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .finding-header .icon { flex-shrink: 0; font-size: 1.1em; }
+    .finding-header .msg { flex: 1; font-size: 0.9em; }
+    .chevron { font-size: 0.8em; color: var(--text-2); transition: transform .2s; }
+    .finding.open .chevron { transform: rotate(90deg); }
+    .finding-detail {
+      padding: 0 16px 12px 36px;
+      font-size: 0.85em;
+      color: var(--text-2);
+      display: none;
+      line-height: 1.5;
+    }
+    .finding.open .finding-detail { display: block; }
+    .screenshot {
+      margin: 12px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .screenshot img { width: 100%; display: block; }
+    .screenshot .caption {
+      padding: 8px 12px;
+      font-size: 0.8em;
+      color: var(--text-2);
+      background: var(--bg);
+    }
+    table.compact {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85em;
+      background: var(--surface);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    table.compact th {
+      text-align: left;
+      padding: 10px 12px;
+      background: #f1f3f5;
+      border-bottom: 2px solid var(--border);
+      font-weight: 600;
+    }
+    table.compact td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+    table.compact tr:last-child td { border-bottom: none; }
+    .actions {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 24px 0;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 0.9em;
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-outline { background: transparent; color: var(--accent); border: 2px solid var(--accent); }
+    .btn:hover { opacity: .85; }
+    .dev-note {
+      margin-top: 32px;
+      padding: 16px;
+      background: #fff3cd;
+      border-radius: var(--radius);
+      font-size: 0.85em;
+      border: 1px solid #ffc107;
+    }
+    .dev-note strong { color: #856404; }
+    .footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.8em;
+      color: var(--text-2);
+    }
+    .no-findings {
+      text-align: center;
+      padding: 40px;
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+    }
+    .no-findings .emoji { font-size: 3em; margin-bottom: 12px; }
+    .no-findings h3 { margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📋 Campus Virtual - ${esc(courseName)}</h1>
+    <div class="subtitle">Reporte de Auditoría de Curso</div>
+    <div class="meta">Curso ID: ${esc(courseId)} · Auditado el ${date}</div>
+  </div>
+
+  <div class="container">
+    <div class="cards">
+      <div class="card critical">
+        <div class="num">${criticalCount}</div>
+        <div class="label">🔴 Críticos</div>
+      </div>
+      <div class="card warning">
+        <div class="num">${warningCount}</div>
+        <div class="label">🟡 Advertencias</div>
+      </div>
+      <div class="card accent">
+        <div class="num">${infoCount}</div>
+        <div class="label">🔵 Informativos</div>
+      </div>
+      <div class="card ${lockedSections > 0 ? 'critical' : 'good'}">
+        <div class="num">${lockedSections}/${totalSections}</div>
+        <div class="label">🔒 Secciones bloqueadas</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <a href="${triggerUrl}" target="_blank" rel="noopener" class="btn btn-primary">🔄 Ejecutar nueva auditoría</a>
+      <a href="${allureUrl}" target="_blank" rel="noopener" class="btn btn-outline">🔍 Ver reporte técnico (Allure)</a>
+    </div>
+
+    ${findingsHTML}
+
+    ${compareHTML}
+
+    ${devNote}
+
+    <div class="footer">
+      <p>UNC Campus Virtual · Reporte generado automáticamente por el pipeline de auditoría</p>
+      <p style="margin-top:4px"><a href="${triggerUrl}" target="_blank" rel="noopener">Ejecutar nueva auditoría →</a></p>
+    </div>
+  </div>
+</body>
+</html>`
+}
+
+function esc(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+}
+
+function main(): void {
+  const resultsPath = resolve(process.argv[2] || 'reports/audit/audit-results.json')
+  const screenshotDir = resolve(process.argv[3] || 'reports/audit')
+  const outputDir = resolve(process.argv[4] || 'audit-report')
+  const allureUrl = process.argv[5] || '/allure/'
+
+  if (!existsSync(resultsPath)) {
+    console.error(`❌ Audit results not found at ${resultsPath}`)
+    process.exit(1)
+  }
+
+  const results: AuditResults = {
+    ...loadJson<AuditResults>(resultsPath),
+    runUrl:
+      process.env.GITHUB_SERVER_URL != null &&
+      process.env.GITHUB_SERVER_URL !== '' &&
+      process.env.GITHUB_REPOSITORY != null &&
+      process.env.GITHUB_REPOSITORY !== '' &&
+      process.env.GITHUB_RUN_ID != null &&
+      process.env.GITHUB_RUN_ID !== ''
+        ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
+        : '',
+    allureUrl,
+    screenshots: loadScreenshots(screenshotDir),
+  }
+
+  if (!existsSync(outputDir)) {
+    mkdirSync(outputDir, { recursive: true })
+  }
+
+  const html = buildHTML(results)
+  writeFileSync(resolve(outputDir, 'index.html'), html, 'utf-8')
+  console.log(`✅ Reporte de auditoría generado: ${resolve(outputDir, 'index.html')}`)
+}
+
+main()

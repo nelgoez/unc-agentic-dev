@@ -1,4 +1,6 @@
 import { resolve } from 'node:path'
+import { writeFileSync, mkdirSync } from 'node:fs'
+import process from 'node:process'
 import { test } from '@playwright/test'
 import { createFixture } from '../components/UiFixture'
 import { MoodleLogin } from '../components/ui/MoodleLogin'
@@ -89,5 +91,29 @@ test.describe('Course Validation — Multi-Role Audit', () => {
     console.log(`Admin sections: ${adminView.sections.length}`)
     console.log(`Student sections: ${studentView.sections.length}`)
     console.log(`Teacher sections: ${teacherView.sections.length}`)
+
+    // Save audit results for the custom HTML report generator
+    const auditDir = resolve('reports/audit')
+    mkdirSync(auditDir, { recursive: true })
+    writeFileSync(
+      resolve(auditDir, 'audit-results.json'),
+      JSON.stringify(
+        {
+          courseId,
+          courseName: adminView.courseName,
+          timestamp: new Date().toISOString(),
+          runUrl: '',
+          allureUrl: '/allure/',
+          adminView,
+          studentView,
+          teacherView,
+          findings,
+        },
+        null,
+        2,
+      ),
+      'utf-8',
+    )
+    console.log(`📊 Audit results saved to reports/audit/audit-results.json`)
   })
 })

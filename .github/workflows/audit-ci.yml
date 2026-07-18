@@ -49,7 +49,7 @@ jobs:
 
       - name: Generate Allure report
         if: always()
-        run: bunx allure generate allure-results --clean -o allure-report
+        run: bunx allure generate allure-results --clean -o allure-report --name "Campus Virtual - Curso ${{ inputs.course_id || '269' }}" --lang es
 
       - name: Upload Allure results
         if: always()
@@ -58,12 +58,25 @@ jobs:
           name: allure-results
           path: allure-results/
 
+      - name: Generate custom audit report
+        if: always()
+        run: bun scripts/generate-audit-report.ts reports/audit/audit-results.json reports/audit audit-report
+        env:
+          CI: true
+
       - name: Upload Allure report
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: allure-report
           path: allure-report/
+
+      - name: Upload custom audit report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: audit-report
+          path: audit-report/
 
       - name: Upload test screenshots
         if: always()
@@ -84,11 +97,17 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Download custom audit report
+        uses: actions/download-artifact@v8
+        with:
+          name: audit-report
+          path: _site
+
       - name: Download Allure report
         uses: actions/download-artifact@v8
         with:
           name: allure-report
-          path: allure-report
+          path: _site/allure
 
       - name: Setup Pages
         uses: actions/configure-pages@v6
@@ -96,7 +115,7 @@ jobs:
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v5
         with:
-          path: allure-report
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
