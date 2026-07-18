@@ -462,7 +462,7 @@ function main(): void {
   const resultsPath = resolve(process.argv[2] || 'reports/audit/audit-results.json')
   const screenshotDir = resolve(process.argv[3] || 'reports/audit')
   const outputDir = resolve(process.argv[4] || 'audit-report')
-  const allureUrl = process.argv[5] || '/allure/'
+  const allureUrl = process.argv[5] || 'allure/'
 
   if (!existsSync(resultsPath)) {
     console.error(`❌ Audit results not found at ${resultsPath}`)
