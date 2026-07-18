@@ -227,106 +227,83 @@ export class MoodleCourse {
 
   findPhantoms(student: CourseStructure): AuditFinding[] {
     const findings: AuditFinding[] = []
-    const seenKeys = new Set<string>()
-
-    function addFinding(f: AuditFinding): void {
-      const key = `${f.sectionNumber}|${f.message}`
-      if (!seenKeys.has(key)) {
-        seenKeys.add(key)
-        findings.push(f)
-      }
-    }
 
     const lockedSections = student.sections.filter((s) => s.isLocked)
     const firstLocked = lockedSections[0] || null
 
-    for (const studentSection of student.sections) {
-      const cleanRestriction = studentSection.restrictionText
-        .replace(/Show\s+more\s*Show\s+less/gi, '')
-        .replace(/\s+/g, ' ')
-        .trim()
-      const hasRestriction = studentSection.isLocked && cleanRestriction.length > 0
+    if (!firstLocked) return findings
 
-      if (hasRestriction) {
-        const seen = new Set<string>()
-        const regex = /the activity[\x20\t]+([^\n,]+?)[\x20\t]+is marked complete/gi
-        const matches: string[] = []
-        const allMatches = cleanRestriction.matchAll(regex)
-        for (const m of allMatches) {
-          const name = m[1].trim()
-          if (!seen.has(name)) {
-            seen.add(name)
-            matches.push(name)
-          }
-        }
+    // Analyze only the first locked section in detail (root cause)
+    const cleanRestriction = firstLocked.restrictionText
+      .replace(/Show\s+more\s*Show\s+less/gi, '')
+      .replace(/\s+/g, ' ')
+      .trim()
 
-        const isFirstLocked = studentSection === firstLocked
-
-        for (const required of matches) {
-          const normalizedRequired = required.toLowerCase()
+    if (cleanRestriction.length > 0) {
+      const seen = new Set<string>()
+      const regex = /the activity[\x20\t]+([^\n,]+?)[\x20\t]+is marked complete/gi
+      for (const m of cleanRestriction.matchAll(regex)) {
+        const name = m[1].trim()
+        if (!seen.has(name)) {
+          seen.add(name)
+          const normalized = name.toLowerCase()
           const matchingActivity = student.sections
             .flatMap((s) => s.activities)
             .find(
               (a) =>
-                a.name.toLowerCase().includes(normalizedRequired) ||
-                normalizedRequired.includes(a.name.toLowerCase()),
+                a.name.toLowerCase().includes(normalized) ||
+                normalized.includes(a.name.toLowerCase()),
             )
 
           if (!matchingActivity) {
-            if (isFirstLocked) {
-              addFinding({
-                severity: 'critical',
-                sectionNumber: studentSection.number,
-                sectionTitle: studentSection.title,
-                message: `Actividad requerida "${required}" no encontrada en el curso`,
-                detail: `El módulo "${studentSection.title}" está bloqueado y requiere "${required}" para desbloquearse, pero no existe ninguna actividad con ese nombre. Causa probable: condición de finalización configurada sobre un recurso (PDF, video) que no es una actividad de Moodle, o la actividad fue eliminada pero la condición persiste.`,
-              })
-            } else {
-              addFinding({
-                severity: 'info',
-                sectionNumber: studentSection.number,
-                sectionTitle: studentSection.title,
-                message: `Actividad "${required}" referenciada pero no visible — probablemente en módulo bloqueado`,
-                detail: `El módulo "${studentSection.title}" requiere "${required}" que no es visible. Probablemente está en "${firstLocked?.title || 'un módulo anterior'}" bloqueado.`,
-              })
-            }
+            findings.push({
+              severity: 'critical',
+              sectionNumber: firstLocked.number,
+              sectionTitle: firstLocked.title,
+              message: `Actividad requerida "${name}" no encontrada en el curso`,
+              detail: `El módulo "${firstLocked.title}" está bloqueado y requiere "${name}" para desbloquearse, pero no existe ninguna actividad con ese nombre. Causa probable: condición de finalización configurada sobre un recurso (PDF, video) que no es una actividad de Moodle, o la actividad fue eliminada pero la condición persiste.`,
+            })
           } else if (!matchingActivity.hasCompletionTracking) {
-            if (isFirstLocked) {
-              addFinding({
-                severity: 'critical',
-                sectionNumber: studentSection.number,
-                sectionTitle: studentSection.title,
-                message: `Actividad "${required}" no tiene seguimiento de finalización — el estudiante queda bloqueado`,
-                detail: `"${studentSection.title}" requiere "${required}" como condición de avance, pero esta actividad no tiene habilitado el seguimiento de finalización. Moodle nunca podrá marcarlo como completado. Solución: habilitar seguimiento de finalización en la configuración de "${required}".`,
-              })
-            } else {
-              addFinding({
-                severity: 'warning',
-                sectionNumber: studentSection.number,
-                sectionTitle: studentSection.title,
-                message: `Actividad "${required}" sin seguimiento de finalización en módulo bloqueado en cascada`,
-                detail: `"${required}" no tiene seguimiento de finalización, pero este módulo está bloqueado por el anterior — al resolver la causa raíz esto se resuelve.`,
-              })
-            }
+            findings.push({
+              severity: 'critical',
+              sectionNumber: firstLocked.number,
+              sectionTitle: firstLocked.title,
+              message: `Actividad "${name}" no tiene seguimiento de finalización`,
+              detail: `"${firstLocked.title}" requiere "${name}" como condición de avance, pero esta actividad no tiene habilitado el seguimiento de finalización. Moodle nunca podrá marcarlo como completado. Solución: habilitar seguimiento de finalización en la configuración de "${name}".`,
+            })
           }
         }
       }
+    }
 
-      if (studentSection.isLocked) {
-        const visibleWithTracking = studentSection.activities.filter(
-          (a) => a.isVisible && a.hasCompletionTracking,
-        )
-        const allComplete =
-          visibleWithTracking.length > 0 && visibleWithTracking.every((a) => a.isComplete)
-        if (allComplete && studentSection !== firstLocked) {
-          addFinding({
-            severity: 'warning',
-            sectionNumber: studentSection.number,
-            sectionTitle: studentSection.title,
-            message: `Módulo bloqueado con actividades completas — probable cascada`,
-            detail: `"${studentSection.title}" está bloqueado a pesar de que las actividades visibles están completas. Es consecuencia del bloqueo del módulo anterior.`,
-          })
-        }
+    // Cascade: single consolidated note for all subsequent locked modules
+    const cascadeCount = lockedSections.length - 1
+    if (cascadeCount > 0) {
+      const cascadeNames = lockedSections
+        .slice(1)
+        .map((s) => `"${s.title}"`)
+        .join(', ')
+      findings.push({
+        severity: 'info',
+        sectionNumber: firstLocked.number,
+        sectionTitle: firstLocked.title,
+        message: `${cascadeCount} módulo(s) bloqueado(s) en cascada tras "${firstLocked.title}"`,
+        detail: `Los siguientes módulos están bloqueados en cascada: ${cascadeNames}. No es un error adicional — es consecuencia directa del bloqueo en "${firstLocked.title}". Al resolver la causa raíz, todos se desbloquean automáticamente.`,
+      })
+    }
+
+    // Bonus: check for sections accessible despite previous lock (actual structural bug)
+    if (firstLocked) {
+      const firstIdx = student.sections.indexOf(firstLocked)
+      const accessibleAfterLock = student.sections.slice(firstIdx + 1).filter((s) => !s.isLocked)
+      if (accessibleAfterLock.length > 0) {
+        findings.push({
+          severity: 'warning',
+          sectionNumber: accessibleAfterLock[0].number,
+          sectionTitle: accessibleAfterLock[0].title,
+          message: `Módulo accesible a pesar de tener módulos anteriores bloqueados`,
+          detail: `"${accessibleAfterLock[0].title}" está accesible para estudiantes aunque "${firstLocked.title}" está bloqueado. Esto puede indicar una configuración incorrecta de dependencias o un error en las condiciones de acceso.`,
+        })
       }
     }
 
