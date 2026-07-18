@@ -186,15 +186,52 @@ function buildHTML(results: AuditResults): string {
 
   let devNote = ''
   if (findings.length > 0) {
+    const lockedSection = studentView.sections.find((s) => s.isLocked)
     devNote = `
+    <h2 class="section-title">🧪 Cómo reproducir este hallazgo manualmente</h2>
+    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Seguí estos pasos con tu propio usuario admin para ver el mismo mismatch que detectó el test automatizado.</p>
+    <div style="background:var(--surface);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);margin-bottom:16px">
+      <div style="display:flex;gap:16px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:2em;font-weight:800;color:var(--accent);margin-bottom:4px">1</div>
+          <strong>Iniciá sesión como admin</strong>
+          <p class="dim" style="font-size:0.85em;margin-top:4px">Entrá a ${esc(results.allureUrl.replace('/allure/', '').replace('https://', '') || 'campus.aulavirtual.unc.edu.ar')} con tu usuario.</p>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:2em;font-weight:800;color:var(--accent);margin-bottom:4px">2</div>
+          <strong>Andá al curso</strong>
+          <p class="dim" style="font-size:0.85em;margin-top:4px">Navegá a <code>/course/view.php?id=${esc(courseId)}</code>. Vas a ver el curso completo como admin (todas las secciones visibles).</p>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:2em;font-weight:800;color:var(--accent);margin-bottom:4px">3</div>
+          <strong>Cambiá tu rol a "Estudiante"</strong>
+          <p class="dim" style="font-size:0.85em;margin-top:4px">Menú de usuario (arriba a la derecha) → <strong>"Cambiar rol a..."</strong> → <strong>"Estudiante"</strong>.</p>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px">
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:2em;font-weight:800;color:var(--accent);margin-bottom:4px">4</div>
+          <strong>Ahora fijate en las secciones</strong>
+          <p class="dim" style="font-size:0.85em;margin-top:4px">
+            ${lockedSection ? `La sección <strong>"${esc(lockedSection.title)}"</strong> que antes veías ahora está bloqueada o invisible. Coincide con el reporte de abajo.` : 'Las secciones marcadas en el reporte son las que cambiaron.'}
+          </p>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:2em;font-weight:800;color:var(--accent);margin-bottom:4px">5</div>
+          <strong>Comprobá con el reporte</strong>
+          <p class="dim" style="font-size:0.85em;margin-top:4px">En la sección <strong>"Vista lado a lado"</strong> de esta página, compará lo que ves como admin vs. lo que ves como estudiante. Los screenshots son evidencia.</p>
+        </div>
+        <div style="flex:1;min-width:200px">
+          <div style="font-size:2em;font-weight:800;color:var(--accent);margin-bottom:4px">6</div>
+          <strong>Revertí el cambio de rol</strong>
+          <p class="dim" style="font-size:0.85em;margin-top:4px">Menú de usuario → "Cambiar rol a..." → "Rol por defecto (Admin)". Así volvés a tu vista normal.</p>
+        </div>
+      </div>
+    </div>
+    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:24px">💡 Este mismo proceso es el que ejecuta el test automatizado en cada push. La diferencia es que el test lo hace en segundos y genera este reporte automáticamente.</p>
     <div class="dev-note">
       <strong>⚠️ Entorno de pruebas en producción</strong><br>
-      Esta auditoría se ejecuta sobre el entorno productivo de Moodle. Para auditar correcciones y cursos en desarrollo, necesitamos acceso a un entorno de pruebas (dev/staging).<br><br>
-      <strong>🔍 ¿Querés verificar con tu propio usuario admin?</strong><br>
-      Entrá al curso, usá el menú de usuario → "Cambiar rol a..." → Estudiante. Comprarás que las secciones marcadas como bloqueadas son las que el estudiante no ve. Los screenshots en este reporte muestran exactamente lo que ellos ven.
-      <br><br>
-      <strong>¿Y si querés auditar tus propios cursos?</strong><br>
-      El pipeline puede apuntar a cualquier curso cambiando el ID. Hablá con el equipo para que agregue tu curso al repositorio de auditoría.
+      Esta auditoría se ejecuta sobre el entorno productivo de Moodle. Los resultados pueden incluir hallazgos ya conocidos o en proceso de corrección.
     </div>`
   }
 
