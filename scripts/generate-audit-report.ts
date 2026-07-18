@@ -9,6 +9,7 @@ interface ActivityData {
   isVisible: boolean
   hasCompletionTracking: boolean
   isComplete: boolean
+  availabilityInfo: string
 }
 
 interface SectionData {
@@ -168,7 +169,7 @@ function buildHTML(results: AuditResults): string {
         <div style="flex:1;min-width:180px;background:var(--bg);border-radius:var(--radius);padding:10px">
           <div style="font-weight:700;color:var(--accent);margin-bottom:4px">👤 Admin (${section.activities.length} act.)</div>
           ${adminScreenshot ? `<div class="screenshot" style="margin:0 0 4px"><img src="data:image/png;base64,${adminScreenshot}" alt="Admin sección ${section.number}"></div>` : ''}
-          <ul style="margin:4px 0 0 14px;font-size:0.8em">${section.activities.map((a) => `<li>${a.isVisible ? '✅' : '👻'} ${esc(a.name)}</li>`).join('') || '<li>Sin actividades</li>'}</ul>
+          <ul style="margin:4px 0 0 14px;font-size:0.8em">${section.activities.map((a) => `<li>${a.isVisible ? '✅' : '👻'} ${esc(a.name)}${a.availabilityInfo ? `<br><span class="dim" style="font-size:0.85em">📋 ${esc(a.availabilityInfo)}</span>` : ''}</li>`).join('') || '<li>Sin actividades</li>'}</ul>
         </div>
         <div style="flex:1;min-width:180px;background:var(--bg);border-radius:var(--radius);padding:10px">
           <div style="font-weight:700;color:var(--warn);margin-bottom:4px">👩‍🏫 Teacher (${tActs} act.)</div>

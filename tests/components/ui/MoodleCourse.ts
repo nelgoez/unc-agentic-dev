@@ -8,6 +8,7 @@ export interface ActivityData {
   isVisible: boolean
   hasCompletionTracking: boolean
   isComplete: boolean
+  availabilityInfo: string
 }
 
 export interface SectionData {
@@ -156,6 +157,15 @@ export class MoodleCourse {
           act.textContent?.trim().substring(0, 60) ||
           'UNNAMED'
 
+        // Admin-only: availability info below restricted activities
+        const availEl = act.querySelector('.availabilityinfo')
+        const availabilityInfo = availEl
+          ? (availEl.textContent || '')
+              .replace(/Show\s+more\s*Show\s+less/gi, '')
+              .replace(/\s+/g, ' ')
+              .trim()
+          : ''
+
         return {
           name,
           type: modType,
@@ -163,6 +173,7 @@ export class MoodleCourse {
           isVisible: !isDimmed,
           hasCompletionTracking: hasCheckbox || !!autoComplete,
           isComplete: checkboxChecked || false,
+          availabilityInfo,
         }
       })
     }, sectionNumber)
