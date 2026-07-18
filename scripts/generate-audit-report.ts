@@ -45,23 +45,35 @@ interface AuditResults {
   studentView: CourseStructure
   teacherView: CourseStructure
   findings: AuditFinding[]
-  screenshots: { sectionNumber: number; data: string }[]
+  screenshots: { sectionNumber: number; role: 'admin' | 'teacher' | 'student'; data: string }[]
 }
 
 function loadJson<T>(filePath: string): T {
   return JSON.parse(readFileSync(filePath, 'utf-8')) as T
 }
 
-function loadScreenshots(dir: string): { sectionNumber: number; data: string }[] {
+function loadScreenshots(
+  dir: string,
+): { sectionNumber: number; role: 'admin' | 'teacher' | 'student'; data: string }[] {
   if (!existsSync(dir)) return []
-  return readdirSync(dir)
-    .filter((f) => /course-\d+-student-section-\d+\.png/.test(f))
-    .map((f) => {
-      const match = f.match(/course-\d+-student-section-(\d+)\.png/)
-      const sectionNumber = match ? Number.parseInt(match[1], 10) : 0
-      const data = readFileSync(resolve(dir, f)).toString('base64')
-      return { sectionNumber, data }
-    })
+  const results: { sectionNumber: number; role: 'admin' | 'teacher' | 'student'; data: string }[] =
+    []
+  for (const role of ['admin', 'teacher', 'student'] as const) {
+    const files = readdirSync(dir).filter((f) =>
+      new RegExp(`course-\\d+-${role}-section-\\d+\\.png`).test(f),
+    )
+    for (const f of files) {
+      const match = f.match(new RegExp(`course-\\d+-${role}-section-(\\d+)\\.png`))
+      if (match) {
+        results.push({
+          sectionNumber: Number.parseInt(match[1], 10),
+          role,
+          data: readFileSync(resolve(dir, f)).toString('base64'),
+        })
+      }
+    }
+  }
+  return results
 }
 
 function severityInfo(severity: string): { icon: string; label: string } {
@@ -95,9 +107,9 @@ function buildHTML(results: AuditResults): string {
   const lockedSections = studentView.sections.filter((s) => s.isLocked).length
   const totalSections = studentView.sections.length
 
-  const screenshotMap = new Map<number, string>()
+  const screenshotMap = new Map<string, string>()
   for (const s of screenshots) {
-    screenshotMap.set(s.sectionNumber, s.data)
+    screenshotMap.set(`${s.sectionNumber}-${s.role}`, s.data)
   }
 
   const triggerUrl = 'https://github.com/nelgoez/unc-agentic-dev/actions/workflows/audit-ci.yml'
@@ -117,7 +129,7 @@ function buildHTML(results: AuditResults): string {
     findingsHTML = `<h2 class="section-title">Hallazgos de la auditoría</h2>`
     for (const f of findings) {
       const si = severityInfo(f.severity)
-      const screenshot = screenshotMap.get(f.sectionNumber)
+      const screenshot = screenshotMap.get(`${f.sectionNumber}-student`)
       findingsHTML += `
     <div class="finding ${f.severity}" onclick="this.classList.toggle('open')">
       <div class="finding-header">
@@ -126,12 +138,16 @@ function buildHTML(results: AuditResults): string {
         <span class="chevron">▶</span>
       </div>
       <div class="finding-detail">${esc(f.detail)}</div>`
-      if (screenshot != null && screenshot !== '') {
+      const fAdminScreenshot = screenshotMap.get(`${f.sectionNumber}-admin`)
+      const fTeacherScreenshot = screenshotMap.get(`${f.sectionNumber}-teacher`)
+      const fStudentScreenshot = screenshotMap.get(`${f.sectionNumber}-student`)
+      if (fAdminScreenshot || fTeacherScreenshot || fStudentScreenshot) {
         findingsHTML += `
-      <div class="screenshot">
-        <img src="data:image/png;base64,${screenshot}" alt="Captura sección ${f.sectionNumber}">
-        <div class="caption">Vista como estudiante - Sección ${f.sectionNumber}: ${esc(f.sectionTitle)}</div>
-      </div>`
+        <div style="display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 12px">
+          ${fAdminScreenshot ? `<div style="flex:1;min-width:200px"><div class="screenshot" style="margin:0"><img src="data:image/png;base64,${fAdminScreenshot}" alt="Admin sección ${f.sectionNumber}"><div class="caption">👤 Admin - ${esc(f.sectionTitle)}</div></div></div>` : ''}
+          ${fTeacherScreenshot ? `<div style="flex:1;min-width:200px"><div class="screenshot" style="margin:0"><img src="data:image/png;base64,${fTeacherScreenshot}" alt="Teacher sección ${f.sectionNumber}"><div class="caption">👩‍🏫 Teacher - ${esc(f.sectionTitle)}</div></div></div>` : ''}
+          ${fStudentScreenshot ? `<div style="flex:1;min-width:200px"><div class="screenshot" style="margin:0"><img src="data:image/png;base64,${fStudentScreenshot}" alt="Student sección ${f.sectionNumber}"><div class="caption">🎓 Estudiante - ${esc(f.sectionTitle)}</div></div></div>` : ''}
+        </div>`
       }
       findingsHTML += `\n    </div>`
     }
@@ -155,7 +171,9 @@ function buildHTML(results: AuditResults): string {
       const adminActs = adminSection?.activities.length ?? 0
       const studentActs = s.activities.length
       const diff = adminActs - studentActs
-      const screenshot = screenshotMap.get(s.number)
+      const adminScreenshot = screenshotMap.get(`${s.number}-admin`)
+      const teacherScreenshot = screenshotMap.get(`${s.number}-teacher`)
+      const studentScreenshot = screenshotMap.get(`${s.number}-student`)
       compareHTML += `
     <div class="finding ${s.isLocked ? 'critical' : 'warning'}">
       <div class="finding-header" onclick="this.parentElement.classList.toggle('open')">
@@ -178,7 +196,16 @@ function buildHTML(results: AuditResults): string {
             </ul>
           </div>
         </div>
-        ${screenshot ? `<div class="screenshot"><img src="data:image/png;base64,${screenshot}" alt="Captura sección ${s.number} como estudiante"><div class="caption">📸 Vista como estudiante - Sección ${s.number}: ${esc(s.title)}</div></div>` : ''}
+        ${
+          adminScreenshot || teacherScreenshot || studentScreenshot
+            ? `
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;padding:0 16px 12px">
+          ${adminScreenshot ? `<div style="flex:1;min-width:240px"><div class="screenshot" style="margin:0"><img src="data:image/png;base64,${adminScreenshot}" alt="Admin sección ${s.number}"><div class="caption">👤 Admin - Sección ${s.number}</div></div></div>` : ''}
+          ${teacherScreenshot ? `<div style="flex:1;min-width:240px"><div class="screenshot" style="margin:0"><img src="data:image/png;base64,${teacherScreenshot}" alt="Teacher sección ${s.number}"><div class="caption">👩‍🏫 Teacher - Sección ${s.number}</div></div></div>` : ''}
+          ${studentScreenshot ? `<div style="flex:1;min-width:240px"><div class="screenshot" style="margin:0"><img src="data:image/png;base64,${studentScreenshot}" alt="Student sección ${s.number}"><div class="caption">🎓 Estudiante - Sección ${s.number}</div></div></div>` : ''}
+        </div>`
+            : ''
+        }
       </div>
     </div>`
     }

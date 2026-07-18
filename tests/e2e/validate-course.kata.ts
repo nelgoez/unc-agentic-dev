@@ -57,17 +57,52 @@ test.describe('Course Validation — Multi-Role Audit', () => {
     const teacherView = await course.analyze(courseId)
     console.log(`Sections: ${teacherView.sections.length}`)
 
-    // 6. Take screenshots from each locked section as student
+    // 6. Take screenshots from ALL roles for each section with differences
     const screenshotDir = resolve('reports/audit')
-    await roles.switchToStudentAndVerify(courseId)
-    console.log(`Role after student switch: ${await roles.getCurrentRoleLabel()}`)
-    for (const section of studentView.sections) {
-      if (section.isLocked) {
-        await course.navigateToSection(section.number)
-        await course.takeScreenshot(
-          resolve(screenshotDir, `course-${courseId}-student-section-${section.number}.png`),
-        )
-      }
+    const sectionsToCapture = studentView.sections.filter((s) => {
+      const adminSection = adminView.sections.find((as) => as.number === s.number)
+      return (
+        adminSection &&
+        (adminSection.activities.length !== s.activities.length ||
+          s.isLocked !== adminSection.isLocked)
+      )
+    })
+    console.log(`Sections to capture (with differences): ${sectionsToCapture.length}`)
+
+    // Admin screenshots (source of truth)
+    console.log('\n=== CAPTURING ADMIN VIEW ===')
+    await roles.revertToAdmin(courseId)
+    console.log(`Role: ${await roles.getCurrentRoleLabel()}`)
+    for (const section of sectionsToCapture) {
+      await course.navigateToSection(section.number)
+      await course.takeScreenshot(
+        resolve(screenshotDir, `course-${courseId}-admin-section-${section.number}.png`),
+      )
+    }
+
+    // Student screenshots (what the student actually sees)
+    console.log('\n=== CAPTURING STUDENT VIEW ===')
+    const studentOk = await roles.switchToStudentAndVerify(courseId)
+    console.log(
+      `Student switch OK: ${studentOk} | Role label: ${await roles.getCurrentRoleLabel()}`,
+    )
+    for (const section of sectionsToCapture) {
+      await course.navigateToSection(section.number)
+      await course.takeScreenshot(
+        resolve(screenshotDir, `course-${courseId}-student-section-${section.number}.png`),
+      )
+    }
+
+    // Teacher screenshots (what the non-editing teacher sees)
+    console.log('\n=== CAPTURING TEACHER VIEW ===')
+    await roles.revertToAdmin(courseId)
+    await roles.switchToTeacher(courseId)
+    console.log(`Role: ${await roles.getCurrentRoleLabel()}`)
+    for (const section of sectionsToCapture) {
+      await course.navigateToSection(section.number)
+      await course.takeScreenshot(
+        resolve(screenshotDir, `course-${courseId}-teacher-section-${section.number}.png`),
+      )
     }
 
     // 7. Annotate test with findings
