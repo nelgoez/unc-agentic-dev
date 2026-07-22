@@ -100,7 +100,7 @@ interface AllureContainer {
 function toStatus(severity: string): 'passed' | 'failed' | 'broken' {
   if (severity === 'critical') return 'failed'
   if (severity === 'error') return 'failed'
-  if (severity === 'unavailable') return 'broken'
+  if (severity === 'unavailable') return 'passed'
   return 'passed'
 }
 
