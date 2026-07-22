@@ -436,6 +436,8 @@ export class MoodleApiClient {
           name: mod.name,
           completion: mod.completion,
           completiondata: mod.completiondata ?? null,
+          groupmode: mod.groupmode,
+          groupingid: mod.groupingid,
         })),
       }
     })

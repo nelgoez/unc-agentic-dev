@@ -75,6 +75,8 @@ interface ApiAuditResults {
           istrackeduser: boolean
           uservisible: boolean
         } | null
+        groupmode: number
+        groupingid: number
       }>
     }>
     totalActivities: number
@@ -204,7 +206,14 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
   // Build API module lookup by name
   const apiModuleByName = new Map<
     string,
-    { completion: number; overrideby: number | null; hascompletion: boolean; isautomatic: boolean }
+    {
+      completion: number
+      overrideby: number | null
+      hascompletion: boolean
+      isautomatic: boolean
+      groupmode: number
+      groupingid: number
+    }
   >()
   if (apiResults?.breakdown?.sections) {
     for (const section of apiResults.breakdown.sections) {
@@ -214,6 +223,8 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
           overrideby: mod.completiondata?.overrideby ?? null,
           hascompletion: mod.completiondata?.hascompletion ?? false,
           isautomatic: mod.completiondata?.isautomatic ?? false,
+          groupmode: mod.groupmode,
+          groupingid: mod.groupingid,
         })
       }
     }
@@ -246,6 +257,10 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
           const actName = nameMatch?.[1]
           const apiMod = actName ? apiModuleByName.get(actName.toLowerCase()) : undefined
           if (apiMod) {
+            if (apiMod.groupmode > 0) {
+              const groupLabel = apiMod.groupmode === 1 ? 'grupos separados' : 'grupos visibles'
+              apiNote = `<p class="dim" style="margin-top:4px;font-size:0.85em">👥 <strong>Actividad grupal</strong> (${groupLabel}) — puede completarse cuando el docente o el grupo complete su parte, sin necesidad de checkbox individual.</p>`
+            }
             if (apiMod.completion === 0) {
               apiNote = `<p class="dim" style="margin-top:4px;font-size:0.85em">🔍 <strong>Confirmado por el servidor:</strong> el seguimiento de finalización está deshabilitado (completion=0).</p>`
             } else if (apiMod.completion === 1) {
