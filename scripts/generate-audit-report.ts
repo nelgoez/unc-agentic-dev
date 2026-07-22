@@ -603,7 +603,7 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     ${devNote}
 
     <div class="footer">
-      <p>UNC Campus Virtual · Reporte generado automáticamente por el pipeline de auditoría</p>
+      <p><a href="https://nelthor.com.ar" target="_blank" rel="noopener" style="color:var(--text-2);text-decoration:underline">Nahuel Gomez</a> · QA Engineer — UNC Campus Virtual</p>
       <p style="margin-top:4px"><a href="${triggerUrl}" target="_blank" rel="noopener">Ejecutar nueva auditoría →</a></p>
     </div>
   </div>
