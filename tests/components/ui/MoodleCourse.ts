@@ -239,8 +239,6 @@ export class MoodleCourse {
   findPhantoms(admin: CourseStructure): AuditFinding[] {
     const findings: AuditFinding[] = []
 
-    // Parse restriction text from ADMIN view — admins can see availability conditions
-    // even though they're not blocked by them. This works regardless of role switch.
     const sectionsWithRestrictions = admin.sections.filter(
       (s) => s.restrictionText && s.restrictionText.trim().length > 3,
     )
@@ -253,11 +251,6 @@ export class MoodleCourse {
       .replace(/\s+/g, ' ')
       .trim()
 
-    // Bilingual extraction: match activity names in both English and Spanish.
-    // Patterns in the restriction text:
-    //   EN: "the activity Activity Name is marked complete"
-    //   ES: "la actividad Nombre de Actividad esté marcada como completada"
-    // Also match anything in quotes: "Activity Name"
     const activityNames = new Set<string>()
 
     const enPattern = /the activity\s+([^,\."]+?)\s+is marked complete/gi
@@ -271,14 +264,12 @@ export class MoodleCourse {
       activityNames.add(m[1].trim())
     }
 
-    // Also extract anything in quotes (both languages use quotes for activity names)
     const quotePattern = /["""]([^"""]+?)["""]/g
     for (const m of cleanText.matchAll(quotePattern)) {
       const name = m[1].trim()
       if (name.length > 2 && name.length < 120) activityNames.add(name)
     }
 
-    // Cascade count: modules after the first restricted one
     const cascadeCount = sectionsWithRestrictions.length - 1
 
     for (const required of activityNames) {
@@ -296,20 +287,22 @@ export class MoodleCourse {
           sectionNumber: firstRestricted.number,
           sectionTitle: firstRestricted.title,
           message: `Actividad requerida "${required}" no encontrada en el curso`,
-          detail: `El módulo "${firstRestricted.title}" está bloqueado por "${required}" según su condición de disponibilidad, pero no existe ninguna actividad con ese nombre. Causa probable: la condición apunta a un recurso (PDF, URL) que no tiene seguimiento de finalización, o la actividad fue eliminada pero la condición persiste.${cascadeCount > 0 ? ` Además, ${cascadeCount} módulo(s) más están bloqueados en cascada.` : ''}`,
+          detail: `El módulo "${firstRestricted.title}" está bloqueado por "${required}" según su condición de disponibilidad, pero no existe ninguna actividad con ese nombre en el curso. Esto impide el avance de cualquier estudiante nuevo.`,
         })
       } else if (!matchingActivity.hasCompletionTracking) {
+        const actSection = admin.sections.find((s) =>
+          s.activities.some((a) => a.name === matchingActivity.name),
+        )
         findings.push({
           severity: 'critical',
-          sectionNumber: firstRestricted.number,
-          sectionTitle: firstRestricted.title,
-          message: `Actividad "${required}" no tiene seguimiento de finalización`,
-          detail: `"${firstRestricted.title}" requiere "${required}" como condición de avance, pero esta actividad no tiene habilitado el seguimiento de finalización. Moodle nunca podrá marcarlo como completado aunque el estudiante la visite. Solución: habilitar seguimiento de finalización en la configuración de "${required}".${cascadeCount > 0 ? ` Al resolver esto, los ${cascadeCount} módulo(s) en cascada también se desbloquean.` : ''}`,
+          sectionNumber: actSection?.number ?? firstRestricted.number,
+          sectionTitle: actSection?.title ?? firstRestricted.title,
+          message: `"${required}" está en "${actSection?.title ?? '?'}" pero no puede marcarse como completada`,
+          detail: `Para desbloquear "${firstRestricted.title}" hace falta que "${required}" esté completada, pero al recorrer el curso como alumno nuevo no encontramos ninguna forma de marcarla como completada (no hay casilla de verificación ni progreso automático). Esto impide el avance a "${firstRestricted.title}" y a los módulos siguientes. Posibles causas: la actividad nunca tuvo habilitado el seguimiento, o se deshabilitó después de que algunos alumnos (como nelthor) ya la hubieran completado.`,
         })
       }
     }
 
-    // Cascade note
     if (cascadeCount > 0) {
       const cascadeNames = sectionsWithRestrictions
         .slice(1)
@@ -319,8 +312,8 @@ export class MoodleCourse {
         severity: 'info',
         sectionNumber: firstRestricted.number,
         sectionTitle: firstRestricted.title,
-        message: `${cascadeCount} módulo(s) bloqueado(s) en cascada tras "${firstRestricted.title}"`,
-        detail: `Los siguientes módulos están bloqueados en cascada: ${cascadeNames}. No es un error adicional — es consecuencia directa de la restricción en "${firstRestricted.title}". Al resolver la causa raíz, todos se desbloquean.`,
+        message: `${cascadeCount} módulo(s) dependen de "${firstRestricted.title}"`,
+        detail: `Los módulos ${cascadeNames} están bloqueados porque dependen de "${firstRestricted.title}". No es un error nuevo — es consecuencia de la restricción anterior.`,
       })
     }
 

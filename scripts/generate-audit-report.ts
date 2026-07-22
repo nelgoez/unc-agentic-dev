@@ -142,6 +142,22 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     minute: '2-digit',
   })
 
+  // Issues resolved (historical)
+  const resolvedHTML = `\
+  <h2 class="section-title">✅ Problemas anteriores que ya no aparecen</h2>
+  <div class="finding good" style="border-left-color:var(--good)">
+    <div class="finding-header" onclick="this.classList.toggle('open')" style="cursor:pointer">
+      <span class="icon">✅</span>
+      <span class="msg"><strong>Actividad fantasma "Notebook Funcion-Lambda"</strong> — Reportado el 17/7, verificado como resuelto el 22/7</span>
+      <span class="chevron">▶</span>
+    </div>
+    <div class="finding-detail">
+      <p style="margin-bottom:8px">El problema original que motivó esta auditoría: el Módulo 3 requería una actividad llamada "Notebook Funcion-Lambda" que existía en las condiciones de disponibilidad pero no como un recurso visible en el curso. Cualquier estudiante nuevo quedaba atascado en Módulo 2 sin poder avanzar.</p>
+      <p style="margin-bottom:8px"><strong>¿Cómo lo detectamos?</strong> Nelthor, un usuario con acceso al curso, reportó que no podía acceder al Módulo 3. Al investigar, descubrimos que la condición de disponibilidad apuntaba a una actividad que no existía como recurso visible.</p>
+      <p><strong>¿Está resuelto?</strong> La verificación del 22/7 confirma que la actividad ya existe en el curso (0 dependencias rotas). El equipo de Campus Virtual probablemente restauró o recreó el recurso faltante.</p>
+    </div>
+  </div>`
+
   // Build cross-referenced findings grouped by section
   const sectionMap = new Map<string, { ui: AuditFinding[]; api: ApiAuditResults['apiFindings'] }>()
   for (const f of findings) {
@@ -161,8 +177,8 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
   if (sectionMap.size === 0) {
     unifiedHTML = `<div class="no-findings"><div class="emoji">✅</div><h3>No se encontraron incidencias</h3><p class="dim">El curso supera la auditoría sin hallazgos críticos ni advertencias.</p></div>`
   } else {
-    unifiedHTML = `<h2 class="section-title">🔎 Hallazgos combinados (UI + API)</h2>
-    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Cada sección del curso analizada desde dos frentes. <span class="badge-ui">UI</span> = navegador real (Playwright), <span class="badge-api">API</span> = análisis estructural vía REST.</p>`
+    unifiedHTML = `<h2 class="section-title">🔎 Hallazgos actuales</h2>
+    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Cada sección del curso analizada de dos maneras: <span class="badge-ui">Recorrido como alumno</span> (navegamos el curso como lo haría un estudiante nuevo) y <span class="badge-srv">Análisis del servidor</span> (revisamos la configuración interna del curso).</p>`
     for (const [sectionName, group] of sectionMap) {
       const allFindings = [...group.ui, ...group.api]
       const sectionCritical = allFindings.filter((f) => f.severity === 'critical').length
@@ -189,7 +205,7 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
         const si = severityInfo(f.severity)
         unifiedHTML += `
         <div style="margin:8px 0;padding:8px;background:var(--bg);border-radius:4px;border-left:3px solid var(--accent)">
-          <span class="badge-api">API</span> ${si.icon} <strong>${esc(f.message)}</strong>
+          <span class="badge-srv">Análisis del servidor</span> ${si.icon} <strong>${esc(f.message)}</strong>
           <p class="dim" style="margin-top:4px;font-size:0.9em">${esc(f.detail)}</p>
         </div>`
       }
@@ -201,7 +217,8 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
   let dbProbesHTML = ''
   if (apiResults?.dbProbes) {
     const dp = apiResults.dbProbes
-    dbProbesHTML = `<h2 class="section-title">🔬 Sondas de base de datos</h2>`
+    dbProbesHTML = `<h2 class="section-title">📋 Datos del curso</h2>
+    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Información general sobre el curso y sus participantes, obtenida desde el servidor.</p>`
 
     if (dp.enrollment) {
       dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👥</span><span class="msg"><strong>Inscripciones:</strong> ${dp.enrollment.total} usuarios (${dp.enrollment.students} estudiantes, ${dp.enrollment.teachers} docentes)</span></div></div>`
@@ -209,16 +226,59 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
       dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👥</span><span class="msg"><strong>Inscripciones:</strong> Datos no disponibles — función no agregada al servicio</span></div></div>`
     }
     if (dp.gradeItems) {
-      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">📊</span><span class="msg"><strong>Items de calificación:</strong> ${dp.gradeItems.total} items</span></div></div>`
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">📊</span><span class="msg"><strong>Notas y calificaciones:</strong> ${dp.gradeItems.total} items registrados</span></div></div>`
     } else {
-      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">📊</span><span class="msg"><strong>Items de calificación:</strong> Datos no disponibles — función no agregada al servicio</span></div></div>`
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">📊</span><span class="msg"><strong>Notas y calificaciones:</strong> Datos no disponibles — función no agregada al servicio</span></div></div>`
     }
     if (dp.cohorts) {
-      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Cohortes:</strong> ${dp.cohorts.total} (${dp.cohorts.names.join(', ')})</span></div></div>`
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Grupos:</strong> ${dp.cohorts.total} (${dp.cohorts.names.join(', ')})</span></div></div>`
     } else {
-      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Cohortes:</strong> Datos no disponibles — función no agregada al servicio</span></div></div>`
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Grupos:</strong> Datos no disponibles — función no agregada al servicio</span></div></div>`
     }
   }
+
+  // Progression / nelthor comparison
+  let progressionHTML = ''
+  if (apiResults?.progression) {
+    const p = apiResults.progression
+    progressionHTML = `
+    <h2 class="section-title">🎓 Comparación: nelthor vs. estudiante nuevo</h2>
+    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Nelthor es un usuario con acceso al curso que fue promovido a administrador durante la investigación. Su progreso HISTÓRICO sigue siendo válido — completó actividades cuando el curso funcionaba distinto. Un estudiante nuevo arranca desde cero.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <div class="finding info" style="border-left-color:var(--good)">
+        <div class="finding-header">
+          <span class="icon">👤</span>
+          <span class="msg"><strong>nelthor</strong><br><span class="dim" style="font-size:0.85em">Progreso histórico: ${p.alreadyComplete}/${p.trackedActivities} actividades completadas</span></span>
+        </div>
+        <div class="finding-detail" style="display:block;padding:8px 16px 12px">
+          <p>Nelthor completó actividades del curso cuando el seguimiento de finalización funcionaba. Su progreso NO refleja lo que un estudiante nuevo puede hacer hoy. Puede acceder a Módulo 2 y 3 porque ya los había desbloqueado antes de que existieran los problemas actuales.</p>
+        </div>
+      </div>
+      <div class="finding info" style="border-left-color:var(--bad)">
+        <div class="finding-header">
+          <span class="icon">🆕</span>
+          <span class="msg"><strong>Estudiante nuevo</strong><br><span class="dim" style="font-size:0.85em">Actividades completadas: 0 (arranca de cero)</span></span>
+        </div>
+        <div class="finding-detail" style="display:block;padding:8px 16px 12px">
+          <p>Un estudiante que se inscribe HOY encuentra las actividades de Bienvenida, pero no puede marcarlas como completadas (no hay casilla de verificación). Sin eso, Módulo 1, 2, 3 y Cierre permanecen bloqueados para siempre.</p>
+        </div>
+      </div>
+    </div>`
+  }
+
+  // Caveats / what we couldn't verify
+  const caveatsHTML = `
+  <h2 class="section-title">⚠️ Cosas que no pudimos verificar</h2>
+  <div style="background:var(--surface);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);margin-bottom:16px">
+    <p style="margin-bottom:8px"><strong>Este análisis tiene limitaciones. No podemos confirmar:</strong></p>
+    <ul style="margin-left:20px;line-height:1.8">
+      <li>Si un docente puede <strong>marcar manualmente</strong> como completada una actividad desde el libro de calificaciones. Nuestra herramienta recorre el curso como alumno, no como administrador.</li>
+      <li>Si el equipo de Campus Virtual realizó <strong>cambios entre la detección del problema y esta verificación</strong>. Los datos reflejan el momento exacto de la auditoría.</li>
+      <li>Si nelthor completó las actividades de Bienvenida <strong>a través de un mecanismo que ya no está disponible</strong> (por ejemplo, porque el seguimiento de finalización se deshabilitó después).</li>
+      <li>Si hay <strong>otras formas de completar actividades</strong> que no pasan por la casilla de verificación en la página del curso (ej: aprobación directa del docente, finalización por grupo).</li>
+    </ul>
+    <p style="margin-top:12px;font-size:0.85em;color:var(--text-2)">💡 Si encontrás un hallazgo que no coincide con la realidad del curso, <strong>avisanos</strong> para ajustar la detección. Esta herramienta mejora con cada feedback.</p>
+  </div>`
 
   // Side-by-side: all sections from all 3 roles
   let compareHTML = `<h2 class="section-title">Comparación visual: Admin · Teacher · Student</h2>
@@ -465,6 +525,7 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     .btn:hover { opacity: .85; }
     .badge-api { display: inline-block; padding: 2px 8px; border-radius: 4px; background: #6f42c1; color: #fff; font-size: 0.75em; font-weight: 600; margin-right: 6px; text-transform: uppercase; }
     .badge-ui { display: inline-block; padding: 2px 8px; border-radius: 4px; background: #0d6efd; color: #fff; font-size: 0.75em; font-weight: 600; margin-right: 6px; text-transform: uppercase; }
+    .badge-srv { display: inline-block; padding: 2px 8px; border-radius: 4px; background: #6f42c1; color: #fff; font-size: 0.75em; font-weight: 600; margin-right: 6px; text-transform: uppercase; }
     .dev-note {
       margin-top: 32px;
       padding: 16px;
@@ -523,11 +584,17 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
       <a href="${allureUrl}" target="_blank" rel="noopener" class="btn btn-outline">🔍 Ver reporte técnico (Allure)</a>
     </div>
 
+    ${resolvedHTML}
+
     ${unifiedHTML}
 
     ${dbProbesHTML}
 
+    ${progressionHTML}
+
     ${compareHTML}
+
+    ${caveatsHTML}
 
     ${devNote}
 

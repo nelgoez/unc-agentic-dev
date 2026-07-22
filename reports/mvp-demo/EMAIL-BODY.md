@@ -1,5 +1,5 @@
 ---
-subject: 'Pipeline de auditoría tri-fuerza — Buenas noticias desde Python 1'
+subject: 'Auditoría curso 269 (Python 1) — Issue original resuelto, nuevos hallazgos con caveats'
 to: Ignacio Acuña, Patricia Otaola
 from: Equipo de Automatización — UNC Campus Virtual
 date: 2026-07-22
@@ -7,7 +7,7 @@ date: 2026-07-22
 
 ## Asunto sugerido
 
-**🚀 Pipeline tri-fuerza activo — Módulo 3 de Python 1 ya no está bloqueado**
+**Auditoría Python 1: el "Notebook Funcion-Lambda" ya no es un problema, pero encontramos 4 actividades en Bienvenida que no pueden marcarse como completadas**
 
 ---
 
@@ -15,56 +15,53 @@ date: 2026-07-22
 
 Hola Ignacio y equipo,
 
-Les comparto una **buena noticia**: el Módulo 3 de Python 1, que reportamos bloqueado para nelthor semanas atrás, **ya no aparece como bloqueado para los nuevos estudiantes**. Pudimos verificarlo gracias al nuevo approach de estudiantes frescos que implementamos.
+Completamos la auditoría del curso 269 (Python 1). Les comparto los resultados con total transparencia, incluyendo lo que pudimos y no pudimos verificar.
 
-### 🔄 Lo que cambió en el pipeline
+### ✅ Noticia buena: el problema del Módulo 3 está resuelto
 
-Antes usábamos un usuario estático (nelthor) para la auditoría desde la vista estudiante. Pero nelthor fue promovido a admin, y su vista del curso ya no reflejaba fielmente la experiencia de un estudiante nuevo. Esto podía generar falsos negativos.
+El caso que reportó nelthur — el Módulo 3 bloqueado por una actividad llamada "Notebook Funcion-Lambda" que no existía como recurso visible — ya no aparece. La verificación del servidor confirma 0 dependencias rotas. Alguien del equipo de Campus Virtual restauró o recreó el recurso faltante. Gracias.
 
-**Ahora creamos un estudiante nuevo en cada corrida:**
-- El pipeline genera un usuario vía API
-- Lo enrola en el curso automáticamente
-- Ejecuta la auditoría como ese estudiante real
-- Lo elimina al terminar
+### 🔴 Lo que encontramos ahora (4 hallazgos)
 
-Esto nos dio una confirmación más confiable de que **el bloqueo del Módulo 3 fue resuelto por el equipo de Campus Virtual**. Reportamos el issue, lo solucionaron, y nosotros lo verificamos automáticamente. Así debería funcionar el ciclo.
+Al recorrer el curso como un estudiante nuevo (creado exclusivamente para esta auditoría), detectamos que 4 actividades en la sección **Bienvenida** no pueden marcarse como completadas:
 
-### 🏗️ Tri-fuerza: 3 frentes en paralelo
+1. "Sobre los docentes"
+2. "Sobre los objetivos"
+3. "Encuesta de diagnóstico inicial"
+4. "Presentaciones de bienvenida"
 
-Cada auditoría corre con 3 técnicas que se complementan:
+Estas actividades son requisito para desbloquear el Módulo 1. Si un estudiante nuevo no puede marcarlas como "completadas", el Módulo 1 nunca se desbloquea, y en cadena tampoco el 2, 3 ni el Cierre.
 
-| Frente | Técnica | Qué detecta |
-|--------|---------|-------------|
-| 🔍 UI | Navegador real con Playwright | Actividades fantasma, candados, diferencias entre roles |
-| 🔬 API | REST API directa | Condiciones rotas en JSON, cmids huérfanos, disponibilidad |
-| 📊 DB | Web services de Moodle | Cohorts, enrollment, grade items, progresión |
+**Pero con un caveat importante:** nelthur — que tiene acceso al curso desde antes — tiene 26 de 28 actividades marcadas como completadas, incluyendo estas 4. No sabemos exactamente cómo las completó. Pudo haber sido:
+- Antes de que se deshabilitara el seguimiento de finalización de esas actividades
+- A través de una función de administrador (como el libro de calificaciones)
+- Por aprobación directa de un docente
 
-### 📎 Links útiles
+Nuestra herramienta no puede distinguir entre estas opciones. Lo que SÍ podemos afirmar es que **un estudiante nuevo, recorriendo el curso hoy, no encuentra forma de marcar esas 4 actividades como completadas**. Si en la práctica los docentes las completan manualmente, este hallazgo es un falso positivo parcial — y nos gustaría saberlo para ajustar la detección.
 
-1. **Reporte en vivo**
-https://nelgoez.github.io/unc-agentic-dev/
-Hallazgos cruzados UI + API, capturas lado a lado.
+### ⚠️ Lo que NO pudimos verificar
 
-2. **Reporte técnico Allure**
-https://nelgoez.github.io/unc-agentic-dev/allure/
-Categorizado visualmente: UI, API, DB, con histórico de corridas.
+- Si un docente puede marcar actividades como completadas desde el libro de calificaciones
+- Si hay cambios entre una auditoría y otra que afecten los resultados
+- Otras formas de completar actividades que no pasen por la interfaz del curso (ej: integraciones externas)
 
-3. **Ejecutar nueva auditoría**
-https://github.com/nelgoez/unc-agentic-dev/actions/workflows/audit-ci.yml
-ID del curso → en ~3 minutos tenés el reporte completo.
+### 📋 Resumen
 
-4. **Propuesta Course Kit**
-https://unc-course-kit.netlify.app/#/11
+| Aspecto | Estado |
+|---------|--------|
+| Phantom "Notebook Funcion-Lambda" | ✅ Resuelto |
+| Actividades sin seguimiento de finalización | 🔴 Detectado (con caveats) |
+| Módulos bloqueados en cascada | 🔴 Consecuencia del punto anterior |
 
-### 📊 Qué encontramos en esta corrida
+### 📎 Acceso a los reportes
 
-Curso 269 (Python 1):
-- **4 hallazgos UI:** Actividades en Módulo 1 sin seguimiento de finalización, con 3 módulos bloqueados en cascada
-- **4 hallazgos API:** Condiciones de nota mínima en grade items del Cierre
-- **0 actividades fantasma**
-- **13217 estudiantes** enrolados, 1 docente, 4 items de calificación
+- **Reporte completo**: https://nelgoez.github.io/unc-agentic-dev/
+- **Reporte técnico**: https://nelgoez.github.io/unc-agentic-dev/allure/
+- **Ejecutar nueva auditoría**: https://github.com/nelgoez/unc-agentic-dev/actions/workflows/audit-ci.yml
 
-**Próximo paso:** ¿Agregamos más cursos al scan? Mandame los IDs y los sumamos.
+### 💬 Feedback
+
+Esta herramienta mejora con cada uso. Si algún hallazgo no coincide con la realidad del curso (falso positivo), o si encuentran issues que la herramienta NO detectó (falso negativo), avísenos. Así podemos ajustar la detección.
 
 Saludos,
 Equipo de Automatización
