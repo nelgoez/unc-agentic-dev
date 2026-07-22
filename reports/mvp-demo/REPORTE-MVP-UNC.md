@@ -147,6 +147,11 @@ Creamos un usuario estudiante nuevo usando la API REST para verificar si el prob
 | `findOrphanedCmIds()`            | Detecta cmids referenciados en JSON de disponibilidad que no existen                      |
 | `getAvailabilityJsonBreakdown()` | Mapa completo de todas las restricciones del curso                                        |
 
+### Reportes Adicionales
+
+- 📊 **[Reporte técnico Allure](../allure-report/index.html)** — Detalle de cada test ejecutado, duración, estado y evidencia técnica
+- 📋 **[Reporte original curso 269](../audit/audit-course-269.html)** — Primer reporte con hallazgos del Módulo 3
+
 ---
 
 ## Verificación con Estudiante Nuevo (2026-07-21)

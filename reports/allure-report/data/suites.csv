@@ -1,0 +1,2 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","48645","Audit course 269 across student/teacher/admin roles","chromium","2026-07-17","passed","2026-07-17","Course Validation — Multi-Role Audit","e2e\validate-course.kata.ts","",""

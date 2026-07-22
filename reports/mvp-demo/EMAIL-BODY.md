@@ -77,3 +77,9 @@ Campus Virtual UNC
 ## Apéndice técnico (para quien lo quiera)
 
 _La herramienta usa la API REST de Moodle para obtener la estructura de cada curso, analiza el JSON de disponibilidad en busca de referencias huérfanas (actividades eliminadas que siguen figurando como restricción), y crea un usuario estudiante temporal para verificar la experiencia real. Los reportes se generan en HTML interactivo y Markdown. Todo el proceso es completamente automatizado y no requiere intervención manual._
+
+### Enlaces a los reportes
+
+- **Reporte interactivo HTML:** https://nelgoez.github.io/unc-agentic-dev/mvp-demo/index.html
+- **Reporte técnico (Allure):** https://nelgoez.github.io/unc-agentic-dev/allure-report/index.html
+- **Reporte original curso 269:** https://nelgoez.github.io/unc-agentic-dev/audit/audit-course-269.html

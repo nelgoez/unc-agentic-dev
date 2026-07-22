@@ -1,0 +1,3 @@
+CAS: keyboard.type() value = ""
+CAS: evaluate.set value = ""
+CAS page after submit — URL: https://autenticar.unc.edu.ar/login, errors: [{"text":"Enter a valid username.","visible":true},{"text":"Enter full Usuario UNC, including @unc.edu.ar or @mi.unc.edu.ar","visible":false}]

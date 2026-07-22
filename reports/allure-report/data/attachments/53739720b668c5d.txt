@@ -1,0 +1,2 @@
+CAS input debug: {"tagName":"INPUT","type":"text","readOnly":false,"disabled":false,"valueAfterSet":"","visible":true}
+CAS page after submit — URL: https://autenticar.unc.edu.ar/login, errors: [{"text":"Enter a valid username.","visible":true},{"text":"Enter full Usuario UNC, including @unc.edu.ar or @mi.unc.edu.ar","visible":false}]

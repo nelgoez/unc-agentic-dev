@@ -1,0 +1,21 @@
+URL after admin login: https://campus.aulavirtual.unc.edu.ar/login/index.php?loginredirect=1
+URL after course nav: https://campus.aulavirtual.unc.edu.ar/enrol/index.php?id=269
+Page title: python-1 | Campus Virtual UNC
+
+=== ADMIN VIEW ===
+Sections: 0
+Tabs: 0
+
+=== STUDENT VIEW ===
+Sections: 0
+
+=== PHANTOM FINDINGS ===
+Total: 0 | CRITICAL: 0 | WARNING: 0
+
+=== TEACHER VIEW ===
+Sections: 0
+
+=== AUDIT COMPLETE ===
+Admin sections: 0
+Student sections: 0
+Teacher sections: 0

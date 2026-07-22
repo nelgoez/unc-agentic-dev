@@ -1,0 +1,30 @@
+
+=== ADMIN VIEW ===
+Sections: 5
+Tabs: 5
+
+=== STUDENT VIEW ===
+Sections: 5
+  Bienvenida section=0 locked=false
+  Módulo 1 section=1 locked=false
+  Módulo 2 section=2 locked=false
+  Módulo 3 section=3 locked=true restriction="Not available unless: The activity Notebook Funcion-Lambda is marked complete"
+  Cierre section=4 locked=true restriction="Not available unless: The activity Clases del Módulo 3 - Estructuras de datos en Python is marked complete ... Not available unless: The activity Clases del Módulo 3 - Estructuras de datos en Python is marked complete The activity Módulo III: actividad individual is marked complete The activity Notebook Tuplas-CEF is marked complete The activity Notebook Listas-CEF is marked complete The activity Notebook Conjuntos-CEF is marked complete The activity Notebook Diccionarios-CEF is marked complete"
+
+=== PHANTOM FINDINGS ===
+Total: 7 | CRITICAL: 1 | WARNING: 0
+  [CRITICAL] Módulo 3: Actividad requerida "Notebook Funcion-Lambda" no encontrada en el curso
+  [INFO] Cierre: Actividad "Clases del Módulo 3 - Estructuras de datos en Python" referenciada pero no visible — probablemente en módulo bloqueado
+  [INFO] Cierre: Actividad "Módulo III: actividad individual" referenciada pero no visible — probablemente en módulo bloqueado
+  [INFO] Cierre: Actividad "Notebook Tuplas-CEF" referenciada pero no visible — probablemente en módulo bloqueado
+  [INFO] Cierre: Actividad "Notebook Listas-CEF" referenciada pero no visible — probablemente en módulo bloqueado
+  [INFO] Cierre: Actividad "Notebook Conjuntos-CEF" referenciada pero no visible — probablemente en módulo bloqueado
+  [INFO] Cierre: Actividad "Notebook Diccionarios-CEF" referenciada pero no visible — probablemente en módulo bloqueado
+
+=== TEACHER VIEW ===
+Sections: 5
+
+=== AUDIT COMPLETE ===
+Admin sections: 5
+Student sections: 5
+Teacher sections: 5
