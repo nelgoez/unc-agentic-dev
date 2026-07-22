@@ -393,6 +393,12 @@ export class MoodleApiClient {
         name: string
         conditions: Array<{ type: string; cm?: number; id?: number; min?: number; max?: number }>
       }>
+      modules: Array<{
+        id: number
+        name: string
+        completion: number
+        completiondata: CompletionData | null
+      }>
     }>
     totalActivities: number
     restrictedActivities: number
@@ -425,6 +431,12 @@ export class MoodleApiClient {
         moduleCount: section.modules.length,
         hasSectionRestriction,
         modulesWithRestrictions,
+        modules: section.modules.map((mod) => ({
+          id: mod.id,
+          name: mod.name,
+          completion: mod.completion,
+          completiondata: mod.completiondata ?? null,
+        })),
       }
     })
 

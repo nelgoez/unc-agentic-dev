@@ -51,7 +51,35 @@ interface ApiAuditResults {
     message: string
     detail: string
   }>
-  breakdown: { sections: unknown[]; totalActivities: number; restrictedActivities: number }
+  breakdown: {
+    sections: Array<{
+      section: number
+      name: string
+      moduleCount: number
+      hasSectionRestriction: boolean
+      modulesWithRestrictions: Array<{
+        id: number
+        name: string
+        conditions: Array<{ type: string; cm?: number; id?: number; min?: number; max?: number }>
+      }>
+      modules: Array<{
+        id: number
+        name: string
+        completion: number
+        completiondata: {
+          state: number
+          timecompleted: number
+          overrideby: number | null
+          hascompletion: boolean
+          isautomatic: boolean
+          istrackeduser: boolean
+          uservisible: boolean
+        } | null
+      }>
+    }>
+    totalActivities: number
+    restrictedActivities: number
+  }
   progression: {
     user: string
     trackedActivities: number
@@ -173,6 +201,24 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     }
   }
 
+  // Build API module lookup by name
+  const apiModuleByName = new Map<
+    string,
+    { completion: number; overrideby: number | null; hascompletion: boolean; isautomatic: boolean }
+  >()
+  if (apiResults?.breakdown?.sections) {
+    for (const section of apiResults.breakdown.sections) {
+      for (const mod of section.modules || []) {
+        apiModuleByName.set(mod.name.toLowerCase(), {
+          completion: mod.completion,
+          overrideby: mod.completiondata?.overrideby ?? null,
+          hascompletion: mod.completiondata?.hascompletion ?? false,
+          isautomatic: mod.completiondata?.isautomatic ?? false,
+        })
+      }
+    }
+  }
+
   let unifiedHTML = ''
   if (sectionMap.size === 0) {
     unifiedHTML = `<div class="no-findings"><div class="emoji">✅</div><h3>No se encontraron incidencias</h3><p class="dim">El curso supera la auditoría sin hallazgos críticos ni advertencias.</p></div>`
@@ -194,10 +240,31 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
       for (const f of group.ui) {
         const si = severityInfo(f.severity)
         const stuScreenshot = screenshotMap.get(`student|${f.sectionNumber}`)
+        let apiNote = ''
+        if (f.message.includes('no puede marcarse como completada')) {
+          const nameMatch = f.message.match(/"([^"]+)"/)
+          const actName = nameMatch?.[1]
+          const apiMod = actName ? apiModuleByName.get(actName.toLowerCase()) : undefined
+          if (apiMod) {
+            if (apiMod.completion === 0) {
+              apiNote = `<p class="dim" style="margin-top:4px;font-size:0.85em">🔍 <strong>Confirmado por el servidor:</strong> el seguimiento de finalización está deshabilitado (completion=0).</p>`
+            } else if (apiMod.completion === 1) {
+              apiNote = `<p class="dim" style="margin-top:4px;font-size:0.85em">🔍 <strong>El servidor indica</strong> que hay seguimiento manual (completion=1), pero no se ve el checkbox en la página. Posible bug de interfaz o permiso.</p>`
+            } else if (apiMod.completion === 2) {
+              apiNote = `<p class="dim" style="margin-top:4px;font-size:0.85em">🔍 <strong>El servidor indica</strong> que hay seguimiento automático (completion=2), pero no se ve el indicador en la página.</p>`
+            }
+            if (apiMod.overrideby !== null) {
+              apiNote += `<p class="dim" style="margin-top:4px;font-size:0.85em">👤 <strong>Finalización forzada</strong> por un docente/administrador (override activo).</p>`
+            }
+          } else {
+            apiNote = `<p class="dim" style="margin-top:4px;font-size:0.85em">🔍 No se encontraron datos del servidor para esta actividad — posiblemente no existe como módulo en la respuesta del API.</p>`
+          }
+        }
         unifiedHTML += `
         <div style="margin:8px 0;padding:8px;background:var(--bg);border-radius:4px;border-left:3px solid ${f.severity === 'critical' ? 'var(--bad)' : f.severity === 'warning' ? 'var(--warn)' : 'var(--accent)'}">
           <span class="badge-ui">UI</span> ${si.icon} <strong>${esc(f.message)}</strong>
           <p class="dim" style="margin-top:4px;font-size:0.9em">${esc(f.detail)}</p>
+          ${apiNote}
           ${stuScreenshot ? `<div class="screenshot" style="margin-top:6px"><img src="data:image/png;base64,${stuScreenshot}" alt="Captura sección ${f.sectionNumber}"><div class="caption">📸 Vista como estudiante - Sección ${f.sectionNumber}</div></div>` : ''}
         </div>`
       }
