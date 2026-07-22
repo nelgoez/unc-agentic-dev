@@ -23,11 +23,22 @@ Y que el pipeline:
 Cuando IT Support reciba un reclamo como:
   "El usuario nagomez@mi.unc.edu.ar no puede ver el Módulo 3 del curso 269"
 
-Pueden tirarle esa combinación al pipeline y obtener en 3 minutos:
-  - Capturas de lo que ESE usuario ve (no un fresh student genérico)
-  - Sus restricciones activas
-  - Su progreso actual
-  - Si hay overrides docentes activos
+Pueden tirarle esa combinación al pipeline y obtener en 3 minutos el reporte completo con la tri-fuerza (los 3 frentes) ejecutándose contra ESE usuario específico:
+
+  🔍 Recorrido como ese usuario (UI)
+     Capturas de lo que ESE usuario ve en cada sección — no un fresh student genérico.
+     Secciones bloqueadas vs accesibles para él/ella puntualmente.
+     Actividades que ve vs actividades que NO ve.
+
+  🔬 Análisis del servidor (API)
+     Estado de finalización real de ESE usuario (qué completó y qué no).
+     Condiciones de disponibilidad que lo afectan (notas, dependencias).
+     Cmids huérfanos o mal referenciados en el curso.
+
+  📊 Datos del curso (DB)
+     Inscripción: rol actual, grupos a los que pertenece, cohortes.
+     Notas y calificaciones: items que tiene, notas mínimas requeridas.
+     Override docente: si alguien forzó manualmente la finalización de alguna actividad para este usuario.
 
 **¿Qué necesitaríamos de su lado?**
 
