@@ -36,6 +36,30 @@ interface AuditFinding {
   detail: string
 }
 
+interface ApiAuditResults {
+  courseId: string
+  timestamp: string
+  courseName: string
+  sections: number
+  totalActivities: number
+  restrictedActivities: number
+  orphansFound: number
+  apiFindings: Array<{
+    severity: string
+    type: string
+    section: string
+    message: string
+    detail: string
+  }>
+  breakdown: { sections: unknown[]; totalActivities: number; restrictedActivities: number }
+  progression: {
+    user: string
+    trackedActivities: number
+    alreadyComplete: number
+    autoProgressed: number
+  } | null
+}
+
 interface AuditResults {
   courseId: string
   courseName: string
@@ -79,7 +103,7 @@ function severityInfo(severity: string): { icon: string; label: string } {
   }
 }
 
-function buildHTML(results: AuditResults): string {
+function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = null): string {
   const {
     courseId,
     courseName,
@@ -139,6 +163,25 @@ function buildHTML(results: AuditResults): string {
       findingsHTML += `\n    </div>`
     }
     findingsHTML += `\n    <p style="margin-top:8px;font-size:0.8em;color:var(--text-2)">💡 Hacé clic en cada hallazgo para ver detalle y captura.</p>`
+  }
+
+  // API audit findings section
+  let apiFindingsHTML = ''
+  if (apiResults && apiResults.apiFindings.length > 0) {
+    apiFindingsHTML = `<h2 class="section-title">🔍 Hallazgos de la capa API</h2>
+    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Análisis estructural vía REST API — disponibilidad JSON, actividades fantasma, condiciones de acceso.</p>`
+    for (const f of apiResults.apiFindings) {
+      const si = severityInfo(f.severity)
+      apiFindingsHTML += `
+      <div class="finding ${f.severity}" onclick="this.classList.toggle('open')">
+        <div class="finding-header">
+          <span class="icon">${si.icon}</span>
+          <span class="msg"><strong>${esc(f.section)}:</strong> ${esc(f.message)}</span>
+          <span class="chevron">▶</span>
+        </div>
+        <div class="finding-detail"><span class="badge-api">API</span> ${esc(f.detail)}</div>
+      </div>`
+    }
   }
 
   // Side-by-side: all sections from all 3 roles
@@ -377,6 +420,7 @@ function buildHTML(results: AuditResults): string {
     .btn-primary { background: var(--accent); color: #fff; }
     .btn-outline { background: transparent; color: var(--accent); border: 2px solid var(--accent); }
     .btn:hover { opacity: .85; }
+    .badge-api { display: inline-block; padding: 2px 8px; border-radius: 4px; background: #6f42c1; color: #fff; font-size: 0.75em; font-weight: 600; margin-right: 6px; text-transform: uppercase; }
     .dev-note {
       margin-top: 32px;
       padding: 16px;
@@ -437,6 +481,8 @@ function buildHTML(results: AuditResults): string {
 
     ${findingsHTML}
 
+    ${apiFindingsHTML}
+
     ${compareHTML}
 
     ${devNote}
@@ -459,14 +505,29 @@ function esc(s: string): string {
 }
 
 function main(): void {
-  const resultsPath = resolve(process.argv[2] || 'reports/audit/audit-results.json')
-  const screenshotDir = resolve(process.argv[3] || 'reports/audit')
-  const outputDir = resolve(process.argv[4] || 'audit-report')
-  const allureUrl = process.argv[5] || 'allure/'
+  const args = process.argv.slice(2)
+  const resultsPath = resolve(args[0] || 'reports/audit/audit-results.json')
+  const screenshotDir = resolve(args[1] || 'reports/audit')
+  const outputDir = resolve(args[2] || 'audit-report')
+  const allureUrl = args[3] || 'allure/'
+  const apiResultsIdx = args.indexOf('--api-results')
+  const apiResultsPath = apiResultsIdx !== -1 ? resolve(args[apiResultsIdx + 1]) : null
 
   if (!existsSync(resultsPath)) {
-    console.error(`❌ Audit results not found at ${resultsPath}`)
-    process.exit(1)
+    if (apiResultsPath && existsSync(apiResultsPath)) {
+      console.log('⚠️ UI audit results not found — generating API-only report')
+    } else {
+      console.error(
+        `❌ No audit results found. Need either UI results at ${resultsPath} or API results at ${apiResultsPath}`,
+      )
+      process.exit(1)
+    }
+  }
+
+  let apiResults: ApiAuditResults | null = null
+  if (apiResultsPath && existsSync(apiResultsPath)) {
+    apiResults = loadJson<ApiAuditResults>(apiResultsPath)
+    console.log(`✅ API audit results loaded: ${apiResults.apiFindings.length} findings`)
   }
 
   const results: AuditResults = {
@@ -488,7 +549,7 @@ function main(): void {
     mkdirSync(outputDir, { recursive: true })
   }
 
-  const html = buildHTML(results)
+  const html = buildHTML(results, apiResults)
   writeFileSync(resolve(outputDir, 'index.html'), html, 'utf-8')
   console.log(`✅ Reporte de auditoría generado: ${resolve(outputDir, 'index.html')}`)
 }
