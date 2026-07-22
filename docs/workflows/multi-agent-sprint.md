@@ -82,22 +82,29 @@
 2. Dispatch Implementer → escribe código + tests
    └─ Si pregunta, orquestador responde
    └─ Reporta DONE / DONE_WITH_CONCERNS / BLOCKED
-3. Orquestador genera review-package (diff)
-4. Dispatch QA Auditor → spec + quality
+3. **Pre-Flight Verification** (NEW — ver abajo)
+   Implementer DEBE llamar a la WS function / ejecutar el test contra el entorno real
+   y probar que devuelve datos reales antes de pasar a QA.
+   └─ Si la WS no funciona: documentar por qué, setear status "unavailable" en el código,
+      NO dejar la feature como "funciona" sin verificar.
+4. Orquestador genera review-package (diff)
+5. Dispatch QA Auditor → spec + quality + verificación de que las WS functions
+   realmente devuelven datos (no solo que el código compila)
    └─ Si ❌ Spec o Issues Critical/Important:
       a. Dispatch Hot-Fixer con lista de hallazgos
       b. Re-dispatch QA Auditor
       c. Loop hasta approve
    └─ Si ✅ → avanza
-5. Dispatch EM Reviewer → Go/No-Go final
+6. Dispatch EM Reviewer → Go/No-Go final
    └─ No-Go → fix + re-review
    └─ Go → tarea completa
-6. Orquestador marca tarea en ledger
+7. Orquestador marca tarea en ledger
 ```
 
 ### Reglas
 
 - **Nunca** dispatch múltiples implementers en paralelo (conflictos de merge)
+- **Pre-Flight Verification obligatoria** (ver paso 3): el implementer debe llamar a la WS function / ejecutar el test contra el entorno real y probar que devuelve datos. Si no funciona, documentar por qué, setear status "unavailable" en el código, NO dejar la feature como "funciona" sin verificar.
 - **Siempre** generar review-package entre implementer y QA Auditor
 - **Siempre** incluir `if: always()` en artefactos CI (lección aprendida)
 - Hallazgos Minor se registran en ledger, no bloquean
