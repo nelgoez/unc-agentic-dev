@@ -2,8 +2,18 @@ import { resolve } from 'node:path'
 import { writeFileSync, mkdirSync } from 'node:fs'
 import { MoodleApiClient } from '../tests/components/api/MoodleApiClient'
 
-const courseId = process.env.TEST_COURSE_ID || '269'
-const baseUrl = process.env.MOODLE_BASE_URL ?? 'https://campus.aulavirtual.unc.edu.ar'
+const _rawCourseId = process.env.TEST_COURSE_ID
+const _rawBaseUrl = process.env.MOODLE_BASE_URL
+if (!_rawCourseId) {
+  console.error('❌ TEST_COURSE_ID is not set')
+  process.exit(1)
+}
+if (!_rawBaseUrl) {
+  console.error('❌ MOODLE_BASE_URL is not set')
+  process.exit(1)
+}
+const courseId: string = _rawCourseId
+const baseUrl: string = _rawBaseUrl
 const wsToken = (process.env.MOODLE_WS_TOKEN ?? '').trim()
 
 const api = new MoodleApiClient(baseUrl, wsToken)
@@ -18,6 +28,7 @@ async function main() {
 
   let nelthor = null
   let progression = null
+  const dryRun = process.env.DRY_RUN !== 'false'
   try {
     const users = await api.getUsersByField('username', ['nelthor'])
     if (users[0]) {
@@ -35,11 +46,20 @@ async function main() {
       )
 
       let completed = 0
-      for (const mod of incompleteMods.slice(0, 5)) {
-        try {
-          const r = await api.markActivityComplete(courseId, mod.cmid, users[0].id)
-          if (r && (r as Record<string, unknown>).state === 1) completed++
-        } catch {}
+      if (dryRun) {
+        console.log('🧪 DRY RUN — progression skipped (set DRY_RUN=false to enable)')
+      } else {
+        for (const mod of incompleteMods.slice(0, 5)) {
+          try {
+            const r = await api.markActivityComplete(courseId, mod.cmid, users[0].id)
+            if (r && (r as Record<string, unknown>).state === 1) completed++
+          } catch (err) {
+            console.warn(
+              '⚠️ Mark activity complete failed:',
+              err instanceof Error ? err.message : err,
+            )
+          }
+        }
       }
 
       progression = {
@@ -48,8 +68,12 @@ async function main() {
         alreadyComplete: tracked.filter((s: { state: number }) => s.state === 1).length,
         autoProgressed: completed,
       }
+    } else {
+      console.warn('⚠️ User "nelthor" not found — progression data unavailable')
     }
-  } catch {}
+  } catch (err) {
+    console.warn('⚠️ Progression step failed:', err instanceof Error ? err.message : err)
+  }
 
   const apiFindings: Array<{
     severity: string

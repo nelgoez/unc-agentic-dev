@@ -526,8 +526,12 @@ function main(): void {
 
   let apiResults: ApiAuditResults | null = null
   if (apiResultsPath && existsSync(apiResultsPath)) {
-    apiResults = loadJson<ApiAuditResults>(apiResultsPath)
-    console.log(`✅ API audit results loaded: ${apiResults.apiFindings.length} findings`)
+    try {
+      apiResults = loadJson<ApiAuditResults>(apiResultsPath)
+      console.log(`✅ API audit results loaded: ${apiResults.apiFindings.length} findings`)
+    } catch (err) {
+      console.warn('⚠️ Failed to load API audit results:', err instanceof Error ? err.message : err)
+    }
   }
 
   const results: AuditResults = {

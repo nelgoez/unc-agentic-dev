@@ -15,6 +15,7 @@ on:
 env:
   MOODLE_BASE_URL: ${{ secrets.MOODLE_BASE_URL }}
   TEST_COURSE_ID: ${{ inputs.course_id || '269' }}
+  CI: true
 
 jobs:
   ui-audit:
@@ -66,6 +67,7 @@ jobs:
           path: reports/audit/api-audit-results.json
 
   generate-report:
+    if: ${{ !cancelled() }}
     needs: [ui-audit, api-audit]
     runs-on: ubuntu-latest
     steps:
@@ -77,22 +79,39 @@ jobs:
         run: bun install --ignore-scripts
 
       - name: Download UI audit results
+        continue-on-error: true
         uses: actions/download-artifact@v8
         with:
           name: ui-audit-results
-          path: reports/audit
+          path: _ui_audit
+
+      - name: Move allure and audit results
+        if: always()
+        run: |
+          if [ -d _ui_audit/allure-results ]; then
+            cp -r _ui_audit/allure-results ./allure-results
+            cp -r _ui_audit/reports/audit ./reports/audit
+          fi
 
       - name: Download API audit results
+        continue-on-error: true
         uses: actions/download-artifact@v8
         with:
           name: api-audit-results
           path: reports/audit
 
       - name: Generate unified audit report
+        if: always()
         run: bun scripts/generate-audit-report.ts reports/audit/audit-results.json reports/audit audit-report --api-results reports/audit/api-audit-results.json
 
       - name: Generate Allure report
-        run: bunx allure generate allure-results --clean -o allure-report --name "Campus Virtual - Curso ${{ env.TEST_COURSE_ID }}" --lang es
+        if: always()
+        run: |
+          if [ -d allure-results ]; then
+            bunx allure generate allure-results --clean -o allure-report --name "Campus Virtual - Curso ${{ env.TEST_COURSE_ID }}" --lang es
+          else
+            echo "⚠️ No allure-results found — skipping Allure report generation"
+          fi
 
       - name: Upload unified report
         uses: actions/upload-artifact@v7
@@ -119,12 +138,14 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Download unified report
+        continue-on-error: true
         uses: actions/download-artifact@v8
         with:
           name: audit-report
           path: _site
 
       - name: Download Allure report
+        continue-on-error: true
         uses: actions/download-artifact@v8
         with:
           name: allure-report
