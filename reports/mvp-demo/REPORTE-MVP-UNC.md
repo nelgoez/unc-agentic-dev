@@ -149,7 +149,7 @@ Creamos un usuario estudiante nuevo usando la API REST para verificar si el prob
 
 ### Reportes Adicionales
 
-- 📊 **[Reporte técnico Allure](../allure-report/index.html)** — Detalle de cada test ejecutado, duración, estado y evidencia técnica
+- 📊 **[Reporte técnico Allure](../allure/index.html)** — Detalle de cada test ejecutado, duración, estado y evidencia técnica
 - 📋 **[Reporte original curso 269](../audit/audit-course-269.html)** — Primer reporte con hallazgos del Módulo 3
 
 ---
