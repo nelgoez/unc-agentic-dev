@@ -114,12 +114,15 @@ See `docs/workflows/git-flow.md` — branch structure (main → staging → feat
 
 ## Multi-Agent Workflow
 
-Use `subagent-driven-development` skill for multi-agent work:
+See `docs/workflows/multi-agent-sprint.md` for the full cycle (Debate → Sprint → Present).
 
-- **Implementer subagent**: builds code/tests per task (fresh context via `scripts/task-brief`)
-- **Task reviewer**: spec compliance + code quality after each task
-- **Final code reviewer**: whole-branch audit at end
-- Roles can be played by different agents (QA, EM, developer) in parallel
+The pattern established:
+
+1. **Plan & Debate** — parallel agents research options (Tavily + Context7), synthesize, human decides
+2. **Implementation Sprint** — Implementer → QA Auditor → Hot-Fixer → EM Reviewer (sequential per task)
+3. **Present & Refine** — show results, get feedback, iterate if needed
+
+Each task generates: brief → implementer report → review package → QA findings → fixes → EM validation → ledger.
 
 ## Session Rules
 
