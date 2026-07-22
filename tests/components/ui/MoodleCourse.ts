@@ -298,7 +298,7 @@ export class MoodleCourse {
           sectionNumber: actSection?.number ?? firstRestricted.number,
           sectionTitle: actSection?.title ?? firstRestricted.title,
           message: `"${required}" está en "${actSection?.title ?? '?'}" pero no puede marcarse como completada`,
-          detail: `Para desbloquear "${firstRestricted.title}" hace falta que "${required}" esté completada, pero al recorrer el curso como alumno nuevo no encontramos ninguna forma de marcarla como completada (no hay casilla de verificación ni progreso automático). Esto impide el avance a "${firstRestricted.title}" y a los módulos siguientes. Posibles causas: la actividad nunca tuvo habilitado el seguimiento, o se deshabilitó después de que algunos alumnos (como nelthor) ya la hubieran completado.`,
+          detail: `Para desbloquear "${firstRestricted.title}" hace falta que "${required}" esté completada, pero al recorrer el curso como alumno nuevo no encontramos ninguna forma de marcarla como completada (no hay casilla de verificación ni progreso automático). Esto impide el avance a "${firstRestricted.title}" y a los módulos siguientes. El usuario nelthor sí completó estas actividades antes de ser promovido a administrador, lo que sugiere que el seguimiento de finalización funcionaba en ese momento y luego se deshabilitó.`,
         })
       }
     }

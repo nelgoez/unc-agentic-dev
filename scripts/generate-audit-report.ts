@@ -153,7 +153,7 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     </div>
     <div class="finding-detail">
       <p style="margin-bottom:8px">El problema original que motivó esta auditoría: el Módulo 3 requería una actividad llamada "Notebook Funcion-Lambda" que existía en las condiciones de disponibilidad pero no como un recurso visible en el curso. Cualquier estudiante nuevo quedaba atascado en Módulo 2 sin poder avanzar.</p>
-      <p style="margin-bottom:8px"><strong>¿Cómo lo detectamos?</strong> Nelthor, un usuario con acceso al curso, reportó que no podía acceder al Módulo 3. Al investigar, descubrimos que la condición de disponibilidad apuntaba a una actividad que no existía como recurso visible.</p>
+      <p style="margin-bottom:8px"><strong>¿Cómo lo detectamos?</strong> Nelthor (un estudiante real, antes de ser promovido a administrador) reportó que no podía acceder al Módulo 3. Al investigar, descubrimos que la condición de disponibilidad apuntaba a una actividad que no existía como recurso visible.</p>
       <p><strong>¿Está resuelto?</strong> La verificación del 22/7 confirma que la actividad ya existe en el curso (0 dependencias rotas). El equipo de Campus Virtual probablemente restauró o recreó el recurso faltante.</p>
     </div>
   </div>`
@@ -243,24 +243,24 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     const p = apiResults.progression
     progressionHTML = `
     <h2 class="section-title">🎓 Comparación: nelthor vs. estudiante nuevo</h2>
-    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Nelthor es un usuario con acceso al curso que fue promovido a administrador durante la investigación. Su progreso HISTÓRICO sigue siendo válido — completó actividades cuando el curso funcionaba distinto. Un estudiante nuevo arranca desde cero.</p>
+    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Nelthor es un usuario que recorrió el curso ANTES de ser promovido a administrador, cuando el seguimiento de finalización funcionaba correctamente. Su progreso histórico (${p.alreadyComplete}/${p.trackedActivities}) muestra que el curso SÍ era funcional en ese momento. Un estudiante nuevo arranca desde cero y se encuentra con una configuración distinta.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
       <div class="finding info" style="border-left-color:var(--good)">
         <div class="finding-header">
           <span class="icon">👤</span>
-          <span class="msg"><strong>nelthor</strong><br><span class="dim" style="font-size:0.85em">Progreso histórico: ${p.alreadyComplete}/${p.trackedActivities} actividades completadas</span></span>
+          <span class="msg"><strong>nelthor (antes de ser admin)</strong><br><span class="dim" style="font-size:0.85em">Progreso: ${p.alreadyComplete}/${p.trackedActivities} actividades completadas</span></span>
         </div>
         <div class="finding-detail" style="display:block;padding:8px 16px 12px">
-          <p>Nelthor completó actividades del curso cuando el seguimiento de finalización funcionaba. Su progreso NO refleja lo que un estudiante nuevo puede hacer hoy. Puede acceder a Módulo 2 y 3 porque ya los había desbloqueado antes de que existieran los problemas actuales.</p>
+          <p>Nelthor cursó cuando las actividades tenían seguimiento de finalización. Completó las 4 actividades de Bienvenida, desbloqueó Módulo 1, luego Módulo 2, y llegó hasta Módulo 3 donde encontró el phantom "Notebook Funcion-Lambda" que lo frenó. Ese phantom ya fue reparado, pero el seguimiento de las actividades iniciales ya no funciona para estudiantes nuevos.</p>
         </div>
       </div>
       <div class="finding info" style="border-left-color:var(--bad)">
         <div class="finding-header">
           <span class="icon">🆕</span>
-          <span class="msg"><strong>Estudiante nuevo</strong><br><span class="dim" style="font-size:0.85em">Actividades completadas: 0 (arranca de cero)</span></span>
+          <span class="msg"><strong>Estudiante nuevo (hoy)</strong><br><span class="dim" style="font-size:0.85em">Actividades completadas: 0</span></span>
         </div>
         <div class="finding-detail" style="display:block;padding:8px 16px 12px">
-          <p>Un estudiante que se inscribe HOY encuentra las actividades de Bienvenida, pero no puede marcarlas como completadas (no hay casilla de verificación). Sin eso, Módulo 1, 2, 3 y Cierre permanecen bloqueados para siempre.</p>
+          <p>Un estudiante que se inscribe HOY encuentra las 4 actividades de Bienvenida, pero no puede marcarlas como completadas. Alguien deshabilitó el seguimiento de finalización después de que nelthor las completara. Sin ese tracking, Módulo 1 nunca se desbloquea, y en cadena tampoco Módulo 2, Módulo 3 ni Cierre.</p>
         </div>
       </div>
     </div>`
@@ -274,8 +274,8 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     <ul style="margin-left:20px;line-height:1.8">
       <li>Si un docente puede <strong>marcar manualmente</strong> como completada una actividad desde el libro de calificaciones. Nuestra herramienta recorre el curso como alumno, no como administrador.</li>
       <li>Si el equipo de Campus Virtual realizó <strong>cambios entre la detección del problema y esta verificación</strong>. Los datos reflejan el momento exacto de la auditoría.</li>
-      <li>Si nelthor completó las actividades de Bienvenida <strong>a través de un mecanismo que ya no está disponible</strong> (por ejemplo, porque el seguimiento de finalización se deshabilitó después).</li>
-      <li>Si hay <strong>otras formas de completar actividades</strong> que no pasan por la casilla de verificación en la página del curso (ej: aprobación directa del docente, finalización por grupo).</li>
+      <li>Si el seguimiento de finalización de las 4 actividades de Bienvenida se deshabilitó <strong>por accidente o intencionalmente</strong>. Nelthor las completó antes de ser admin, cuando el tracking funcionaba.</li>
+      <li>Si hay <strong>otras formas de completar actividades</strong> que no pasan por la casilla de verificación en la página del curso (ej: aprobación directa del docente, finalización por grupo, integraciones externas).</li>
     </ul>
     <p style="margin-top:12px;font-size:0.85em;color:var(--text-2)">💡 Si encontrás un hallazgo que no coincide con la realidad del curso, <strong>avisanos</strong> para ajustar la detección. Esta herramienta mejora con cada feedback.</p>
   </div>`

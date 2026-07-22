@@ -32,12 +32,9 @@ Al recorrer el curso como un estudiante nuevo (creado exclusivamente para esta a
 
 Estas actividades son requisito para desbloquear el Módulo 1. Si un estudiante nuevo no puede marcarlas como "completadas", el Módulo 1 nunca se desbloquea, y en cadena tampoco el 2, 3 ni el Cierre.
 
-**Pero con un caveat importante:** nelthur — que tiene acceso al curso desde antes — tiene 26 de 28 actividades marcadas como completadas, incluyendo estas 4. No sabemos exactamente cómo las completó. Pudo haber sido:
-- Antes de que se deshabilitara el seguimiento de finalización de esas actividades
-- A través de una función de administrador (como el libro de calificaciones)
-- Por aprobación directa de un docente
+**Pero con un dato importante:** nelthur completó esas 4 actividades ANTES de ser promovido a administrador, cuando el seguimiento de finalización funcionaba. Su progreso histórico (26/28) muestra que el curso SÍ era transitable en ese momento. Alguien deshabilitó el seguimiento de finalización de esas actividades después. No sabemos si fue intencional o un efecto secundario de otro cambio.
 
-Nuestra herramienta no puede distinguir entre estas opciones. Lo que SÍ podemos afirmar es que **un estudiante nuevo, recorriendo el curso hoy, no encuentra forma de marcar esas 4 actividades como completadas**. Si en la práctica los docentes las completan manualmente, este hallazgo es un falso positivo parcial — y nos gustaría saberlo para ajustar la detección.
+Lo que SÍ podemos afirmar es que **un estudiante nuevo, recorriendo el curso hoy, no encuentra forma de marcar esas 4 actividades como completadas**. Si en la práctica los docentes las completan manualmente o hay otro mecanismo que no detectamos, este hallazgo es un falso positivo parcial — y nos gustaría saberlo para ajustar la detección.
 
 ### ⚠️ Lo que NO pudimos verificar
 
