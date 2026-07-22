@@ -1,0 +1,832 @@
+[
+  {
+    "id": 1,
+    "name": "Switch role to...",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=1"
+  },
+  {
+    "id": 3,
+    "name": "Mujeres Emprendedoras: Herramientas para emprender con perspectiva de género",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=3"
+  },
+  {
+    "id": 13,
+    "name": "Inteligencia Artificial: Empezar a Pensar(la) - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=13"
+  },
+  {
+    "id": 15,
+    "name": "Seguridad en el trabajo de Carpintería-Reciclamos Pallets",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=15"
+  },
+  {
+    "id": 16,
+    "name": "Mecánica Básica del Automotor - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=16"
+  },
+  {
+    "id": 17,
+    "name": "UNC sobre Ruedas",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=17"
+  },
+  {
+    "id": 18,
+    "name": "Jardinería Vertical y Cuadros Vivos - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=18"
+  },
+  {
+    "id": 19,
+    "name": "Construcción de Termotanques Solares Sustentables",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=19"
+  },
+  {
+    "id": 20,
+    "name": "Servicios Turísticos",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=20"
+  },
+  {
+    "id": 21,
+    "name": "Confección, arreglos y reciclado de indumentaria - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=21"
+  },
+  {
+    "id": 22,
+    "name": "Mi Propio Jardín - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=22"
+  },
+  {
+    "id": 23,
+    "name": "Seguridad Vial",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=23"
+  },
+  {
+    "id": 24,
+    "name": "Formación en género y abordaje de violencias de género para Estudiantes de la UNC",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=24"
+  },
+  {
+    "id": 25,
+    "name": "Formación Docente en Género y Abordaje de Violencias UNC - “Ley Micaela”",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=25"
+  },
+  {
+    "id": 27,
+    "name": "Síntomas Sociales en las Series de Televisión del Siglo XXI",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=27"
+  },
+  {
+    "id": 28,
+    "name": "Encuentros sobre Derechos Humanos",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=28"
+  },
+  {
+    "id": 29,
+    "name": "Gestión Operativa de Servicios de Alojamiento",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=29"
+  },
+  {
+    "id": 30,
+    "name": "Producción de Alimentos Artesanales: Conservas, Confituras y Productos Lácteos - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=30"
+  },
+  {
+    "id": 31,
+    "name": "Construcción de azudes para almacenamiento de agua de lluvia",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=31"
+  },
+  {
+    "id": 32,
+    "name": "Hoja de Cálculo de Google Drive",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=32"
+  },
+  {
+    "id": 33,
+    "name": "Formación para Todo Público en Género y Abordaje de Violencias",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=33"
+  },
+  {
+    "id": 34,
+    "name": "De Peones a Reyes - Ajedrez 2.0 en la UNC - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=34"
+  },
+  {
+    "id": 35,
+    "name": "Curso de Chi Kung para la Salud Baduanjin - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=35"
+  },
+  {
+    "id": 36,
+    "name": "De Peones a Reyes - Ajedrez Avanzado en la UNC - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=36"
+  },
+  {
+    "id": 37,
+    "name": "Enseñar en la Virtualidad",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=37"
+  },
+  {
+    "id": 38,
+    "name": "Habilidades comunicativas para el aula universitaria",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=38"
+  },
+  {
+    "id": 39,
+    "name": "Entrenamiento en Casa - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=39"
+  },
+  {
+    "id": 40,
+    "name": "Curso de Tai Chi Chuan para la Salud - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=40"
+  },
+  {
+    "id": 41,
+    "name": "Presentaciones de Google Drive",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=41"
+  },
+  {
+    "id": 42,
+    "name": "Gestión Documental Electrónica (GDE) para Personal Nodocente-UNC",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=42"
+  },
+  {
+    "id": 43,
+    "name": "Gestión Documental Electrónica (GDE) para Docentes y ATP",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=43"
+  },
+  {
+    "id": 44,
+    "name": "Vínculos y aprendizajes en las experiencias universitarias",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=44"
+  },
+  {
+    "id": 45,
+    "name": "Nuestras Propias Semillas",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=45"
+  },
+  {
+    "id": 46,
+    "name": "Taller de Teatro: Historias para jugar",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=46"
+  },
+  {
+    "id": 47,
+    "name": "Taller Artes Visuales: \"Cómo atrapar una casa en un dibujo\"",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=47"
+  },
+  {
+    "id": 48,
+    "name": "Procesador de Textos de Google Drive",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=48"
+  },
+  {
+    "id": 49,
+    "name": "Herramientas didácticas situadas",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=49"
+  },
+  {
+    "id": 50,
+    "name": "Física elemental para futuros Arquitectos y Diseñadores",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=50"
+  },
+  {
+    "id": 51,
+    "name": "Matemática elemental para futuros Arquitectos y Diseñadores",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=51"
+  },
+  {
+    "id": 52,
+    "name": "Mi Propia Huerta - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=52"
+  },
+  {
+    "id": 53,
+    "name": "Introducción a la Fotografía - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=53"
+  },
+  {
+    "id": 54,
+    "name": "Taller Audiovisual: A.B.C. de Cine",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=54"
+  },
+  {
+    "id": 55,
+    "name": "Diversidades en el aula universitaria",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=55"
+  },
+  {
+    "id": 56,
+    "name": "Trabajo Integrado de Google Drive",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=56"
+  },
+  {
+    "id": 57,
+    "name": "Repostería Tradicional Centroeuropea",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=57"
+  },
+  {
+    "id": 58,
+    "name": "Moldería y Confección de Prendas - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=58"
+  },
+  {
+    "id": 59,
+    "name": "Dirección y Gestión de Proyectos",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=59"
+  },
+  {
+    "id": 60,
+    "name": "Matriz de Marco Lógico",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=60"
+  },
+  {
+    "id": 61,
+    "name": "Metodologías y Herramientas de Gestión de Proyectos",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=61"
+  },
+  {
+    "id": 63,
+    "name": "Producción de Alimentos Tradicionales de Colonia Caroya - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=63"
+  },
+  {
+    "id": 64,
+    "name": "Iniciación a la Docencia Universitaria en la UNC",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=64"
+  },
+  {
+    "id": 65,
+    "name": "Innovación Abierta y Vinculación",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=65"
+  },
+  {
+    "id": 66,
+    "name": "Metodologías ágiles para procesos de innovación abierta",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=66"
+  },
+  {
+    "id": 68,
+    "name": "Ciudades en letras, música y cine",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=68"
+  },
+  {
+    "id": 82,
+    "name": "Gestión emocional para vivir mejor - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=82"
+  },
+  {
+    "id": 83,
+    "name": "Curso Introductorio a los Derechos Sexuales y (NO) Reproductivos desde una perspectiva de género",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=83"
+  },
+  {
+    "id": 111,
+    "name": "Soldadura Eléctrica - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=111"
+  },
+  {
+    "id": 112,
+    "name": "3 Claves para lanzar tu marca personal",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=112"
+  },
+  {
+    "id": 113,
+    "name": "Operario Certificado de Limpieza Institucional",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=113"
+  },
+  {
+    "id": 114,
+    "name": "Ergonomía y Autocuidado en actividades de la vida cotidiana",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=114"
+  },
+  {
+    "id": 115,
+    "name": "Ergonomía para el Autocuidado en el proceso de enseñanza aprendizaje",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=115"
+  },
+  {
+    "id": 116,
+    "name": "Los Mitos Estructurales",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=116"
+  },
+  {
+    "id": 118,
+    "name": "Fantasmas del Fin del Mundo en las Series de TV",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=118"
+  },
+  {
+    "id": 119,
+    "name": "Bitácora Urbana",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=119"
+  },
+  {
+    "id": 120,
+    "name": "El arte de investigar y las competencias digitales",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=120"
+  },
+  {
+    "id": 121,
+    "name": "Cultivo Hidropónico en Casa",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=121"
+  },
+  {
+    "id": 123,
+    "name": "Formación Nodocente en Género y Abordaje de Violencias-UNC-“Ley Micaela”",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=123"
+  },
+  {
+    "id": 124,
+    "name": "Lectocomprensión en inglés para carreras de nivel pregrado",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=124"
+  },
+  {
+    "id": 125,
+    "name": "Gestión eficiente del calor: cuidados personales en verano - (Verano 2024)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=125"
+  },
+  {
+    "id": 127,
+    "name": "Gestión eficiente del calor: cuidados personales en verano",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=127"
+  },
+  {
+    "id": 135,
+    "name": "Introducción a la Fotografía",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=135"
+  },
+  {
+    "id": 142,
+    "name": "Mi Propio Jardín",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=142"
+  },
+  {
+    "id": 143,
+    "name": "Mi Propia Huerta",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=143"
+  },
+  {
+    "id": 144,
+    "name": "Jardinería Vertical y Cuadros Vivos",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=144"
+  },
+  {
+    "id": 145,
+    "name": "Mecánica Básica del Automotor",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=145"
+  },
+  {
+    "id": 147,
+    "name": "Confección, arreglos y reciclado de indumentaria",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=147"
+  },
+  {
+    "id": 148,
+    "name": "Producción de Alimentos Artesanales: Conservas, Confituras y Productos Lácteos",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=148"
+  },
+  {
+    "id": 149,
+    "name": "Moldería y Confección de Prendas",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=149"
+  },
+  {
+    "id": 150,
+    "name": "Producción de Alimentos Tradicionales de Colonia Caroya",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=150"
+  },
+  {
+    "id": 151,
+    "name": "Gestión emocional para vivir mejor",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=151"
+  },
+  {
+    "id": 152,
+    "name": "Curso de Tai Chi Chuan para la Salud Baduanjin",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=152"
+  },
+  {
+    "id": 154,
+    "name": "De Peones a Reyes - Ajedrez 2.0 en la UNC",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=154"
+  },
+  {
+    "id": 155,
+    "name": "Curso de Chi Kung para la Salud Baduanjin",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=155"
+  },
+  {
+    "id": 156,
+    "name": "De Peones a Reyes - Ajedrez Avanzado en la UNC",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=156"
+  },
+  {
+    "id": 157,
+    "name": "Entrenamiento en Casa",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=157"
+  },
+  {
+    "id": 159,
+    "name": "Inteligencia Artificial: Empezar a Pensar(la)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=159"
+  },
+  {
+    "id": 160,
+    "name": "Soldadura Eléctrica",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=160"
+  },
+  {
+    "id": 169,
+    "name": "Presupuesto Participativo Municipal",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=169"
+  },
+  {
+    "id": 174,
+    "name": "Capacitación en Turismo Alternativo",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=174"
+  },
+  {
+    "id": 184,
+    "name": "Dependencia emocional. Vínculos sexoafectivos: \"Amar en tiempos actuales\"",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=184"
+  },
+  {
+    "id": 187,
+    "name": "Manejo de la incertidumbre en tiempos actuales",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=187"
+  },
+  {
+    "id": 188,
+    "name": "¿Cómo afrontar la ansiedad?",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=188"
+  },
+  {
+    "id": 189,
+    "name": "El viaje de la adopción: Curso esencial para nuevas familias de perros.",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=189"
+  },
+  {
+    "id": 190,
+    "name": "Cómo transitar el duelo por la pérdida de una mascota",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=190"
+  },
+  {
+    "id": 191,
+    "name": "Comidas Típicas de Colonia Caroya",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=191"
+  },
+  {
+    "id": 192,
+    "name": "Bases para un entrenamiento Eficiente",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=192"
+  },
+  {
+    "id": 194,
+    "name": "Bienestar Animal",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=194"
+  },
+  {
+    "id": 195,
+    "name": "Manejo del estrés laboral",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=195"
+  },
+  {
+    "id": 198,
+    "name": "UNC FLOW: Una introducción al Hip Hop",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=198"
+  },
+  {
+    "id": 207,
+    "name": "Herramientas de inteligencia artificial para docentes 1",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=207"
+  },
+  {
+    "id": 208,
+    "name": "Ceremonial para Ceremonialistas - Nivel Universitario I",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=208"
+  },
+  {
+    "id": 212,
+    "name": "Inclusión financiera",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=212"
+  },
+  {
+    "id": 213,
+    "name": "Introducción al Crochet",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=213"
+  },
+  {
+    "id": 215,
+    "name": "Prevención de estafas virtuales",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=215"
+  },
+  {
+    "id": 216,
+    "name": "Captar audiencias y sumar clics: Videos profesionales para redes sociales",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=216"
+  },
+  {
+    "id": 217,
+    "name": "Introducción a la fotografía callejera",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=217"
+  },
+  {
+    "id": 218,
+    "name": "Oratoria",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=218"
+  },
+  {
+    "id": 219,
+    "name": "Manejo eficaz del tiempo para el aumento de la productividad",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=219"
+  },
+  {
+    "id": 220,
+    "name": "Herramientas de inteligencia artificial para docentes 2",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=220"
+  },
+  {
+    "id": 221,
+    "name": "Peluquería y barbería masculina",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=221"
+  },
+  {
+    "id": 222,
+    "name": "Cultivar tomates en casa",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=222"
+  },
+  {
+    "id": 223,
+    "name": "Creación de marca personal: Potenciá tu imagen",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=223"
+  },
+  {
+    "id": 224,
+    "name": "Técnicas para un cabello saludable",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=224"
+  },
+  {
+    "id": 225,
+    "name": "Maquillaje nivel básico",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=225"
+  },
+  {
+    "id": 226,
+    "name": "Taller de bordado a mano - Nivel inicial",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=226"
+  },
+  {
+    "id": 227,
+    "name": "Taller de bordado a mano - Nivel intermedio",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=227"
+  },
+  {
+    "id": 228,
+    "name": "Taller de bordado a mano: Intervención de prendas",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=228"
+  },
+  {
+    "id": 229,
+    "name": "Soy FAUD",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=229"
+  },
+  {
+    "id": 235,
+    "name": "Oratoria y presentaciones públicas efectivas",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=235"
+  },
+  {
+    "id": 238,
+    "name": "Captar audiencias y sumar clics: Videos profesionales para redes sociales (re-edición)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=238"
+  },
+  {
+    "id": 239,
+    "name": "Propiedad Intelectual como herramienta estratégica para la innovación",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=239"
+  },
+  {
+    "id": 244,
+    "name": "Restauración del curso iniciada",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=244"
+  },
+  {
+    "id": 245,
+    "name": "Restauración del curso iniciada copia 1",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=245"
+  },
+  {
+    "id": 246,
+    "name": "Restauración del curso iniciada copia 2",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=246"
+  },
+  {
+    "id": 257,
+    "name": "Trabajo Final",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=257"
+  },
+  {
+    "id": 261,
+    "name": "Elaboración de Plan de Negocios",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=261"
+  },
+  {
+    "id": 262,
+    "name": "Armado de CV y carta de presentación",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=262"
+  },
+  {
+    "id": 263,
+    "name": "Cómo crear tu perfil profesional en redes sociales",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=263"
+  },
+  {
+    "id": 264,
+    "name": "Comunicación asertiva en parejas",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=264"
+  },
+  {
+    "id": 265,
+    "name": "Yoga y Mindfulness para la vida cotidiana",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=265"
+  },
+  {
+    "id": 266,
+    "name": "Peluquería Masculina",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=266"
+  },
+  {
+    "id": 267,
+    "name": "IA y automatización de flujos de trabajo: aprende a automatizar de forma eficaz y eficiente",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=267"
+  },
+  {
+    "id": 268,
+    "name": "Salud Pública, Industria y Medios: pensamiento crítico para el autocuidado ciudadano",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=268"
+  },
+  {
+    "id": 269,
+    "name": "Aprendiendo a caminar en Python - Certificación 1",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=269"
+  },
+  {
+    "id": 270,
+    "name": "Introducción al diseño de estampa textil",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=270"
+  },
+  {
+    "id": 271,
+    "name": "Organización de Eventos Profesional: planifica y gestiona desde cero",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=271"
+  },
+  {
+    "id": 272,
+    "name": "Tatuaje Profesional: nociones técnicas, bioseguridad y ética para tatuadores",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=272"
+  },
+  {
+    "id": 273,
+    "name": "Corte de cabello masculino",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=273"
+  },
+  {
+    "id": 276,
+    "name": "Aprendiendo a caminar en Python - Certificación 2",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=276"
+  },
+  {
+    "id": 282,
+    "name": "Desarrollo de producto y testeo de mercado",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=282"
+  },
+  {
+    "id": 287,
+    "name": "Atención al cliente y fidelización",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=287"
+  },
+  {
+    "id": 289,
+    "name": "Modelos de negocios innovadores",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=289"
+  },
+  {
+    "id": 292,
+    "name": "Estrategias de venta digital",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=292"
+  },
+  {
+    "id": 293,
+    "name": "Cómo fijar precios en emprendimientos",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=293"
+  },
+  {
+    "id": 304,
+    "name": "Violencias Digitales: herramientas para la prevención",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=304"
+  },
+  {
+    "id": 305,
+    "name": "Laboratorio de Diseño Tecnopedagógico",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=305"
+  },
+  {
+    "id": 306,
+    "name": "Derechos Digitales y Seguridad Online",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=306"
+  },
+  {
+    "id": 307,
+    "name": "Copia - CURSO VIOLENCIAS DIGITALES",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=307"
+  },
+  {
+    "id": 308,
+    "name": "Copia - Organización de eventos",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=308"
+  },
+  {
+    "id": 309,
+    "name": "IDEA FERNANDO",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=309"
+  },
+  {
+    "id": 312,
+    "name": "Jardineria Sustentable y Agroecológica",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=312"
+  },
+  {
+    "id": 313,
+    "name": "Computación Cuantica desde cero",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=313"
+  },
+  {
+    "id": 314,
+    "name": "Introducción a la transformación digital sociourbana",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=314"
+  },
+  {
+    "id": 315,
+    "name": "El lenguaje de las imágenes en las culturas del noroeste argentino",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=315"
+  },
+  {
+    "id": 316,
+    "name": "Liderazgo en Contextos de Estrés: Cómo Evitar el Burnout y Tomar Mejores Decisiones",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=316"
+  },
+  {
+    "id": 317,
+    "name": "Diálogo Respetuoso en Momento Críticos",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=317"
+  },
+  {
+    "id": 318,
+    "name": "Salud vocal y auditiva para el uso laboral de la voz",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=318"
+  },
+  {
+    "id": 319,
+    "name": "Introducción al arte del Origami",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=319"
+  },
+  {
+    "id": 320,
+    "name": "Seguridad y Profesionalización en la Construcción",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=320"
+  },
+  {
+    "id": 321,
+    "name": "IA Aplicada: cómo usarla en tu trabajo y estudio",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=321"
+  },
+  {
+    "id": 322,
+    "name": "Tango primeros pasos",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=322"
+  },
+  {
+    "id": 323,
+    "name": "Prejuicios, segregación y memoria: continuidades del terrorismo de Estado en la Argentina (1976–2026)",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=323"
+  },
+  {
+    "id": 324,
+    "name": "Cómo Proteger tu Marca en Internet",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=324"
+  },
+  {
+    "id": 325,
+    "name": "Fotografía de producto con IA",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=325"
+  },
+  {
+    "id": 326,
+    "name": "Taller de pintura de Obra: Técnicas Profesionales para Transformar Espacios",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=326"
+  },
+  {
+    "id": 328,
+    "name": "Genocidio Armenio: Memoria, Negacionismo y Discursos de Odio",
+    "href": "https://campus.aulavirtual.unc.edu.ar/course/view.php?id=328"
+  }
+]

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auditoría Multi-Curso — UNC Campus Virtual</title>
+<style>
+:root {
+  --unc-blue: #2b4f6a;
+  --unc-blue-light: #3a6a8a;
+  --unc-blue-dark: #1c3448;
+  --bg: #f5f7fa;
+  --card-bg: #ffffff;
+  --text: #1a1a2e;
+  --text-muted: #6b7280;
+  --border: #e5e7eb;
+  --success: #16a34a;
+  --warning: #d97706;
+  --critical: #dc2626;
+  --info: #2563eb;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  padding: 0;
+}
+.container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, var(--unc-blue-dark), var(--unc-blue));
+  color: #fff;
+  padding: 40px 24px;
+  text-align: center;
+}
+.header h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 8px; }
+.header p { font-size: 1rem; opacity: 0.85; }
+
+/* Cards */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 24px;
+  overflow: hidden;
+}
+.card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-body { padding: 20px; }
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+th { background: var(--unc-blue); color: #fff; font-weight: 600; white-space: nowrap; }
+tr:hover td { background: #f8fafc; }
+tr:last-child td { border-bottom: none; }
+
+/* Status badges */
+.badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.badge-clean { background: #dcfce7; color: #166534; }
+.badge-warning { background: #fef3c7; color: #92400e; }
+.badge-critical { background: #fce4ec; color: #b91c1c; }
+
+/* Clarification box */
+.clarification {
+  background: #fef9c3;
+  border-left: 4px solid var(--warning);
+  padding: 16px 20px;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin-bottom: 24px;
+  font-size: 0.92rem;
+}
+.clarification strong { color: var(--unc-blue-dark); }
+
+/* Section detail */
+.course-title { font-size: 1.2rem; font-weight: 700; color: var(--unc-blue); margin-bottom: 4px; }
+.course-id { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px; }
+
+.restriction-item {
+  background: #f0f4ff;
+  border-left: 3px solid var(--info);
+  padding: 10px 14px;
+  margin-bottom: 8px;
+  border-radius: 0 4px 4px 0;
+  font-size: 0.88rem;
+}
+.restriction-item .r-name { font-weight: 600; }
+.restriction-item .r-section { color: var(--text-muted); font-size: 0.82rem; }
+.restriction-item .r-cond { margin-top: 4px; font-family: 'SF Mono', 'Cascadia Code', monospace; font-size: 0.82rem; color: var(--text-muted); }
+
+/* Code blocks */
+pre {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 14px 18px;
+  border-radius: 6px;
+  overflow-x: auto;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin: 12px 0;
+}
+code { font-family: 'SF Mono', 'Cascadia Code', 'Consolas', monospace; }
+
+/* KPI grid */
+.kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.kpi-card {
+  background: var(--bg);
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+}
+.kpi-card .kpi-value { font-size: 1.5rem; font-weight: 700; color: var(--unc-blue); }
+.kpi-card .kpi-label { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+
+/* Collapsible sections */
+details.detail-block {
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+details.detail-block summary {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  background: #f9fafb;
+  border-bottom: 1px solid transparent;
+  user-select: none;
+}
+details.detail-block[open] summary { border-bottom-color: var(--border); }
+details.detail-block .detail-content { padding: 12px 16px; }
+
+/* Grid for course cards */
+.course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.course-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  border-top: 3px solid var(--unc-blue);
+  padding: 16px;
+}
+.course-card .cc-title { font-size: 1rem; font-weight: 700; color: var(--unc-blue); margin-bottom: 2px; }
+.course-card .cc-id { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+.course-card .cc-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; font-size: 0.85rem; }
+.course-card .cc-stat { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dashed var(--border); }
+
+/* Methodology table */
+.methodology-table { width: 100%; font-size: 0.88rem; }
+.methodology-table td:first-child { font-weight: 600; white-space: nowrap; width: 180px; color: var(--unc-blue); }
+
+/* Footer */
+.footer { text-align: center; padding: 24px; color: var(--text-muted); font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 32px; }
+
+/* Summary stat bar */
+.summary-bar {
+  display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+  padding: 20px; background: var(--unc-blue); color: #fff; border-radius: var(--radius);
+  margin-bottom: 24px; text-align: center;
+}
+.summary-bar .sb-item { flex: 1; min-width: 120px; }
+.summary-bar .sb-value { font-size: 1.75rem; font-weight: 700; }
+.summary-bar .sb-label { font-size: 0.8rem; opacity: 0.8; }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .course-grid { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+  .summary-bar { flex-direction: column; gap: 8px; }
+  table { font-size: 0.82rem; }
+  th, td { padding: 6px 8px; }
+  .header h1 { font-size: 1.35rem; }
+}
+
+/* Print */
+@media print {
+  .header { background: var(--unc-blue) !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .clarification { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .summary-bar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Auditoría Multi-Curso — UNC Campus Virtual</h1>
+  <p>Detección de actividades fantasma, restricciones y verificación con estudiantes nuevos</p>
+  <p style="margin-top:6px;font-size:0.85rem;opacity:0.7">Generado: 2026-07-21</p>
+</div>
+
+<div class="container">
+
+  <!-- Summary Bar -->
+  <div class="summary-bar">
+    <div class="sb-item">
+      <div class="sb-value">4</div>
+      <div class="sb-label">Cursos auditados</div>
+    </div>
+    <div class="sb-item">
+      <div class="sb-value">0</div>
+      <div class="sb-label">Phantoms encontrados</div>
+    </div>
+    <div class="sb-item">
+      <div class="sb-value">12</div>
+      <div class="sb-label">Restricciones totales</div>
+    </div>
+    <div class="sb-item">
+      <div class="sb-value">127</div>
+      <div class="sb-label">Actividades totales</div>
+    </div>
+  </div>
+
+  <!-- Clarification Box -->
+  <div class="clarification">
+    <strong>Clarificación sobre la metodología de detección</strong><br><br>
+    El problema original en el curso 269 (actividad fantasma "Notebook Funcion-Lambda" bloqueando el Módulo 3) fue detectado usando <strong>nelthor</strong> — un usuario que fue promovido a administrador durante la investigación. Esta promoción le dio a nelthor capacidades que <strong>enmascararon el bug</strong> de nuestra detección:<br><br>
+    &bull; Como admin, nelthor ve todas las actividades sin restricciones de disponibilidad.<br>
+    &bull; Ya no representa la experiencia de un estudiante real.<br><br>
+    Nuestra nueva metodología crea <strong>cuentas de estudiante nuevas y sin privilegios</strong> por cada auditoría, proporcionando datos genuinos de la experiencia del estudiante. El problema del Módulo 3 parece estar <strong>resuelto</strong> en los servidores de UNC.
+  </div>
+
+  <!-- Executive Summary -->
+  <div class="card">
+    <div class="card-header">Resumen Ejecutivo</div>
+    <div class="card-body">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Curso</th>
+            <th>Secciones</th>
+            <th>Actividades</th>
+            <th>Phantoms</th>
+            <th>Restricciones</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>265</td>
+            <td>Yoga y Mindfulness para la vida cotidiana</td>
+            <td>5</td>
+            <td>11</td>
+            <td>0</td>
+            <td>2</td>
+            <td><span class="badge badge-clean">Limpio</span></td>
+          </tr>
+          <tr>
+            <td>267</td>
+            <td>IA y automatización de flujos de trabajo</td>
+            <td>7</td>
+            <td>20</td>
+            <td>0</td>
+            <td>6</td>
+            <td><span class="badge badge-clean">Limpio</span></td>
+          </tr>
+          <tr>
+            <td>269</td>
+            <td>Aprendiendo a caminar en Python — Certificación 1</td>
+            <td>5</td>
+            <td>46</td>
+            <td>0</td>
+            <td>2</td>
+            <td><span class="badge badge-clean">Limpio</span></td>
+          </tr>
+          <tr>
+            <td>276</td>
+            <td>Aprendiendo a caminar en Python — Certificación 2</td>
+            <td>5</td>
+            <td>50</td>
+            <td>0</td>
+            <td>2</td>
+            <td><span class="badge badge-clean">Limpio</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Per-Course Details -->
+  <div class="card">
+    <div class="card-header">Detalle por Curso</div>
+    <div class="card-body">
+
+<!-- ==================== Course 265 ==================== -->
+<details class="detail-block">
+<summary>265 — Yoga y Mindfulness para la vida cotidiana</summary>
+<div class="detail-content">
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-value">5</div><div class="kpi-label">Secciones</div></div>
+    <div class="kpi-card"><div class="kpi-value">11</div><div class="kpi-label">Actividades</div></div>
+    <div class="kpi-card"><div class="kpi-value">0</div><div class="kpi-label">Phantoms</div></div>
+    <div class="kpi-card"><div class="kpi-value">2</div><div class="kpi-label">Restricciones</div></div>
+  </div>
+
+  <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:10px"><strong>Estudiante nuevo:</strong> 8 actividades con tracking, 0 completadas</p>
+
+  <table>
+    <thead><tr><th>Actividad</th><th>Sección</th><th>Tipo</th><th>Detalle</th></tr></thead>
+    <tbody>
+      <tr><td>Certificado de asistencia</td><td>Cierre del curso</td><td>completion</td><td>Requiere cmid 6759</td></tr>
+      <tr><td>Certificado de aprobaci&oacute;n</td><td>Cierre del curso</td><td>grade</td><td>Nota m&iacute;nima 60 (items 1404, 1405, 1406, 1407)</td></tr>
+      <tr><td>Certificado de aprobaci&oacute;n</td><td>Cierre del curso</td><td>completion</td><td>Requiere cmid 6759</td></tr>
+    </tbody>
+  </table>
+</div>
+</details>
+
+<!-- ==================== Course 267 ==================== -->
+<details class="detail-block">
+<summary>267 — IA y automatización de flujos de trabajo</summary>
+<div class="detail-content">
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-value">7</div><div class="kpi-label">Secciones</div></div>
+    <div class="kpi-card"><div class="kpi-value">20</div><div class="kpi-label">Actividades</div></div>
+    <div class="kpi-card"><div class="kpi-value">0</div><div class="kpi-label">Phantoms</div></div>
+    <div class="kpi-card"><div class="kpi-value">6</div><div class="kpi-label">Restricciones</div></div>
+  </div>
+
+  <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:10px"><strong>Estudiante nuevo:</strong> 19 actividades con tracking, 0 completadas</p>
+
+  <table>
+    <thead><tr><th>Actividad</th><th>Sección</th><th>Tipo</th><th>Detalle</th></tr></thead>
+    <tbody>
+      <tr><td>Cuestionario: Modulo 1</td><td>Módulo 1</td><td>completion</td><td>Requiere cmid 6776</td></tr>
+      <tr><td>Cuestionario: Modulo 2</td><td>Módulo 2</td><td>completion</td><td>Requiere cmid 6635</td></tr>
+      <tr><td>Cuestionario: Modulo 3</td><td>Módulo 3</td><td>completion</td><td>Requiere cmid 6638</td></tr>
+      <tr><td>Cuestionario - Módulo 4</td><td>Módulo 4</td><td>completion</td><td>Requiere cmid 6639</td></tr>
+      <tr><td>Certificado de Aprobación</td><td>Módulo 5: Cierre</td><td>completion (10)</td><td>10 condiciones: cmids 6776, 6635, 6636, 6638, 6637, 6639, 6640, 6777, 6674, 6977</td></tr>
+      <tr><td>Certificado de Asistencia</td><td>Módulo 5: Cierre</td><td>completion (2)</td><td>Requiere cmids 6977, 6674</td></tr>
+    </tbody>
+  </table>
+</div>
+</details>
+
+<!-- ==================== Course 269 ==================== -->
+<details class="detail-block" open>
+<summary>269 — Aprendiendo a caminar en Python — Certificación 1</summary>
+<div class="detail-content">
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-value">5</div><div class="kpi-label">Secciones</div></div>
+    <div class="kpi-card"><div class="kpi-value">46</div><div class="kpi-label">Actividades</div></div>
+    <div class="kpi-card"><div class="kpi-value">0</div><div class="kpi-label">Phantoms</div></div>
+    <div class="kpi-card"><div class="kpi-value">2</div><div class="kpi-label">Restricciones</div></div>
+  </div>
+
+  <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:10px">
+    <strong>nelthor (admin):</strong> 28 actividades con tracking, 26 completadas &bull;
+    <strong>Estudiante nuevo:</strong> 28 actividades con tracking, 0 completadas
+  </p>
+
+  <table>
+    <thead><tr><th>Actividad</th><th>Sección</th><th>Tipo</th><th>Detalle</th></tr></thead>
+    <tbody>
+      <tr><td>Certificado de aprobaci&oacute;n</td><td>Cierre</td><td>grade</td><td>Nota m&iacute;nima 60 (items 1424, 1390, 1416, 1423)</td></tr>
+      <tr><td>Certificado de aprobaci&oacute;n</td><td>Cierre</td><td>completion</td><td>Requiere cmid 6628</td></tr>
+      <tr><td>Certificado de asistencia</td><td>Cierre</td><td>completion</td><td>Requiere cmid 6628</td></tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:12px;font-size:0.88rem;background:#f0fdf4;padding:10px 14px;border-radius:4px;">
+    <strong>Módulo 3:</strong> Sin restricciones a nivel de secci&oacute;n ni de actividad. Accesible para estudiantes nuevos. El problema original parece resuelto.
+  </p>
+</div>
+</details>
+
+<!-- ==================== Course 276 ==================== -->
+<details class="detail-block">
+<summary>276 — Aprendiendo a caminar en Python — Certificación 2</summary>
+<div class="detail-content">
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-value">5</div><div class="kpi-label">Secciones</div></div>
+    <div class="kpi-card"><div class="kpi-value">50</div><div class="kpi-label">Actividades</div></div>
+    <div class="kpi-card"><div class="kpi-value">0</div><div class="kpi-label">Phantoms</div></div>
+    <div class="kpi-card"><div class="kpi-value">2</div><div class="kpi-label">Restricciones</div></div>
+  </div>
+
+  <p style="font-size:0.88rem;color:var(--text-muted);margin-bottom:10px"><strong>Estudiante nuevo:</strong> 17 actividades con tracking, 0 completadas</p>
+
+  <table>
+    <thead><tr><th>Actividad</th><th>Sección</th><th>Tipo</th><th>Detalle</th></tr></thead>
+    <tbody>
+      <tr><td>Certificado de aprobaci&oacute;n</td><td>Cierre</td><td>grade</td><td>Nota m&iacute;nima 60 (items 1439, 1436, 1437, 1438)</td></tr>
+      <tr><td>Certificado de aprobaci&oacute;n</td><td>Cierre</td><td>completion</td><td>Requiere cmid 6968</td></tr>
+      <tr><td>Certificado de asistencia</td><td>Cierre</td><td>completion</td><td>Requiere cmid 6968</td></tr>
+    </tbody>
+  </table>
+</div>
+</details>
+
+    </div>
+  </div>
+
+  <!-- Technical Appendix -->
+  <div class="card">
+    <div class="card-header">Apéndice Técnico</div>
+    <div class="card-body">
+      <details class="detail-block">
+        <summary>Cómo funciona el JSON de disponibilidad</summary>
+        <div class="detail-content">
+          <p style="margin-bottom:8px">Moodle almacena las restricciones de acceso en un campo JSON dentro de la tabla <code>course_modules</code>. Cada restricción sigue este formato:</p>
+<pre>{
+  "type": "completion",
+  "cm": 6628,
+  "e": 1
+}</pre>
+          <p style="margin-bottom:8px">Donde:</p>
+          <ul style="padding-left:20px;margin-bottom:8px;font-size:0.88rem">
+            <li><strong>type:</strong> <code>"completion"</code> (requiere completar una actividad) o <code>"grade"</code> (requiere nota mínima)</li>
+            <li><strong>cm:</strong> ID del course module que debe estar completado</li>
+            <li><strong>e:</strong> 1 = marcado como completado, 2 = cualquier estado de completado</li>
+            <li><strong>id:</strong> (para tipo grade) ID del grade item</li>
+            <li><strong>min:</strong> (para tipo grade) nota mínima requerida</li>
+          </ul>
+        </div>
+      </details>
+
+      <details class="detail-block">
+        <summary>Cómo persisten los phantoms</summary>
+        <div class="detail-content">
+          <p style="font-size:0.88rem">Cuando una actividad es eliminada en Moodle, el sistema <strong>no limpia automáticamente</strong> las restricciones que la referencian. El JSON de disponibilidad persiste en la base de datos, resultando en una <strong>actividad fantasma</strong>: una restricción que referencia un cmid que ya no existe. Esto puede causar bloqueos permanentes para estudiantes, ya que la condición de completitud nunca podrá satisfacerse.</p>
+        </div>
+      </details>
+
+      <details class="detail-block">
+        <summary>Metodología de detección</summary>
+        <div class="detail-content">
+          <ol style="padding-left:20px;font-size:0.88rem">
+            <li>Obtener estructura del curso vía <code>core_course_get_contents</code></li>
+            <li>Extraer JSON de disponibilidad de cada módulo</li>
+            <li>Detectar cmids referenciados que no existen en la estructura actual (<code>findOrphanedCmIds()</code>)</li>
+            <li>Crear usuario estudiante nuevo vía API REST</li>
+            <li>Matricular el usuario en el curso</li>
+            <li>Obtener datos de completación como estudiante real</li>
+            <li>Comparar con datos de nelthor (admin) para identificar discrepancias</li>
+            <li>Eliminar el usuario de prueba</li>
+          </ol>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- Methodology -->
+  <div class="card">
+    <div class="card-header">Metodología</div>
+    <div class="card-body">
+      <table class="methodology-table">
+        <tr><td>MoodleApiClient</td><td>Cliente REST API con token de servicio web para todas las operaciones contra Moodle</td></tr>
+        <tr><td>Fresh Student Creation</td><td>Se crea un usuario estudiante nuevo vía <code>core_user_create_users</code>, se matricula, se obtienen datos de completación, y se elimina al finalizar</td></tr>
+        <tr><td>Phantom Detection</td><td><code>findOrphanedCmIds()</code> compara todos los cmids referenciados en availability JSON contra los cmids existentes en el curso</td></tr>
+        <tr><td>Allure Reporting</td><td>Los tests se ejecutan con <code>allure-playwright</code>. Resultados en <code>allure-results/</code>. Reporte generado con <code>allure generate</code>.</td></tr>
+        <tr><td>Multi-Course Support</td><td>El script <code>generate-report.ts</code> ahora itera sobre los cursos 267, 265, 269 y 276 ejecutando la misma batería de detección</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- Email-ready Summary -->
+  <div class="card">
+    <div class="card-header">Resumen para Email</div>
+    <div class="card-body" style="font-size:0.9rem">
+      <p><strong>Para:</strong> Ignacio, Patricia, Tadeo</p>
+      <p><strong>Asunto:</strong> Auditoría multi-curso completada — 4 cursos verificados</p>
+      <br>
+      <p>Completamos la auditoría automatizada de los 4 cursos del programa:</p>
+      <br>
+      <table>
+        <tr><th>Curso</th><th>Actividades</th><th>Restricciones</th><th>Estado</th></tr>
+        <tr><td>265 — Yoga y Mindfulness</td><td>11</td><td>2</td><td><span class="badge badge-clean">Limpio</span></td></tr>
+        <tr><td>267 — IA y automatización</td><td>20</td><td>6</td><td><span class="badge badge-clean">Limpio</span></td></tr>
+        <tr><td>269 — Python Certificación 1</td><td>46</td><td>2</td><td><span class="badge badge-clean">Limpio</span></td></tr>
+        <tr><td>276 — Python Certificación 2</td><td>50</td><td>2</td><td><span class="badge badge-clean">Limpio</span></td></tr>
+      </table>
+      <br>
+      <p><strong>Resultados clave:</strong></p>
+      <ul style="padding-left:20px">
+        <li>0 actividades fantasma detectadas en los 4 cursos</li>
+        <li>Todas las restricciones referencian actividades y grade items válidos</li>
+        <li>El problema original del Módulo 3 en curso 269 parece resuelto</li>
+        <li>Se utilizaron cuentas de estudiante nuevas (no admin) para verificación real</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  UNC Campus Virtual — Suite de Auditoría Automatizada &bull; Generado: 2026-07-21T23:52:42.914Z
+</div>
+
+</body>
+</html>

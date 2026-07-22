@@ -1,0 +1,337 @@
+{
+  "auditDate": "2026-07-21T23:52:42.914Z",
+  "courses": {
+    "265": {
+      "name": "Yoga y Mindfulness para la vida cotidiana",
+      "sections": 5,
+      "activities": 11,
+      "orphans": [],
+      "restrictions": [
+        {
+          "activityName": "Certificado de asistencia",
+          "sectionName": "Cierre del curso ",
+          "severity": "info",
+          "conditions": [
+            {
+              "type": "completion",
+              "cm": 6759,
+              "e": 1
+            }
+          ],
+          "message": "Requires completion of cmid 6759"
+        },
+        {
+          "activityName": "Certificado de aprobación",
+          "sectionName": "Cierre del curso ",
+          "severity": "info",
+          "conditions": [
+            {
+              "type": "grade",
+              "id": 1404,
+              "min": 60
+            },
+            {
+              "type": "grade",
+              "id": 1405,
+              "min": 60
+            },
+            {
+              "type": "grade",
+              "id": 1406,
+              "min": 60
+            },
+            {
+              "type": "grade",
+              "id": 1407,
+              "min": 60
+            },
+            {
+              "type": "completion",
+              "cm": 6759,
+              "e": 1
+            }
+          ],
+          "message": "Requires min grade 60 (grade item 1404); Requires min grade 60 (grade item 1405); Requires min grade 60 (grade item 1406); Requires min grade 60 (grade item 1407); Requires completion of cmid 6759"
+        }
+      ],
+      "restrictedActivitiesCount": 2,
+      "freshStudent": {
+        "created": true,
+        "completionEntries": 8,
+        "completed": 0
+      }
+    },
+    "267": {
+      "name": "IA y automatización de flujos de trabajo",
+      "sections": 7,
+      "activities": 20,
+      "orphans": [],
+      "restrictions": [
+        {
+          "activityName": "Cuestionario: Modulo 1",
+          "sectionName": "Módulo 1: ¿Que es la automatización?",
+          "severity": "info",
+          "conditions": [
+            {
+              "type": "completion",
+              "cm": 6776,
+              "e": 1
+            }
+          ],
+          "message": "Requires completion of cmid 6776"
+        },
+        {
+          "activityName": "Cuestionario: Modulo 2",
+          "sectionName": "Módulo 2: Lógica del Workflow",
+          "severity": "info",
+          "conditions": [
+            {
+              "type": "completion",
+              "cm": 6635,
+              "e": 1
+            }
+          ],
+          "message": "Requires completion of cmid 6635"
+        },
+        {
+          "activityName": "Cuestionario: Modulo 3",
+          "sectionName": "Módulo 3: IA aplicada a la automatización",
+          "severity": "info",
+          "conditions": [
+            {
+              "type": "completion",
+              "cm": 6638,
+              "e": 1
+            }
+          ],
+          "message": "Requires completion of cmid 6638"
+        },
+        {
+          "activityName": "Cuestionario - Módulo 4",
+          "sectionName": "Módulo 4 - Introducción a N8N",
+          "severity": "info",
+          "conditions": [
+            {
+              "type": "completion",
+              "cm": 6639,
+              "e": 1
+            }
+          ],
+          "message": "Requires completion of cmid 6639"
+        },
+        {
+          "activityName": "Certificado de Aprobación",
+          "sectionName": "Módulo 5: Cierre y Certificación",
+          "severity": "info",
+          "conditions": [
+            {
+              "type": "completion",
+              "cm": 6776,
+              "e": 2
+            },
+            {
+              "type": "completion",
+              "cm": 6635,
+              "e": 2
+            },
+            {
+              "type": "completion",
+              "cm": 6636,
+              "e": 1
+            },
+            {
+              "type": "completion",
+              "cm": 6638,
+              "e": 2
+            },
+            {
+              "type": "completion",
+              "cm": 6637,
+              "e": 1
+            },
+            {
+              "type": "completion",
+              "cm": 6639,
+              "e": 2
+            },
+            {
+              "type": "completion",
+              "cm": 6640,
+              "e": 1
+            },
+            {
+              "type": "completion",
+              "cm": 6777,
+              "e": 2
+            },
+            {
+              "type": "completion",
+              "cm": 6674,
+              "e": 1
+            },
+            {
+              "type": "completion",
+              "cm": 6977,
+              "e": 1
+            }
+          ],
+          "message": "Requires completion of cmid 6776; Requires completion of cmid 6635; Requires completion of cmid 6636; Requires completion of cmid 6638; Requires completion of cmid 6637; Requires completion of cmid 6639; Requires completion of cmid 6640; Requires completion of cmid 6777; Requires completion of cmid 6674; Requires completion of cmid 6977"
+        },
+        {
+          "activityName": "Certificado de Asistencia",
+          "sectionName": "Módulo 5: Cierre y Certificación",
+          "severity": "info",
+          "conditions": [
+            {
+              "type": "completion",
+              "cm": 6977,
+              "e": 1
+            },
+            {
+              "type": "completion",
+              "cm": 6674,
+              "e": 1
+            }
+          ],
+          "message": "Requires completion of cmid 6977; Requires completion of cmid 6674"
+        }
+      ],
+      "restrictedActivitiesCount": 6,
+      "freshStudent": {
+        "created": true,
+        "completionEntries": 19,
+        "completed": 0
+      }
+    },
+    "269": {
+      "name": "Aprendiendo a caminar en Python - Certificación 1",
+      "sections": 5,
+      "activities": 46,
+      "orphans": [],
+      "restrictions": [
+        {
+          "activityName": "Certificado de aprobación",
+          "sectionName": "Cierre",
+          "severity": "info",
+          "conditions": [
+            {
+              "type": "grade",
+              "id": 1424,
+              "min": 60
+            },
+            {
+              "type": "completion",
+              "cm": 6628,
+              "e": 1
+            },
+            {
+              "type": "grade",
+              "id": 1390,
+              "min": 60
+            },
+            {
+              "type": "grade",
+              "id": 1416,
+              "min": 60
+            },
+            {
+              "type": "grade",
+              "id": 1423,
+              "min": 60
+            }
+          ],
+          "message": "Requires min grade 60 (grade item 1424); Requires min grade 60 (grade item 1390); Requires min grade 60 (grade item 1416); Requires min grade 60 (grade item 1423); Requires completion of cmid 6628"
+        },
+        {
+          "activityName": "Certificado de asistencia",
+          "sectionName": "Cierre",
+          "severity": "info",
+          "conditions": [
+            {
+              "type": "completion",
+              "cm": 6628,
+              "e": 1
+            }
+          ],
+          "message": "Requires completion of cmid 6628"
+        }
+      ],
+      "restrictedActivitiesCount": 2,
+      "freshStudent": {
+        "created": true,
+        "completionEntries": 28,
+        "completed": 0
+      },
+      "nelthorComparison": {
+        "completionEntries": 28,
+        "completed": 26
+      }
+    },
+    "276": {
+      "name": "Aprendiendo a caminar en Python - Certificación 2",
+      "sections": 5,
+      "activities": 50,
+      "orphans": [],
+      "restrictions": [
+        {
+          "activityName": "Certificado de aprobación",
+          "sectionName": "Cierre",
+          "severity": "info",
+          "conditions": [
+            {
+              "type": "grade",
+              "id": 1439,
+              "min": 60
+            },
+            {
+              "type": "completion",
+              "cm": 6968,
+              "e": 1
+            },
+            {
+              "type": "grade",
+              "id": 1436,
+              "min": 60
+            },
+            {
+              "type": "grade",
+              "id": 1437,
+              "min": 60
+            },
+            {
+              "type": "grade",
+              "id": 1438,
+              "min": 60
+            }
+          ],
+          "message": "Requires min grade 60 (grade item 1439); Requires min grade 60 (grade item 1436); Requires min grade 60 (grade item 1437); Requires min grade 60 (grade item 1438); Requires completion of cmid 6968"
+        },
+        {
+          "activityName": "Certificado de asistencia",
+          "sectionName": "Cierre",
+          "severity": "info",
+          "conditions": [
+            {
+              "type": "completion",
+              "cm": 6968,
+              "e": 1
+            }
+          ],
+          "message": "Requires completion of cmid 6968"
+        }
+      ],
+      "restrictedActivitiesCount": 2,
+      "freshStudent": {
+        "created": true,
+        "completionEntries": 17,
+        "completed": 0
+      }
+    }
+  },
+  "summary": {
+    "totalCourses": 4,
+    "coursesWithPhantoms": 0,
+    "totalRestrictions": 12,
+    "totalPhantoms": 0
+  }
+}

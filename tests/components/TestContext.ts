@@ -6,6 +6,7 @@ export interface TestEnv {
   studentPass: string
   adminUser: string
   adminPass: string
+  wsToken: string
   isCI: boolean
 }
 
@@ -19,6 +20,7 @@ export class TestContext {
       studentPass: (process.env.STUDENT_PASSWORD ?? '').trim(),
       adminUser: (process.env.ADMIN_USERNAME ?? '').trim(),
       adminPass: (process.env.ADMIN_PASSWORD ?? '').trim(),
+      wsToken: (process.env.MOODLE_WS_TOKEN ?? '').trim(),
       isCI: Boolean(process.env.CI),
       ...overrides,
     }
@@ -26,6 +28,10 @@ export class TestContext {
 
   get hasAdminCreds(): boolean {
     return this.env.adminUser !== '' && this.env.adminPass !== ''
+  }
+
+  get hasWsToken(): boolean {
+    return this.env.wsToken !== ''
   }
 
   uniqueEmail(prefix = 'test'): string {

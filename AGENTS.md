@@ -108,6 +108,19 @@ tests/
 - **No ATC calls another ATC** — components are independent.
 - **Fixtures via `createFixture()`** — never instantiate components manually in tests.
 
+## Git Flow
+
+See `docs/workflows/git-flow.md` — branch structure (main → staging → feature/\*), semantic commits (feat/fix/refactor/test/docs), PR flow.
+
+## Multi-Agent Workflow
+
+Use `subagent-driven-development` skill for multi-agent work:
+
+- **Implementer subagent**: builds code/tests per task (fresh context via `scripts/task-brief`)
+- **Task reviewer**: spec compliance + code quality after each task
+- **Final code reviewer**: whole-branch audit at end
+- Roles can be played by different agents (QA, EM, developer) in parallel
+
 ## Session Rules
 
 ### Clean up after yourself

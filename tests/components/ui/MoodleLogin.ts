@@ -36,9 +36,6 @@ export class MoodleLogin {
 
   @atc('ML-3', { story: 'UNC-RE-1', feature: 'Moodle Login' })
   async loginAsAdmin(): Promise<void> {
-    await this.loginAs(
-      process.env.STUDENT_USERNAME ?? '',
-      (process.env.STUDENT_PASSWORD ?? '').trim(),
-    )
+    await this.loginAs(process.env.ADMIN_USERNAME ?? '', (process.env.ADMIN_PASSWORD ?? '').trim())
   }
 }

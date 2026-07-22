@@ -1,0 +1,836 @@
+{
+  "timestamp": "2026-07-21T23:27:20.989Z",
+  "courseId": 269,
+  "environment": {
+    "baseUrl": "https://campus.aulavirtual.unc.edu.ar"
+  },
+  "apiAuditTests": {
+    "passed": true
+  },
+  "freshStudent": {
+    "username": "verify_1784676443869",
+    "userId": 215682,
+    "created": true,
+    "cleanedUp": true
+  },
+  "courseStructure": {
+    "totalSections": 5,
+    "totalActivities": 46,
+    "sections": [
+      {
+        "section": 0,
+        "name": "Bienvenida",
+        "moduleCount": 10,
+        "hasSectionRestriction": false,
+        "restrictedModuleCount": 0
+      },
+      {
+        "section": 1,
+        "name": "Módulo 1",
+        "moduleCount": 9,
+        "hasSectionRestriction": false,
+        "restrictedModuleCount": 0
+      },
+      {
+        "section": 2,
+        "name": "Módulo 2",
+        "moduleCount": 9,
+        "hasSectionRestriction": false,
+        "restrictedModuleCount": 0
+      },
+      {
+        "section": 3,
+        "name": "Módulo 3",
+        "moduleCount": 9,
+        "hasSectionRestriction": false,
+        "restrictedModuleCount": 0
+      },
+      {
+        "section": 4,
+        "name": "Cierre",
+        "moduleCount": 9,
+        "hasSectionRestriction": false,
+        "restrictedModuleCount": 2
+      }
+    ]
+  },
+  "module3Assessment": {
+    "section": 3,
+    "name": "Módulo 3",
+    "hasSectionRestriction": false,
+    "totalActivities": 9,
+    "restrictedActivities": []
+  },
+  "freshStudentCompletion": {
+    "fetched": true,
+    "count": 28,
+    "statuses": [
+      {
+        "cmid": 6570,
+        "modname": "page",
+        "instance": 448,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6571,
+        "modname": "page",
+        "instance": 449,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6665,
+        "modname": "feedback",
+        "instance": 32,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          },
+          {
+            "rulename": "completionsubmit",
+            "rulevalue": {
+              "status": 0,
+              "description": "Submit feedback"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6679,
+        "modname": "data",
+        "instance": 77,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          },
+          {
+            "rulename": "completionentries",
+            "rulevalue": {
+              "status": 0,
+              "description": "Make entries: 1"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6889,
+        "modname": "book",
+        "instance": 901,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6680,
+        "modname": "quiz",
+        "instance": 1036,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          },
+          {
+            "rulename": "completionminattempts",
+            "rulevalue": {
+              "status": 0,
+              "description": "Make attempts: 1"
+            }
+          },
+          {
+            "rulename": "completionusegrade",
+            "rulevalue": {
+              "status": 0,
+              "description": "Receive a grade"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6681,
+        "modname": "data",
+        "instance": 78,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": false,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          },
+          {
+            "rulename": "completionentries",
+            "rulevalue": {
+              "status": 0,
+              "description": "Make entries: 1"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6911,
+        "modname": "resource",
+        "instance": 617,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6912,
+        "modname": "resource",
+        "instance": 618,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6913,
+        "modname": "resource",
+        "instance": 619,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6914,
+        "modname": "resource",
+        "instance": 620,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6895,
+        "modname": "book",
+        "instance": 902,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6790,
+        "modname": "quiz",
+        "instance": 1058,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          },
+          {
+            "rulename": "completionminattempts",
+            "rulevalue": {
+              "status": 0,
+              "description": "Make attempts: 1"
+            }
+          },
+          {
+            "rulename": "completionusegrade",
+            "rulevalue": {
+              "status": 0,
+              "description": "Receive a grade"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6810,
+        "modname": "data",
+        "instance": 92,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": false,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          },
+          {
+            "rulename": "completionentries",
+            "rulevalue": {
+              "status": 0,
+              "description": "Make entries: 1"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6916,
+        "modname": "resource",
+        "instance": 622,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6917,
+        "modname": "resource",
+        "instance": 623,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": false,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6918,
+        "modname": "resource",
+        "instance": 624,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6896,
+        "modname": "book",
+        "instance": 903,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6811,
+        "modname": "quiz",
+        "instance": 1065,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          },
+          {
+            "rulename": "completionminattempts",
+            "rulevalue": {
+              "status": 0,
+              "description": "Make attempts: 1"
+            }
+          },
+          {
+            "rulename": "completionusegrade",
+            "rulevalue": {
+              "status": 0,
+              "description": "Receive a grade"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6812,
+        "modname": "data",
+        "instance": 93,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": false,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          },
+          {
+            "rulename": "completionentries",
+            "rulevalue": {
+              "status": 0,
+              "description": "Make entries: 1"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6919,
+        "modname": "resource",
+        "instance": 625,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6921,
+        "modname": "resource",
+        "instance": 627,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6923,
+        "modname": "resource",
+        "instance": 629,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6924,
+        "modname": "resource",
+        "instance": 630,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6628,
+        "modname": "feedback",
+        "instance": 30,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": true,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          },
+          {
+            "rulename": "completionsubmit",
+            "rulevalue": {
+              "status": 0,
+              "description": "Submit feedback"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 6813,
+        "modname": "quiz",
+        "instance": 1066,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": false,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          },
+          {
+            "rulename": "completionminattempts",
+            "rulevalue": {
+              "status": 0,
+              "description": "Make attempts: 1"
+            }
+          },
+          {
+            "rulename": "completionusegrade",
+            "rulevalue": {
+              "status": 0,
+              "description": "Receive a grade"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 7009,
+        "modname": "page",
+        "instance": 514,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 2,
+        "overrideby": null,
+        "valueused": false,
+        "hascompletion": true,
+        "isautomatic": true,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [
+          {
+            "rulename": "completionview",
+            "rulevalue": {
+              "status": 0,
+              "description": "View"
+            }
+          }
+        ],
+        "isoverallcomplete": false
+      },
+      {
+        "cmid": 7010,
+        "modname": "page",
+        "instance": 515,
+        "state": 0,
+        "timecompleted": 0,
+        "tracking": 1,
+        "overrideby": null,
+        "valueused": false,
+        "hascompletion": true,
+        "isautomatic": false,
+        "istrackeduser": false,
+        "uservisible": true,
+        "details": [],
+        "isoverallcomplete": false
+      }
+    ]
+  },
+  "module3Accessibility": {
+    "accessible": true,
+    "reason": "Module 3 has no restrictions at section or activity level — fully accessible to enrolled students."
+  }
+}
