@@ -1,18 +1,27 @@
-### Task 2: Audit all discovered courses
+## Task 2: MoodleStudentFactory — Fresh student creation
 
-For each discovered course (except 269 which is already audited):
+**New file:** `tests/components/shared/MoodleStudentFactory.ts`
 
-1. Call `api.getCourseContents(courseId)` to get structure
-2. Call `api.getAvailabilityJsonBreakdown(courseId)` for restrictions
-3. Call `api.findOrphanedCmIds()` for phantom detection
-4. Create a fresh student via `api.createUser()` and check completion status
-5. Clean up the test user
-6. Log all findings per course
+```typescript
+class MoodleStudentFactory {
+  constructor(private api: MoodleApiClient) {}
 
-Output `reports/mvp-demo/multi-course-audit.json` with findings per course.
+  async createAndEnrolStudent(
+    courseId: number,
+    roleId: number = 5,
+  ): Promise<{
+    userId: number
+    username: string
+    password: string
+  }>
+  // 1. Generate unique username/password
+  // 2. api.createUser(username, password, 'Audit', 'Student', email)
+  // 3. api.getCourseEnrolMethods(courseId) → find manual method
+  // 4. api.submitUserEnrolmentForm(formdata)
+  // 5. Return credentials
 
-Acceptance criteria:
+  async cleanupStudent(userId: number): Promise<void>
+  // api.deleteUsers([userId])
+}
+```
 
-- [ ] Each new course has structure + restrictions + phantom analysis
-- [ ] Fresh student created and cleaned up per course
-- [ ] JSON output per course

@@ -1,52 +1,31 @@
-# Task 3 Report — Generate final HTML report + Allure integration
+# Task 3 Report: validate-course.kata.ts — Use Student Factory
 
 **Status:** DONE
 
-## Files Created / Modified
+## Changes Made
 
-### Created
+**File:** `tests/e2e/validate-course.kata.ts`
 
-- **HTML Report:** `D:\Nahuel\Proyectos\UNC\unc-agentic-dev\reports\mvp-demo\index.html`
-  - Self-contained (no external CSS/JS), inline CSS with CSS variables
-  - UNC blue (#2b4f6a) theme, mobile-responsive
-  - Status badges: 🟢 Clean / 🟡 Warning / 🔴 Critical
-  - Sections: Executive Summary Table, Clarification Box (nelthor/admin), Per-Course Detail (collapsible), Technical Appendix, Methodology, Email-ready Summary
+### What was done:
 
-### Modified
+1. **Added imports** for `MoodleApiClient` and `MoodleStudentFactory`
+2. **Added env var reading** for `MOODLE_BASE_URL` and `MOODLE_WS_TOKEN`
+3. **Added step "0"**: Logs in as admin, creates `MoodleApiClient` + `MoodleStudentFactory`, calls `createAndEnrolStudent(courseId)`, stores result in `freshStudent` variable
+4. **Modified step "6"**: When `freshStudent` is available, uses `login.loginAs(freshStudent.username, freshStudent.password)` instead of `roles.switchToStudent()`. Falls back to role switching if factory returned null
+5. **Added step "10"**: Cleanup — calls `factory.cleanupStudent(freshStudent.userId)` to delete the temporary student via Moodle API
+6. **Added `freshStudent` and `factory` state variables** at test scope for cross-step access
 
-- **Markdown Report:** `D:\Nahuel\Proyectos\UNC\unc-agentic-dev\reports\mvp-demo\REPORTE-MVP-UNC.md`
-  - Appended multi-course findings (courses 267, 265, 276) maintaining existing format
-  - Added summary table, per-course detail, conclusions
+### What was kept:
 
-- **Script:** `D:\Nahuel\Proyectos\UNC\unc-agentic-dev\scripts\generate-report.ts`
-  - Refactored to iterate over all 4 courses (267, 265, 269, 276)
-  - Generates individual per-course markdown reports
-  - Generates a combined multi-course summary report
-  - Proper error handling per course
+- `loginAsAdmin()` for admin steps 0 and 1 (unchanged)
+- `MoodleRoleSwitch` for teacher role switching in step 4 (unchanged)
+- All existing logic for course analysis, screenshots, phantom detection, and result saving
 
-### Allure Integration
+### Verification:
 
-- `allure-results/` directory exists (referenced in playwright.config.ts)
-- Script `generate-audit-report.ts` already supports Allure links
-- GitHub Actions workflow (`audit-ci.yml`) already generates Allure reports
-- Added reference in the HTML report's methodology section
+- `bun run types:check` — PASS (no errors)
+- Commit: `f58119b` with message `feat(test): use MoodleStudentFactory for fresh student credentials`
 
-## Courses Covered
+### Files changed:
 
-4 courses:
-
-| ID  | Name                                              | Sections | Activities | Restrictions | Status |
-| --- | ------------------------------------------------- | -------- | ---------- | ------------ | ------ |
-| 265 | Yoga y Mindfulness para la vida cotidiana         | 5        | 11         | 2            | Clean  |
-| 267 | IA y automatización de flujos de trabajo          | 7        | 20         | 6            | Clean  |
-| 269 | Aprendiendo a caminar en Python — Certificación 1 | 5        | 46         | 2            | Clean  |
-| 276 | Aprendiendo a caminar en Python — Certificación 2 | 5        | 50         | 2            | Clean  |
-
-**Summary:** 0 phantoms, 12 restrictions, 127 activities across all courses.
-
-## Deliverables
-
-- `reports/mvp-demo/index.html` — Full HTML report
-- `reports/mvp-demo/REPORTE-MVP-UNC.md` — Updated markdown with multi-course findings
-- `scripts/generate-report.ts` — Refactored for multi-course support
-- `allure-results/` — Directory structure set up
+- `tests/e2e/validate-course.kata.ts` — 32 insertions, 4 deletions

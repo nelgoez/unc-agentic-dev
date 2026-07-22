@@ -1,19 +1,13 @@
 ---
-subject: 'Reporte de auditoría automatizada — Campus Virtual UNC'
+subject: 'Pipeline de auditoría automatizada — Tri-fuerza activo'
 to: Ignacio Acuña, Patricia Otaola
 from: Equipo de Automatización — UNC Campus Virtual
-date: 2026-07-21
+date: 2026-07-22
 ---
 
 ## Asunto sugerido
 
-**Reporte de auditoría automatizada — Campus Virtual UNC**
-
----
-
-## Asunto sugerido
-
-**Pipeline de auditoría de cursos — ya funciona, resultados y próximos pasos**
+**Pipeline de auditoría tri-fuerza: UI + API + DB — ya corre en producción**
 
 ---
 
@@ -21,29 +15,37 @@ date: 2026-07-21
 
 Hola Ignacio y equipo,
 
-Tal como lo charlamos, ya tenemos el pipeline de auditoria corriendo sobre el curso 269 (Python). Te comparto los links:
+Actualizamos el pipeline de auditoría. Ahora corre con 3 frentes en paralelo (tri-fuerza) sobre los cursos activos. Te comparto los links:
 
 1. **Reporte en vivo**
 https://nelgoez.github.io/unc-agentic-dev/
-Hallazgos, capturas lado a lado admin vs estudiante, guia paso a paso para reproducir.
+Hallazgos, capturas admin/estudiante, guía paso a paso.
 
-2. **Reporte tecnico (Allure)**
+2. **Reporte técnico unificado (Allure)**
 https://nelgoez.github.io/unc-agentic-dev/allure/
-Historial de ejecuciones y detalle técnico.
+Ahora con categorías visuales: Auditoría UI, Auditoría API, Sondas DB. Cada corrida muestra qué encontró cada frente, con detalle técnico y severidad.
 
-3. **Ejecutar nueva auditoria**
+3. **Ejecutar nueva auditoría**
 https://github.com/nelgoez/unc-agentic-dev/actions/workflows/audit-ci.yml
-Solo el ID del curso, en ~2 minutos tienes el reporte.
+Elegís el ID del curso y en ~3 minutos tenés el reporte completo.
 
-4. **Propuesta completa**
+4. **Propuesta Course Kit**
 https://unc-course-kit.netlify.app/#/11
 
-**Que encontramos:**
-El curso 269 detectó un bloqueo real en el Módulo 3. La condición de acceso del módulo pide una actividad que existe en Moodle pero no muestra ningún link ni acceso para el estudiante. El alumno ve el candado, ve el tooltip que dice "no disponible hasta que completes X actividad", pero no puede hacer nada porque el recurso directamente no aparece. El Cierre también queda bloqueado en cascada.
-Este es exactamente el tipo de error que el pipeline busca detectar: dependencias rotas que solo se descubren cuando un estudiante las reporta.
-Importante: corre sobre producción. Los hallazgos son sobre cursos reales con estudiantes reales.
-Esto es un MVP — el caso del curso 269 ya demostro que el concepto funciona. Sabemos que hay margen de mejora en la detección, pero el valor está en empezar a correrlo.
+**Qué cambió con la tri-fuerza:**
 
-**Proximo paso:** si te copa, me decis que otros cursos agregar y con que prioridad. Para cada uno solo necesito el ID.
+| Frente | Técnica | Qué detecta |
+|--------|---------|-------------|
+| 🔍 UI | Playwright (navegador real) | Actividades fantasma, candados que no deberían estar, vistas por rol |
+| 🔬 API | REST API directa | Condiciones rotas en JSON de disponibilidad, cmids huérfanos |
+| 📊 DB | Web services de Moodle | Cohorts, enrolment, grade items, progresión automática |
+
+**Estudiante fresco en cada corrida:**
+Cada ejecución crea un usuario nuevo vía API, lo enrola en el curso, hace la auditoría como ese estudiante, y lo elimina al terminar. Ya no dependemos de cuentas estáticas — lo que ve el reporte es exactamente lo que ve un estudiante real registrado hoy.
+
+**Cobertura actual:** 4 cursos auditados (265, 267, 269, 276) — 0 phantoms, 12 restricciones funcionales, 127 actividades verificadas.
+
+**Próximo paso:** ¿Agregamos más cursos? Mandame los IDs y los sumamos al próximo scan.
 
 Saludos,
+Equipo de Automatización

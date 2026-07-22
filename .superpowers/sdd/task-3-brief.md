@@ -1,18 +1,12 @@
-### Task 3: Generate final HTML report + Allure integration
+## Task 3: validate-course.kata.ts — Use Student Factory
 
-Create `reports/mvp-demo/index.html` that includes:
+**File:** `tests/e2e/validate-course.kata.ts`
 
-- Executive summary table (all courses, key metrics)
-- Per-course detail sections
-- Clarification box: "The original bug in course 269 appears to be fixed on UNC's side. Our previous report used nelthor (promoted to admin) which masked the issue. This report uses fresh test student accounts for real user experience data."
-- Technical appendix with availability JSON examples
-- Email-ready summary section
+Changes:
 
-Also update `scripts/generate-report.ts` to include all courses.
+1. Import `MoodleApiClient` and `MoodleStudentFactory`
+2. Step "0": login as admin, create fresh student via factory
+3. Login test uses the fresh student credentials instead of `loginAsStudent()`
+4. Step "Revert": cleanup via `factory.cleanupStudent(userId)`
+5. Move STUDENT_USERNAME/STUDENT_PASSWORD env fallback to a comment for local dev
 
-Acceptance criteria:
-
-- [ ] HTML report with all courses
-- [ ] Clarification box about nelthor/admin issue
-- [ ] Email-ready summary
-- [ ] Allure output directory structure set up

@@ -1,57 +1,40 @@
-# Task 1: Discover Course IDs
+# Task 1 Report — Add enrolment WS functions to MoodleApiClient
 
-**Status:** DONE_WITH_CONCERNS
+## What was implemented
 
-**Executed:** 2026-07-21
+Added two new public methods to `MoodleApiClient` at `tests/components/api/MoodleApiClient.ts:362-382`:
 
-## Summary
+1. **`getCourseEnrolMethods(courseId: number)`** — MAC-11
+   - WS: `core_enrol_get_course_enrolment_methods`
+   - Returns `Array<{id: number, type: string, name: string}>`
+   - Simple delegated call via `this.call<>()` (same pattern as MAC-1)
 
-Discovered 166 unique courses from the UNC Moodle instance (`campus.aulavirtual.unc.edu.ar`) via fetch-based web scraping with admin session cookies.
+2. **`submitUserEnrolmentForm(formdata: string)`** — MAC-12
+   - WS: `core_enrol_submit_user_enrolment_form`
+   - Returns `{result: boolean, error?: string}`
+   - Checks the `error` field from the WS response and throws if set (per brief exception for error-field WS)
 
-## Approach
+Both use `@atc` decorator with story `UNC-RE-1` and feature `Enrolment`, using IDs MAC-11 and MAC-12 (next available after existing MAC-1 through MAC-10).
 
-**Plan A (Playwright) — FAILED.** All browser engines (Chromium, Firefox, WebKit) time out on launch in this Windows environment. The processes start but Playwright cannot connect via `--remote-debugging-pipe`. Likely a Windows security/Defender restriction on the debugging pipe connection.
+## What was tested
 
-**Final approach — fetch-based web form login:**
+- TypeScript type checking passed (`bun run types:check` — clean)
+- The file compiles without errors with `--strict` mode (`bunx tsc --noEmit` — clean)
+- Existing `repo:check` failures are pre-existing (formatting in unrelated files)
 
-1. GET `/login/index.php` to extract CSRF `logintoken` from the HTML form
-2. POST credentials (`username`, `password`, `logintoken`) to same endpoint
-3. Capture `MoodleSession` cookie from `Set-Cookie` response header
-4. Follow redirect to establish session, then navigate `/course/index.php`
-5. Parse HTML with regex for `course/view.php?id=N` links
-6. Browse all category pages (found via `/course/index.php`) to discover additional courses
-7. Also scrape `/my/` dashboard as supplementary source
-8. Deduplicate by course ID
+## Files changed
 
-## Results
+- `tests/components/api/MoodleApiClient.ts` — +22 lines
 
-| Metric                           | Value                                      |
-| -------------------------------- | ------------------------------------------ |
-| Total unique courses             | **166**                                    |
-| Duplicates                       | 0                                          |
-| Course 269 found                 | **YES**                                    |
-| Course 267 (IA y Automatización) | **YES**                                    |
-| Course 265 (Yoga y Mindfulness)  | **YES**                                    |
-| Output file                      | `reports/mvp-demo/discovered-courses.json` |
+## Self-review findings
 
-## Key Target Courses
+None. Methods follow existing patterns:
 
-| ID  | Name                                                                                        |
-| --- | ------------------------------------------------------------------------------------------- |
-| 265 | Yoga y Mindfulness para la vida cotidiana                                                   |
-| 267 | IA y automatización de flujos de trabajo: aprende a automatizar de forma eficaz y eficiente |
-| 269 | Aprendiendo a caminar en Python - Certificación 1                                           |
+- `getCourseEnrolMethods` mirrors MAC-1 pattern (simple `this.call<>()` return)
+- `submitUserEnrolmentForm` mirrors MAC-5 pattern (call + unwrap/validate response)
+- `@atc` IDs MAC-11/MAC-12 are the next sequential IDs after MAC-10
+- The duplicate MAC-7 on `getAvailabilityJsonBreakdown` was left untouched (pre-existing)
 
-## Concerns
+## Issues or concerns
 
-1. **Playwright inoperable in this environment.** Chromium processes launch but timeout on Playwright's `--remote-debugging-pipe` connection. This may affect future tasks that need browser automation. Consider fixing the root cause (sandbox/permissions on `C:\Users\Nahuel\AppData\Local\ms-playwright\chromium_headless_shell-1228\chrome-headless-shell-win64\chrome-headless-shell.exe`), or use the fetch-based approach as the primary for all scraping tasks.
-
-2. **Course 1 is a "Switch role to..." item** — likely a UI element rather than a real course. Should be filtered out in downstream processing.
-
-3. **Some course names include suffixes like "(Verano 2024)"** — there are apparent duplicates with the same root name but different years (e.g., IDs 13 vs 159 both mention IA). These are correctly treated as separate courses since they have different IDs.
-
-## Acceptance Criteria
-
-- [x] JSON file with course IDs and names written
-- [x] Course 269 is in the list
-- [x] At least 3 additional courses discovered (166 total)
+None.

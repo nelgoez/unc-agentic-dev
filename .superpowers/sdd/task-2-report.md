@@ -1,48 +1,37 @@
-# Task 2 Report: Multi-Course Audit
+# Task 2 Report — MoodleStudentFactory
 
-**Date:** 2026-07-21
-**Script:** `scripts/audit-courses.ts`
-**Output:** `reports/mvp-demo/multi-course-audit.json`
+## What I implemented
 
-## Results per Course
+Created `tests/components/shared/MoodleStudentFactory.ts` with:
 
-### Course 267 — IA y automatización de flujos de trabajo
+- **`MoodleStudentFactory` class** — constructor takes `MoodleApiClient` instance
+- **`createAndEnrolStudent(courseId, roleId = 5)`** — generates unique username/password via `crypto.randomUUID()`, calls `api.createUser()`, finds manual enrolment method via `api.getCourseEnrolMethods()`, builds URL-encoded formdata (`enrolid`, `userid`, `roleid`), calls `api.submitUserEnrolmentForm()`, returns `{ userId, username, password }` or `null` on failure
+- **`cleanupStudent(userId)`** — calls `api.deleteUsers([userId])` wrapped in try/catch
 
-- Sections: 7 | Activities: 20 | Phantoms: 0 | Restrictions: 6
-- Fresh student: 0/19 completed
-- All 6 restrictions are sequential completion gates (mod quizzes requiring prior module material). Normal structure — no phantoms.
+Error handling: both methods gracefully wrap API calls in try/catch, logging warnings via `console.warn`.
 
-### Course 265 — Yoga y Mindfulness para la vida cotidiana
+## What I tested
 
-- Sections: 5 | Activities: 11 | Phantoms: 0 | Restrictions: 2
-- Fresh student: 0/8 completed
-- 2 restricted activities: certificates in "Cierre del curso" requiring grade ≥60 on 4 grade items + completion of cmid 6759. All references valid.
+- **TypeScript check**: `bun run types:check` — passed (0 errors)
+- **ESLint**: auto-fixed by lint-staged during commit — no warnings
+- **Vars check**: `bun run vars:check` — passed
 
-### Course 269 — Aprendiendo a caminar en Python - Certificación 1
+No runtime tests were run (requires a live Moodle instance with API credentials).
 
-- Sections: 5 | Activities: 46 | Phantoms: 0 | Restrictions: 2
-- Fresh student: 0/28 completed | nelthor: 26/28
-- Certificates require grades ≥60 on 4 grade items + completion of cmid 6628. The previously-reported phantom (Notebook Funcion-Lambda) no longer appears in the availability JSON — the cmid references are now clean.
+## Files changed
 
-### Course 276 — Aprendiendo a caminar en Python - Certificación 2
+| File                                              | Action                 |
+| ------------------------------------------------- | ---------------------- |
+| `tests/components/shared/MoodleStudentFactory.ts` | **Created** (50 lines) |
 
-- Sections: 5 | Activities: 50 | Phantoms: 0 | Restrictions: 2
-- Fresh student: 0/17 completed
-- Certificates require grades ≥60 on 4 grade items + completion of cmid 6968. All valid.
+## Self-review findings
 
-## Summary
+- `import type` for `MoodleApiClient` was auto-applied by eslint — correct usage (type-only in constructor parameter)
+- `formdata` uses `URLSearchParams` for proper URL encoding, aligned with Moodle WS expectations
+- No hardcoded credentials; uses generated random values (crypto.randomUUID)
+- Commit hook ran `types:check` and `vars:check` successfully
 
-| Metric                              | Value              |
-| ----------------------------------- | ------------------ |
-| Total courses audited               | 4                  |
-| Total phantoms found                | **0**              |
-| Courses with phantoms               | 0                  |
-| Total restriction conditions        | 12                 |
-| Fresh students created & cleaned up | 4 (all successful) |
+## Concerns
 
-## Conclusions
-
-- **No phantoms detected** in any of the 4 courses. All availability JSON references point to valid cmids.
-- Course 269 (Python 1) is now clean — the previously-reported phantom from the original audit (Notebook Funcion-Lambda) has been resolved.
-- All courses follow a similar pattern: module quizzes gated by prior activity completion, and certificates in a "Cierre" section gated by grade conditions.
-- nelthor (course 269) has 26/28 activities completed, confirming active progression.
+- No runtime/integration tests — require a Moodle environment with manual enrolment plugin enabled
+- `submitUserEnrolmentForm` WS may behave differently across Moodle versions
