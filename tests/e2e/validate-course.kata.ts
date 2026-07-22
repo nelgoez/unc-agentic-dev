@@ -6,8 +6,12 @@ import { createFixture } from '../components/UiFixture'
 import { MoodleLogin } from '../components/ui/MoodleLogin'
 import { MoodleCourse } from '../components/ui/MoodleCourse'
 import { MoodleRoleSwitch, MoodleRole } from '../components/ui/MoodleRoleSwitch'
+import { MoodleApiClient } from '../components/api/MoodleApiClient'
+import { MoodleStudentFactory } from '../components/shared/MoodleStudentFactory'
 
 const courseId = process.env.TEST_COURSE_ID || '269'
+const moodleBaseUrl = process.env.MOODLE_BASE_URL || ''
+const moodleWsToken = process.env.MOODLE_WS_TOKEN || ''
 
 test.describe('Course Validation — Multi-Role Audit', () => {
   test(`Audit course ${courseId} across student/teacher/admin roles`, async ({ page }) => {
@@ -18,6 +22,19 @@ test.describe('Course Validation — Multi-Role Audit', () => {
 
     const screenshotDir = resolve('reports/audit')
     mkdirSync(screenshotDir, { recursive: true })
+
+    let freshStudent: { userId: number; username: string; password: string } | null = null
+    let factory: MoodleStudentFactory | null = null
+
+    await test.step('0. Creación de estudiante fresco vía factory', async () => {
+      await login.loginAsAdmin()
+      const api = new MoodleApiClient(moodleBaseUrl, moodleWsToken)
+      factory = new MoodleStudentFactory(api)
+      freshStudent = await factory.createAndEnrolStudent(Number(courseId))
+      if (!freshStudent) {
+        console.warn('⚠️ Could not create fresh student — falling back to static student')
+      }
+    })
 
     await test.step('1. Inicio de sesión como administrador', async () => {
       await login.loginAsAdmin()
@@ -60,12 +77,16 @@ test.describe('Course Validation — Multi-Role Audit', () => {
         return view
       })
 
-    const studentView = await test.step('6. Cambio a rol estudiante', async () => {
+    const studentView = await test.step('6. Ingreso como estudiante fresco', async () => {
       console.log('\n=== STUDENT VIEW ===')
-      await roles.revertToAdmin(courseId)
-      const ok = await roles.switchToStudent(courseId)
+      if (freshStudent) {
+        await login.loginAs(freshStudent.username, freshStudent.password)
+      } else {
+        await roles.revertToAdmin(courseId)
+        await roles.switchToStudent(courseId)
+      }
       const view = await course.analyze(courseId)
-      console.log(`Sections: ${view.sections.length} (switch OK: ${ok})`)
+      console.log(`Sections: ${view.sections.length}`)
       return view
     })
 
@@ -141,6 +162,13 @@ test.describe('Course Validation — Multi-Role Audit', () => {
         'utf-8',
       )
       console.log(`📊 Data saved to reports/audit/audit-results.json`)
+    })
+
+    await test.step('10. Limpieza — borrar estudiante temporal', async () => {
+      if (factory && freshStudent) {
+        await factory.cleanupStudent(freshStudent.userId)
+        console.log(`🧹 Cleaned up student ${freshStudent.username} (ID: ${freshStudent.userId})`)
+      }
     })
   })
 })
