@@ -620,7 +620,8 @@ function main(): void {
   const resultsPath = resolve(args[0] || 'reports/audit/audit-results.json')
   const screenshotDir = resolve(args[1] || 'reports/audit')
   const outputDir = resolve(args[2] || 'audit-report')
-  const allureUrl = args[3] || '/unc-agentic-dev/allure/'
+  const positional = args.filter((a) => !a.startsWith('--'))
+  const allureUrl = positional[3] || '/unc-agentic-dev/allure/'
   const apiResultsIdx = args.indexOf('--api-results')
   const apiResultsPath = apiResultsIdx !== -1 ? resolve(args[apiResultsIdx + 1]) : null
 
