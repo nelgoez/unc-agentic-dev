@@ -1,0 +1,30 @@
+[
+  {
+    "name": "🧪 Preparación",
+    "matchedStatuses": ["passed", "failed", "broken"],
+    "messageRegex": ".*(setup|cleanup|crear|eliminar|student|factory|factory|login).*"
+  },
+  {
+    "name": "🔍 Auditoría UI",
+    "matchedStatuses": ["passed", "failed", "broken"],
+    "messageRegex": ".*(analizar|analyze|screenshot|captura|seccion|sección|navegar|role switch).*"
+  },
+  {
+    "name": "🔬 Auditoría API",
+    "matchedStatuses": ["passed", "failed"],
+    "messageRegex": ".*(API|REST|hallazgo|huérfano|orphan|condición|condition).*"
+  },
+  {
+    "name": "📊 Sondas DB",
+    "matchedStatuses": ["passed", "failed", "broken"],
+    "messageRegex": ".*(enrollment|cohort|probe|DB|grade|alumnos|docentes).*"
+  },
+  {
+    "name": "⚠️ Advertencias",
+    "matchedStatuses": ["broken"]
+  },
+  {
+    "name": "✅ Éxito",
+    "matchedStatuses": ["passed"]
+  }
+]
