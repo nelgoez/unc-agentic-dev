@@ -359,6 +359,28 @@ export class MoodleApiClient {
     }
   }
 
+  @atc('MAC-11', { story: 'UNC-RE-1', feature: 'Enrolment' })
+  async getCourseEnrolMethods(
+    courseId: number,
+  ): Promise<Array<{ id: number; type: string; name: string }>> {
+    return this.call<Array<{ id: number; type: string; name: string }>>(
+      'core_enrol_get_course_enrolment_methods',
+      { courseid: courseId },
+    )
+  }
+
+  @atc('MAC-12', { story: 'UNC-RE-1', feature: 'Enrolment' })
+  async submitUserEnrolmentForm(formdata: string): Promise<{ result: boolean; error?: string }> {
+    const result = await this.call<{ result: boolean; error?: string }>(
+      'core_enrol_submit_user_enrolment_form',
+      { formdata },
+    )
+    if (result && result.error) {
+      throw new Error(`Moodle enrolment error: ${result.error}`)
+    }
+    return result
+  }
+
   @atc('MAC-7', { story: 'UNC-MVP-1', feature: 'Deep Audit' })
   async getAvailabilityJsonBreakdown(courseId: number | string): Promise<{
     sections: Array<{
