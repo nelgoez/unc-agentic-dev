@@ -127,6 +127,15 @@ jobs:
             echo "⚠️ No allure-results found — skipping Allure report generation"
           fi
 
+      - name: Copy MVP static content
+        if: always()
+        run: |
+          if [ -d reports/mvp-demo ]; then
+            mkdir -p audit-report/mvp-demo
+            cp -r reports/mvp-demo/* audit-report/mvp-demo/
+            echo "✅ MVP content copied to audit-report/mvp-demo/"
+          fi
+
       - name: Upload unified report
         uses: actions/upload-artifact@v7
         with:
