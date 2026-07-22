@@ -230,10 +230,12 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     } else {
       dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">📊</span><span class="msg"><strong>Notas y calificaciones:</strong> Datos no disponibles — función no agregada al servicio</span></div></div>`
     }
-    if (dp.cohorts) {
+    if (dp.cohorts && dp.cohorts.status === 'unavailable') {
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Grupos (cohorts):</strong> No se pudo consultar — la función web de cohorts no está agregada al servicio UNC Auditor. Para activarla, un administrador debe agregar core_cohort_get_cohorts al servicio web "UNC Auditor".</span></div></div>`
+    } else if (dp.cohorts) {
       dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Grupos:</strong> ${dp.cohorts.total} (${dp.cohorts.names.join(', ')})</span></div></div>`
     } else {
-      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Grupos:</strong> Datos no disponibles — función no agregada al servicio</span></div></div>`
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Grupos:</strong> Datos no disponibles</span></div></div>`
     }
   }
 
@@ -276,7 +278,9 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
       <li>Si el equipo de Campus Virtual realizó <strong>cambios entre la detección del problema y esta verificación</strong>. Los datos reflejan el momento exacto de la auditoría.</li>
       <li>Si el seguimiento de finalización de las 4 actividades de Bienvenida se deshabilitó <strong>por accidente o intencionalmente</strong>. Nelthor las completó antes de ser admin, cuando el tracking funcionaba.</li>
       <li>Si hay <strong>otras formas de completar actividades</strong> que no pasan por la casilla de verificación en la página del curso (ej: aprobación directa del docente, finalización por grupo, integraciones externas).</li>
+      <li>Restricciones por <strong>grupos (cohorts)</strong> — la función web de cohorts no está disponible en el servicio UNC Auditor. Cualquier curso que use cohorts para matricular o restringir acceso no está siendo auditado en ese aspecto.</li>
     </ul>
+    <p style="margin-top:12px;font-size:0.85em"><strong>📋 Para mejorar la cobertura:</strong> Un administrador de Moodle debe agregar las funciones <code>core_cohort_get_cohorts</code> y <code>core_cohort_get_cohort_members</code> al servicio web "UNC Auditor" en Administración del sitio &gt; Servicios web &gt; Servicios externos.</p>
     <p style="margin-top:12px;font-size:0.85em;color:var(--text-2)">💡 Si encontrás un hallazgo que no coincide con la realidad del curso, <strong>avisanos</strong> para ajustar la detección. Esta herramienta mejora con cada feedback.</p>
   </div>`
 

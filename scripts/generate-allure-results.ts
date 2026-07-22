@@ -100,7 +100,7 @@ interface AllureContainer {
 function toStatus(severity: string): 'passed' | 'failed' | 'broken' {
   if (severity === 'critical') return 'failed'
   if (severity === 'error') return 'failed'
-  if (severity === 'unavailable') return 'passed'
+  if (severity === 'unavailable') return 'broken'
   return 'passed'
 }
 
@@ -300,7 +300,12 @@ function main(): void {
   if (probes.cohorts) {
     const p = probes.cohorts
     const names = p.names.length > 0 ? p.names.join(', ') : '(ninguno)'
-    const detail = `Total: ${p.total} | Nombres: ${names} | Estado: ${p.status}`
+    let detail: string
+    if (p.status === 'unavailable') {
+      detail = `No se pudo consultar — la función web de cohorts (core_cohort_get_cohorts) no está agregada al servicio UNC Auditor. Para verificar restricciones por cohorte, un administrador debe agregar esta función al servicio web "UNC Auditor" en Administración del sitio > Servicios web > Servicios externos.`
+    } else {
+      detail = `Total: ${p.total} | Nombres: ${names} | Estado: ${p.status}`
+    }
     const r = makeDbProbeResult(
       'Cohorts',
       p.status,
