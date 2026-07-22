@@ -83,6 +83,25 @@ export interface CompletionStatusResponse {
   warnings?: unknown[]
 }
 
+export interface EnrolledUser {
+  id: number
+  username: string
+  fullname: string
+  roles: Array<{ roleid: number; name: string; shortname: string }>
+}
+
+export interface GradeItem {
+  id: number
+  itemname: string
+  category: string
+  grademax: number
+  grademin: number
+}
+
+export interface CohortSearchResult {
+  cohorts: Array<{ id: number; name: string; idnumber: string; visible: boolean }>
+}
+
 export class MoodleApiClient {
   private baseUrl: string
   private token: string
@@ -288,7 +307,56 @@ export class MoodleApiClient {
     }
   }
 
-  @atc('MAC-6', { story: 'UNC-MVP-1', feature: 'Deep Audit' })
+  @atc('MAC-8', { story: 'UNC-MVP-1', feature: 'DB Probes' })
+  async getEnrolledUsers(courseId: number): Promise<EnrolledUser[] | null> {
+    try {
+      const result = await this.call<EnrolledUser[] | { exception: string }>(
+        'core_enrol_get_enrolled_users',
+        { courseid: courseId },
+      )
+      if (!result || (Array.isArray(result) && result.length === 0)) return null
+      if (!Array.isArray(result)) return null
+      return result as EnrolledUser[]
+    } catch (err) {
+      console.warn('⚠️ getEnrolledUsers failed:', err instanceof Error ? err.message : err)
+      return null
+    }
+  }
+
+  @atc('MAC-9', { story: 'UNC-MVP-1', feature: 'DB Probes' })
+  async getGradeItems(courseId: number): Promise<GradeItem[] | null> {
+    try {
+      const result = await this.call<GradeItem[] | { exception: string }>(
+        'core_grades_get_gradeitems',
+        { courseid: courseId },
+      )
+      if (!result || (Array.isArray(result) && result.length === 0)) return null
+      if (!Array.isArray(result)) return null
+      return result as GradeItem[]
+    } catch (err) {
+      console.warn('⚠️ getGradeItems failed:', err instanceof Error ? err.message : err)
+      return null
+    }
+  }
+
+  @atc('MAC-10', { story: 'UNC-MVP-1', feature: 'DB Probes' })
+  async searchCohorts(query: string, contextId: number): Promise<CohortSearchResult | null> {
+    try {
+      const result = await this.call<CohortSearchResult | { exception: string }>(
+        'core_cohort_search_cohorts',
+        { query, context: { contextid: contextId }, includes: 'parents', limitnum: 100 },
+      )
+      if (!result || (typeof result === 'object' && 'exception' in result)) return null
+      const cr = result as CohortSearchResult
+      if (!cr.cohorts || cr.cohorts.length === 0) return null
+      return cr
+    } catch (err) {
+      console.warn('⚠️ searchCohorts failed:', err instanceof Error ? err.message : err)
+      return null
+    }
+  }
+
+  @atc('MAC-7', { story: 'UNC-MVP-1', feature: 'Deep Audit' })
   async getAvailabilityJsonBreakdown(courseId: number | string): Promise<{
     sections: Array<{
       section: number

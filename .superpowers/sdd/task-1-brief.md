@@ -1,20 +1,39 @@
-### Task 1: Discover course IDs
+### Task 1: Refactor validate-course.kata.ts with captioned steps
 
-Create a script that logs into Moodle as admin (via Playwright browser) and navigates to the course listing at `/course/index.php`, extracts all course IDs and names, and saves them to `reports/mvp-demo/discovered-courses.json`.
+Refactor the existing `tests/e2e/validate-course.kata.ts` to wrap each logical action in a `test.step()` with a Spanish caption.
 
-Approach:
+Current structure (one big test):
 
-- Use Playwright with `chromium.launch({ headless: true, timeout: 30000 })`
-- Login with ADMIN_USERNAME/ADMIN_PASSWORD from .env
-- Navigate to `/course/index.php`
-- Extract all `<a href*="course/view.php?id=...">` links
-- Deduplicate by ID
-- Save JSON output
+1. Login as admin
+2. Scan as admin + screenshots
+3. Switch to teacher + screenshots
+4. Switch to student + screenshots
+5. Phantom detection
+6. Save results
 
-If Playwright is too slow, fallback: use `core_course_get_courses_by_field` with available REST API token, or use `bun` with `fetch` to login and scrape the HTML page directly using the admin session.
+Expected new structure (one test, multiple captioned steps):
 
-Acceptance criteria:
+```
+test.step('1. Inicio de sesión como administrador', ...)
+test.step('2. Escaneo del curso — vista administrador', ...)
+test.step('3. Captura de pantallas por sección (admin)', ...)
+test.step('4. Cambio a rol docente', ...)
+test.step('5. Captura de pantallas por sección (docente)', ...)
+test.step('6. Cambio a rol estudiante', ...)
+test.step('7. Captura de pantallas por sección (estudiante)', ...)
+test.step('8. Detección de actividades fantasma', ...)
+test.step('9. Guardado de resultados', ...)
+```
 
-- [ ] JSON file with course IDs and names written
-- [ ] Course 269 is in the list
-- [ ] At least 3 additional courses discovered
+Each step caption should be clear enough that Ignacio or Patricia can follow along in the Allure report.
+
+The `test.step()` output appears in:
+
+- Allure report (as nested steps)
+- Playwright trace viewer
+- Console output (with indentation)
+
+See Playwright docs: https://playwright.dev/docs/api/class-test#test-step
+
+No logic changes — only wrapping existing code in captioned steps.
+

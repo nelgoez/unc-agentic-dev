@@ -75,6 +75,47 @@ async function main() {
     console.warn('⚠️ Progression step failed:', err instanceof Error ? err.message : err)
   }
 
+  const dbProbes: {
+    enrollment: { total: number; students: number; teachers: number; status: string } | null
+    gradeItems: { total: number; status: string } | null
+    cohorts: { total: number; names: string[]; status: string } | null
+  } = { enrollment: null, gradeItems: null, cohorts: null }
+
+  try {
+    const enrolled = await api.getEnrolledUsers(Number(courseId))
+    if (enrolled && enrolled.length > 0) {
+      const students = enrolled.filter((u) =>
+        u.roles?.some((r) => r.shortname === 'student'),
+      ).length
+      const teachers = enrolled.filter((u) =>
+        u.roles?.some((r) => r.shortname === 'editingteacher' || r.shortname === 'teacher'),
+      ).length
+      dbProbes.enrollment = { total: enrolled.length, students, teachers, status: 'ok' }
+    } else {
+      dbProbes.enrollment = { total: 0, students: 0, teachers: 0, status: 'unavailable' }
+    }
+  } catch (err) {
+    console.warn('⚠️ Enrollment probe failed:', err instanceof Error ? err.message : err)
+  }
+
+  try {
+    const items = await api.getGradeItems(Number(courseId))
+    dbProbes.gradeItems = { total: items?.length ?? 0, status: items ? 'ok' : 'unavailable' }
+  } catch (err) {
+    console.warn('⚠️ Grade items probe failed:', err instanceof Error ? err.message : err)
+  }
+
+  try {
+    const cohorts = await api.searchCohorts(courseId.toString(), 1)
+    dbProbes.cohorts = {
+      total: cohorts?.cohorts?.length ?? 0,
+      names: (cohorts?.cohorts ?? []).map((c) => c.name),
+      status: cohorts ? 'ok' : 'unavailable',
+    }
+  } catch (err) {
+    console.warn('⚠️ Cohorts probe failed:', err instanceof Error ? err.message : err)
+  }
+
   const apiFindings: Array<{
     severity: string
     type: string
@@ -134,6 +175,7 @@ async function main() {
     apiFindings,
     breakdown,
     progression,
+    dbProbes,
   }
 
   writeFileSync(resolve(outDir, 'api-audit-results.json'), JSON.stringify(result, null, 2))
@@ -146,6 +188,17 @@ async function main() {
     console.log(
       `   Progression: ${progression.autoProgressed}/${progression.trackedActivities} auto-completed`,
     )
+  }
+  if (dbProbes.enrollment) {
+    console.log(
+      `   Enrollment: ${dbProbes.enrollment.total} users (${dbProbes.enrollment.students} students, ${dbProbes.enrollment.teachers} teachers)`,
+    )
+  }
+  if (dbProbes.gradeItems) {
+    console.log(`   Grade items: ${dbProbes.gradeItems.total}`)
+  }
+  if (dbProbes.cohorts) {
+    console.log(`   Cohorts: ${dbProbes.cohorts.total}`)
   }
 }
 

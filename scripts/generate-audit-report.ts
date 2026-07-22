@@ -58,6 +58,11 @@ interface ApiAuditResults {
     alreadyComplete: number
     autoProgressed: number
   } | null
+  dbProbes?: {
+    enrollment: { total: number; students: number; teachers: number; status: string } | null
+    gradeItems: { total: number; status: string } | null
+    cohorts: { total: number; names: string[]; status: string } | null
+  }
 }
 
 interface AuditResults {
@@ -181,6 +186,29 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
         </div>
         <div class="finding-detail"><span class="badge-api">API</span> ${esc(f.detail)}</div>
       </div>`
+    }
+  }
+
+  // DB probes section
+  let dbProbesHTML = ''
+  if (apiResults?.dbProbes) {
+    const dp = apiResults.dbProbes
+    dbProbesHTML = `<h2 class="section-title">🔬 Sondas de base de datos</h2>`
+
+    if (dp.enrollment) {
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👥</span><span class="msg"><strong>Inscripciones:</strong> ${dp.enrollment.total} usuarios (${dp.enrollment.students} estudiantes, ${dp.enrollment.teachers} docentes)</span></div></div>`
+    } else {
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👥</span><span class="msg"><strong>Inscripciones:</strong> Datos no disponibles — función no agregada al servicio</span></div></div>`
+    }
+    if (dp.gradeItems) {
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">📊</span><span class="msg"><strong>Items de calificación:</strong> ${dp.gradeItems.total} items</span></div></div>`
+    } else {
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">📊</span><span class="msg"><strong>Items de calificación:</strong> Datos no disponibles — función no agregada al servicio</span></div></div>`
+    }
+    if (dp.cohorts) {
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Cohortes:</strong> ${dp.cohorts.total} (${dp.cohorts.names.join(', ')})</span></div></div>`
+    } else {
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Cohortes:</strong> Datos no disponibles — función no agregada al servicio</span></div></div>`
     }
   }
 
@@ -482,6 +510,8 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     ${findingsHTML}
 
     ${apiFindingsHTML}
+
+    ${dbProbesHTML}
 
     ${compareHTML}
 
