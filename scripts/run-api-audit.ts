@@ -95,7 +95,9 @@ async function main() {
       dbProbes.enrollment = { total: 0, students: 0, teachers: 0, status: 'unavailable' }
     }
   } catch (err) {
-    console.warn('⚠️ Enrollment probe failed:', err instanceof Error ? err.message : err)
+    const msg = err instanceof Error ? err.message.substring(0, 80) : String(err)
+    console.warn('Enrollment unavailable (WS non-responsive):', msg)
+    dbProbes.enrollment = { total: 0, students: 0, teachers: 0, status: 'error' }
   }
 
   try {

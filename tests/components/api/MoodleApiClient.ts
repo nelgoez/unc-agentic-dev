@@ -130,6 +130,10 @@ export class MoodleApiClient {
             url.searchParams.append(`${key}[${i}]`, String(item))
           }
         }
+      } else if (typeof value === 'object') {
+        for (const [subKey, subVal] of Object.entries(value as Record<string, unknown>)) {
+          url.searchParams.append(`${key}[${subKey}]`, String(subVal))
+        }
       } else {
         url.searchParams.set(key, String(value))
       }
@@ -326,13 +330,12 @@ export class MoodleApiClient {
   @atc('MAC-9', { story: 'UNC-MVP-1', feature: 'DB Probes' })
   async getGradeItems(courseId: number): Promise<GradeItem[] | null> {
     try {
-      const result = await this.call<GradeItem[] | { exception: string }>(
+      const result = await this.call<{ gradeItems: GradeItem[]; warnings?: unknown[] }>(
         'core_grades_get_gradeitems',
         { courseid: courseId },
       )
-      if (!result || (Array.isArray(result) && result.length === 0)) return null
-      if (!Array.isArray(result)) return null
-      return result as GradeItem[]
+      if (!result || !result.gradeItems || result.gradeItems.length === 0) return null
+      return result.gradeItems
     } catch (err) {
       console.warn('⚠️ getGradeItems failed:', err instanceof Error ? err.message : err)
       return null
