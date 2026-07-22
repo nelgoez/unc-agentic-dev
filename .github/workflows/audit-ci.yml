@@ -91,7 +91,10 @@ jobs:
         run: |
           if [ -d _ui_audit/allure-results ]; then
             cp -r _ui_audit/allure-results ./allure-results
-            cp -r _ui_audit/reports/audit ./reports/audit
+          fi
+          if [ -d _ui_audit/reports/audit ]; then
+            mkdir -p reports/audit
+            cp -r _ui_audit/reports/audit/* ./reports/audit/
           fi
 
       - name: Download API audit results

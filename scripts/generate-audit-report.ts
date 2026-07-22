@@ -543,17 +543,6 @@ function main(): void {
   const apiResultsIdx = args.indexOf('--api-results')
   const apiResultsPath = apiResultsIdx !== -1 ? resolve(args[apiResultsIdx + 1]) : null
 
-  if (!existsSync(resultsPath)) {
-    if (apiResultsPath && existsSync(apiResultsPath)) {
-      console.log('⚠️ UI audit results not found — generating API-only report')
-    } else {
-      console.error(
-        `❌ No audit results found. Need either UI results at ${resultsPath} or API results at ${apiResultsPath}`,
-      )
-      process.exit(1)
-    }
-  }
-
   let apiResults: ApiAuditResults | null = null
   if (apiResultsPath && existsSync(apiResultsPath)) {
     try {
@@ -564,19 +553,43 @@ function main(): void {
     }
   }
 
-  const results: AuditResults = {
-    ...loadJson<AuditResults>(resultsPath),
-    runUrl:
-      process.env.GITHUB_SERVER_URL != null &&
-      process.env.GITHUB_SERVER_URL !== '' &&
-      process.env.GITHUB_REPOSITORY != null &&
-      process.env.GITHUB_REPOSITORY !== '' &&
-      process.env.GITHUB_RUN_ID != null &&
-      process.env.GITHUB_RUN_ID !== ''
-        ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
-        : '',
-    allureUrl,
-    screenshots: loadScreenshots(screenshotDir),
+  const runUrl =
+    process.env.GITHUB_SERVER_URL != null &&
+    process.env.GITHUB_SERVER_URL !== '' &&
+    process.env.GITHUB_REPOSITORY != null &&
+    process.env.GITHUB_REPOSITORY !== '' &&
+    process.env.GITHUB_RUN_ID != null &&
+    process.env.GITHUB_RUN_ID !== ''
+      ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
+      : ''
+
+  let results: AuditResults
+  if (existsSync(resultsPath)) {
+    results = {
+      ...loadJson<AuditResults>(resultsPath),
+      runUrl,
+      allureUrl,
+      screenshots: loadScreenshots(screenshotDir),
+    }
+  } else if (apiResults) {
+    console.log('⚠️ UI audit results not found — generating API-only report')
+    results = {
+      courseId: apiResults.courseId,
+      courseName: apiResults.courseName,
+      timestamp: apiResults.timestamp,
+      runUrl,
+      allureUrl,
+      adminView: { courseName: apiResults.courseName, courseUrl: '', tabs: [], sections: [] },
+      teacherView: { courseName: apiResults.courseName, courseUrl: '', tabs: [], sections: [] },
+      studentView: { courseName: apiResults.courseName, courseUrl: '', tabs: [], sections: [] },
+      findings: [],
+      screenshots: [],
+    }
+  } else {
+    console.error(
+      `❌ No audit results found. Need either UI results at ${resultsPath} or API results at ${apiResultsPath}`,
+    )
+    process.exit(1)
   }
 
   if (!existsSync(outputDir)) {
