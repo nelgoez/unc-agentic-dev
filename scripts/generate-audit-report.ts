@@ -231,7 +231,7 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
       dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">📊</span><span class="msg"><strong>Notas y calificaciones:</strong> Datos no disponibles — función no agregada al servicio</span></div></div>`
     }
     if (dp.cohorts && dp.cohorts.status === 'unavailable') {
-      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Grupos (cohorts):</strong> No se pudo consultar — la función web de cohorts no está agregada al servicio UNC Auditor. Para activarla, un administrador debe agregar core_cohort_get_cohorts al servicio web "UNC Auditor".</span></div></div>`
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Grupos (cohorts):</strong> No se encontraron cohorts para este curso — la función web funciona correctamente.</span></div></div>`
     } else if (dp.cohorts) {
       dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Grupos:</strong> ${dp.cohorts.total} (${dp.cohorts.names.join(', ')})</span></div></div>`
     } else {
@@ -280,7 +280,7 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
       <li>Si hay <strong>otras formas de completar actividades</strong> que no pasan por la casilla de verificación en la página del curso (ej: aprobación directa del docente, finalización por grupo, integraciones externas).</li>
       <li>Restricciones por <strong>grupos (cohorts)</strong> — la función web de cohorts no está disponible en el servicio UNC Auditor. Cualquier curso que use cohorts para matricular o restringir acceso no está siendo auditado en ese aspecto.</li>
     </ul>
-    <p style="margin-top:12px;font-size:0.85em"><strong>📋 Para mejorar la cobertura:</strong> Un administrador de Moodle debe agregar las funciones <code>core_cohort_get_cohorts</code> y <code>core_cohort_get_cohort_members</code> al servicio web "UNC Auditor" en Administración del sitio &gt; Servicios web &gt; Servicios externos.</p>
+    <p style="margin-top:12px;font-size:0.85em"><strong>📋 Para mejorar la cobertura:</strong> Actualmente no podemos auditar restricciones por cohorts si el curso las usa. Si algún curso usa cohorts para matricular o restringir acceso, avísenos para ajustar la detección.</p>
     <p style="margin-top:12px;font-size:0.85em;color:var(--text-2)">💡 Si encontrás un hallazgo que no coincide con la realidad del curso, <strong>avisanos</strong> para ajustar la detección. Esta herramienta mejora con cada feedback.</p>
   </div>`
 

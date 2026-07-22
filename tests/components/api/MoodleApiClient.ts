@@ -351,7 +351,7 @@ export class MoodleApiClient {
       )
       if (!result || (typeof result === 'object' && 'exception' in result)) return null
       const cr = result as CohortSearchResult
-      if (!cr.cohorts || cr.cohorts.length === 0) return null
+      if (!cr.cohorts) return { cohorts: [] }
       return cr
     } catch (err) {
       console.warn('⚠️ searchCohorts failed:', err instanceof Error ? err.message : err)

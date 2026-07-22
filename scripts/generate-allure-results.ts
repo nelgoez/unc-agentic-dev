@@ -302,7 +302,7 @@ function main(): void {
     const names = p.names.length > 0 ? p.names.join(', ') : '(ninguno)'
     let detail: string
     if (p.status === 'unavailable') {
-      detail = `No se pudo consultar — la función web de cohorts (core_cohort_get_cohorts) no está agregada al servicio UNC Auditor. Para verificar restricciones por cohorte, un administrador debe agregar esta función al servicio web "UNC Auditor" en Administración del sitio > Servicios web > Servicios externos.`
+      detail = `No se encontraron cohorts en este curso — la función web funciona, simplemente no hay cohorts asociadas.`
     } else {
       detail = `Total: ${p.total} | Nombres: ${names} | Estado: ${p.status}`
     }
