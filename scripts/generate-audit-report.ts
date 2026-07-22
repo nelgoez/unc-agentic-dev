@@ -142,50 +142,58 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     minute: '2-digit',
   })
 
-  let findingsHTML = ''
-  if (findings.length === 0) {
-    findingsHTML = `<div class="no-findings"><div class="emoji">✅</div><h3>No se encontraron incidencias</h3><p class="dim">El curso supera la auditoría sin hallazgos críticos ni advertencias.</p></div>`
-  } else {
-    findingsHTML = `<h2 class="section-title">Hallazgos de la auditoría</h2>`
-    for (const f of findings) {
-      const si = severityInfo(f.severity)
-      const stuScreenshot = screenshotMap.get(`student|${f.sectionNumber}`)
-      findingsHTML += `
-    <div class="finding ${f.severity}" onclick="this.classList.toggle('open')">
-      <div class="finding-header">
-        <span class="icon">${si.icon}</span>
-        <span class="msg"><strong>${esc(f.sectionTitle)}:</strong> ${esc(f.message)}</span>
-        <span class="chevron">▶</span>
-      </div>
-      <div class="finding-detail">${esc(f.detail)}</div>`
-      if (stuScreenshot != null && stuScreenshot !== '') {
-        findingsHTML += `
-      <div class="screenshot">
-        <img src="data:image/png;base64,${stuScreenshot}" alt="Captura sección ${f.sectionNumber}">
-        <div class="caption">📸 Vista como estudiante - Sección ${f.sectionNumber}: ${esc(f.sectionTitle)}</div>
-      </div>`
-      }
-      findingsHTML += `\n    </div>`
+  // Build cross-referenced findings grouped by section
+  const sectionMap = new Map<string, { ui: AuditFinding[]; api: ApiAuditResults['apiFindings'] }>()
+  for (const f of findings) {
+    const key = f.sectionTitle
+    if (!sectionMap.has(key)) sectionMap.set(key, { ui: [], api: [] })
+    sectionMap.get(key)!.ui.push(f)
+  }
+  if (apiResults) {
+    for (const f of apiResults.apiFindings) {
+      const key = f.section
+      if (!sectionMap.has(key)) sectionMap.set(key, { ui: [], api: [] })
+      sectionMap.get(key)!.api.push(f)
     }
-    findingsHTML += `\n    <p style="margin-top:8px;font-size:0.8em;color:var(--text-2)">💡 Hacé clic en cada hallazgo para ver detalle y captura.</p>`
   }
 
-  // API audit findings section
-  let apiFindingsHTML = ''
-  if (apiResults && apiResults.apiFindings.length > 0) {
-    apiFindingsHTML = `<h2 class="section-title">🔍 Hallazgos de la capa API</h2>
-    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Análisis estructural vía REST API — disponibilidad JSON, actividades fantasma, condiciones de acceso.</p>`
-    for (const f of apiResults.apiFindings) {
-      const si = severityInfo(f.severity)
-      apiFindingsHTML += `
-      <div class="finding ${f.severity}" onclick="this.classList.toggle('open')">
-        <div class="finding-header">
-          <span class="icon">${si.icon}</span>
-          <span class="msg"><strong>${esc(f.section)}:</strong> ${esc(f.message)}</span>
-          <span class="chevron">▶</span>
-        </div>
-        <div class="finding-detail"><span class="badge-api">API</span> ${esc(f.detail)}</div>
-      </div>`
+  let unifiedHTML = ''
+  if (sectionMap.size === 0) {
+    unifiedHTML = `<div class="no-findings"><div class="emoji">✅</div><h3>No se encontraron incidencias</h3><p class="dim">El curso supera la auditoría sin hallazgos críticos ni advertencias.</p></div>`
+  } else {
+    unifiedHTML = `<h2 class="section-title">🔎 Hallazgos combinados (UI + API)</h2>
+    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Cada sección del curso analizada desde dos frentes. <span class="badge-ui">UI</span> = navegador real (Playwright), <span class="badge-api">API</span> = análisis estructural vía REST.</p>`
+    for (const [sectionName, group] of sectionMap) {
+      const allFindings = [...group.ui, ...group.api]
+      const sectionCritical = allFindings.filter((f) => f.severity === 'critical').length
+      const sectionTotal = allFindings.length
+      unifiedHTML += `
+    <div class="finding ${sectionCritical > 0 ? 'critical' : 'info'}" onclick="this.classList.toggle('open')">
+      <div class="finding-header">
+        <span class="icon">${sectionCritical > 0 ? '🔴' : '🔵'}</span>
+        <span class="msg"><strong>${esc(sectionName)}</strong> — ${sectionCritical} crítico(s), ${sectionTotal} hallazgo(s) en total</span>
+        <span class="chevron">▶</span>
+      </div>
+      <div class="finding-detail">`
+      for (const f of group.ui) {
+        const si = severityInfo(f.severity)
+        const stuScreenshot = screenshotMap.get(`student|${f.sectionNumber}`)
+        unifiedHTML += `
+        <div style="margin:8px 0;padding:8px;background:var(--bg);border-radius:4px;border-left:3px solid ${f.severity === 'critical' ? 'var(--bad)' : f.severity === 'warning' ? 'var(--warn)' : 'var(--accent)'}">
+          <span class="badge-ui">UI</span> ${si.icon} <strong>${esc(f.message)}</strong>
+          <p class="dim" style="margin-top:4px;font-size:0.9em">${esc(f.detail)}</p>
+          ${stuScreenshot ? `<div class="screenshot" style="margin-top:6px"><img src="data:image/png;base64,${stuScreenshot}" alt="Captura sección ${f.sectionNumber}"><div class="caption">📸 Vista como estudiante - Sección ${f.sectionNumber}</div></div>` : ''}
+        </div>`
+      }
+      for (const f of group.api) {
+        const si = severityInfo(f.severity)
+        unifiedHTML += `
+        <div style="margin:8px 0;padding:8px;background:var(--bg);border-radius:4px;border-left:3px solid var(--accent)">
+          <span class="badge-api">API</span> ${si.icon} <strong>${esc(f.message)}</strong>
+          <p class="dim" style="margin-top:4px;font-size:0.9em">${esc(f.detail)}</p>
+        </div>`
+      }
+      unifiedHTML += `\n      </div>\n    </div>`
     }
   }
 
@@ -305,6 +313,13 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     <div class="dev-note">
       <strong>⚠️ Entorno de pruebas en producción</strong><br>
       Esta auditoría se ejecuta sobre el entorno productivo de Moodle. Los resultados pueden incluir hallazgos ya conocidos o en proceso de corrección.
+    </div>
+
+    <div class="dev-note" style="margin-top:12px;background:#cce5ff;border-color:#0d6efd">
+      <strong>🔄 Mejora: estudiantes frescos en cada corrida</strong><br>
+      Desde julio 2026, el pipeline crea un usuario nuevo vía API, lo enrola en el curso, ejecuta la auditoría como ese estudiante, y lo elimina al terminar. Esto reemplaza el approach anterior que usaba un usuario estático (nelthor).<br><br>
+      <strong>🧪 ¿Por qué es importante?</strong> Nelthor fue promovido a administrador, por lo que su vista del curso ya no reflejaba la experiencia de un estudiante real. Esto podía generar falsos negativos: por ejemplo, el Módulo 3 de Python 1 aparecía bloqueado para nelthor (admin con role switch) pero la causa real solo se confirmó al usar un estudiante fresco.<br><br>
+      <strong>👤 Estado de nelthor:</strong> Sigue siendo un usuario enrolado en Python 1 y su progresión en el curso sigue siendo válida. Usando cambio de rol o navegación directa desde su cuenta admin, aún puede acceder a su progreso histórico y completar actividades pendientes.
     </div>`
   }
 
@@ -449,6 +464,7 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     .btn-outline { background: transparent; color: var(--accent); border: 2px solid var(--accent); }
     .btn:hover { opacity: .85; }
     .badge-api { display: inline-block; padding: 2px 8px; border-radius: 4px; background: #6f42c1; color: #fff; font-size: 0.75em; font-weight: 600; margin-right: 6px; text-transform: uppercase; }
+    .badge-ui { display: inline-block; padding: 2px 8px; border-radius: 4px; background: #0d6efd; color: #fff; font-size: 0.75em; font-weight: 600; margin-right: 6px; text-transform: uppercase; }
     .dev-note {
       margin-top: 32px;
       padding: 16px;
@@ -507,9 +523,7 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
       <a href="${allureUrl}" target="_blank" rel="noopener" class="btn btn-outline">🔍 Ver reporte técnico (Allure)</a>
     </div>
 
-    ${findingsHTML}
-
-    ${apiFindingsHTML}
+    ${unifiedHTML}
 
     ${dbProbesHTML}
 
@@ -539,7 +553,7 @@ function main(): void {
   const resultsPath = resolve(args[0] || 'reports/audit/audit-results.json')
   const screenshotDir = resolve(args[1] || 'reports/audit')
   const outputDir = resolve(args[2] || 'audit-report')
-  const allureUrl = args[3] || 'allure/'
+  const allureUrl = args[3] || '/unc-agentic-dev/allure/'
   const apiResultsIdx = args.indexOf('--api-results')
   const apiResultsPath = apiResultsIdx !== -1 ? resolve(args[apiResultsIdx + 1]) : null
 
