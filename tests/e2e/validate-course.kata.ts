@@ -36,8 +36,7 @@ test.describe('Course Validation — Multi-Role Audit', () => {
       }
     })
 
-    await test.step('1. Inicio de sesión como administrador', async () => {
-      await login.loginAsAdmin()
+    await test.step('1. Navegación al curso como administrador', async () => {
       await course.goToCourse(courseId)
     })
 
