@@ -322,33 +322,33 @@ test.describe('Course Validation — Multi-Role Audit', () => {
             if (!matchingStudentAct) {
               // Activity not in student view at all
               if (dbVisible === 0) {
-                // DB says hidden — flag as DB-level visibility issue (Lambda case in gated sections)
-                console.log(
-                  `  "${adminAct.name}" (cmid ${cmid}): DB visible=0, not in student view, section ${isGated ? 'gated' : 'open'} → BLOCKER`,
-                )
+                // DB says hidden — flag as DB-level visibility issue
+                console.log(`  "${adminAct.name}" (cmid ${cmid}): DB visible=0 → BLOCKER`)
                 phantoms.push({
                   severity: 'critical',
                   sectionNumber: adminSection.number,
                   sectionTitle: adminSection.title,
                   message: `"${adminAct.name}" tiene visible=0 en DB — oculto para estudiantes`,
-                  detail: `El recurso "${adminAct.name}" (cmid ${cmid}) está configurado como oculto en la base de datos (visible=0). Los estudiantes no pueden verlo ni acceder a él, incluso si la sección está disponible para ellos.`,
+                  detail: `El recurso "${adminAct.name}" (cmid ${cmid}) está configurado como oculto en la base de datos (visible=0). Los estudiantes no pueden verlo ni acceder a él.`,
                   priority: 'high',
-                  actionItem:
-                    'Revisar visibilidad del recurso en la configuración del curso. Si debe estar disponible para estudiantes, cambiar visible=1 en los ajustes del módulo.',
+                  actionItem: 'Revisar visibilidad del recurso en la configuración del curso.',
                 })
-              } else if (!isGated) {
-                // DB says visible but not in student view in an open section → weird, flag as warning
+              } else if (dbVisible === 1) {
+                // DB says visible, no availability conditions, but student can't see it
+                // This is a resource permission issue (Lambda case: visible=1, completion=2 auto,
+                // but the file download link doesn't render for students)
                 console.log(
-                  `  "${adminAct.name}" (cmid ${cmid}): DB visible=1, not in student view, section open → WARNING`,
+                  `  "${adminAct.name}" (cmid ${cmid}): DB visible=1, not in student view, section ${isGated ? 'gated' : 'open'} → RESOURCE ACCESS ISSUE`,
                 )
                 phantoms.push({
-                  severity: 'warning',
+                  severity: 'critical',
                   sectionNumber: adminSection.number,
                   sectionTitle: adminSection.title,
-                  message: `"${adminAct.name}" es visible en DB pero no aparece para estudiantes`,
-                  detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 en la base de datos pero no aparece en la vista del estudiante en una sección abierta. Posible problema de permisos o configuración.`,
-                  priority: 'medium',
-                  actionItem: 'Verificar permisos y visibilidad del recurso.',
+                  message: `"${adminAct.name}" es visible en DB pero estudiantes no pueden acceder`,
+                  detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 en la base de datos y no tiene restricciones de disponibilidad, pero los estudiantes no pueden verlo ni acceder a él. El enlace de descarga no se renderiza para estudiantes. Probablemente sea un problema de permisos del tipo de recurso o archivo.`,
+                  priority: 'high',
+                  actionItem:
+                    'Revisar permisos del recurso. Verificar que el tipo de archivo permita acceso a estudiantes.',
                 })
               }
               continue
