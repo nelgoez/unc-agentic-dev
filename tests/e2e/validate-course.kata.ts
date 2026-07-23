@@ -335,13 +335,13 @@ test.describe('Course Validation — Multi-Role Audit', () => {
               } else if (
                 dbVisible === 1 &&
                 modData &&
-                (modData.completion > 0 || modData.completiondata?.hascompletion === true)
+                modData.completion === 2 &&
+                modData.completiondata?.isautomatic === true
               ) {
-                // DB says visible, completion tracking enabled, but student can't see it
-                // This is a resource permission issue (Lambda case: visible=1, completion=2 auto,
-                // hascompletion=true, but the file link doesn't render for students)
+                // Auto-complete resource (completion=2, view to complete) not accessible to students
+                // This is the Lambda case: the resource link doesn't render for students
                 console.log(
-                  `  "${adminAct.name}" (cmid ${cmid}): DB visible=1, has completion tracking, NOT in student view → BLOCKER`,
+                  `  "${adminAct.name}" (cmid ${cmid}): auto-complete resource NOT in student view → BLOCKER`,
                 )
                 phantoms.push({
                   severity: 'critical',
