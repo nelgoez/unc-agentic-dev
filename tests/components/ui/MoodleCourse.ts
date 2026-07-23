@@ -250,6 +250,7 @@ export class MoodleCourse {
     admin: CourseStructure,
     student?: CourseStructure,
     apiModuleData?: Map<string, { completion: number; isautomatic: boolean }>,
+    nelthorData?: Map<string, { state: number }>,
   ): AuditFinding[] {
     const findings: AuditFinding[] = []
 
@@ -395,6 +396,22 @@ export class MoodleCourse {
       }
 
       findings.push(...visibilityPhantoms)
+    }
+
+    if (nelthorData) {
+      for (const finding of findings) {
+        if (finding.severity !== 'critical') continue
+        const nameMatch = finding.message.match(/"([^"]+?)"/)
+        if (!nameMatch) continue
+        const originalName = nameMatch[1]
+        const nelthorEntry = nelthorData.get(originalName.toLowerCase())
+        if (nelthorEntry && nelthorEntry.state === 1) {
+          finding.severity = 'info'
+          finding.priority = 'low'
+          finding.detail +=
+            ' [Nelthor (estudiante real) completó esta actividad sin problemas antes de ser administrador. Esto no bloqueó su avance. El hallazgo puede deberse a un cambio posterior en la configuración del curso.]'
+        }
+      }
     }
 
     return findings
