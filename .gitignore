@@ -48,6 +48,9 @@ test-results/
 # Planning / scratch
 .scratch/
 
+# SDD sprint artifacts
+.superpowers/
+
 # Local Netlify folder
 .netlify
 
