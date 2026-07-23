@@ -322,7 +322,6 @@ test.describe('Course Validation — Multi-Role Audit', () => {
             if (!matchingStudentAct) {
               // Activity not in student view at all
               if (dbVisible === 0) {
-                // DB says hidden — flag as DB-level visibility issue
                 console.log(`  "${adminAct.name}" (cmid ${cmid}): DB visible=0 → BLOCKER`)
                 phantoms.push({
                   severity: 'critical',
@@ -333,23 +332,45 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                   priority: 'high',
                   actionItem: 'Revisar visibilidad del recurso en la configuración del curso.',
                 })
-              } else if (dbVisible === 1) {
-                // DB says visible, no availability conditions, but student can't see it
+              } else if (
+                dbVisible === 1 &&
+                modData &&
+                (modData.completion > 0 || modData.completiondata?.hascompletion === true)
+              ) {
+                // DB says visible, completion tracking enabled, but student can't see it
                 // This is a resource permission issue (Lambda case: visible=1, completion=2 auto,
-                // but the file download link doesn't render for students)
+                // hascompletion=true, but the file link doesn't render for students)
                 console.log(
-                  `  "${adminAct.name}" (cmid ${cmid}): DB visible=1, not in student view, section ${isGated ? 'gated' : 'open'} → RESOURCE ACCESS ISSUE`,
+                  `  "${adminAct.name}" (cmid ${cmid}): DB visible=1, has completion tracking, NOT in student view → BLOCKER`,
                 )
                 phantoms.push({
                   severity: 'critical',
                   sectionNumber: adminSection.number,
                   sectionTitle: adminSection.title,
-                  message: `"${adminAct.name}" es visible en DB pero estudiantes no pueden acceder`,
-                  detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 en la base de datos y no tiene restricciones de disponibilidad, pero los estudiantes no pueden verlo ni acceder a él. El enlace de descarga no se renderiza para estudiantes. Probablemente sea un problema de permisos del tipo de recurso o archivo.`,
+                  message: `"${adminAct.name}" tiene finalización automática pero estudiantes no pueden acceder`,
+                  detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 en DB y finalización automática configurada (completion=${modData.completion}), pero los estudiantes no pueden verlo ni acceder a él. El enlace no se renderiza para estudiantes.`,
                   priority: 'high',
                   actionItem:
                     'Revisar permisos del recurso. Verificar que el tipo de archivo permita acceso a estudiantes.',
                 })
+              } else if (dbVisible === 1 && !isGated) {
+                // DB says visible, no completion tracking, in open section but missing from student
+                console.log(
+                  `  "${adminAct.name}" (cmid ${cmid}): DB visible=1, no completion, not in student view, open section → WARNING`,
+                )
+                phantoms.push({
+                  severity: 'warning',
+                  sectionNumber: adminSection.number,
+                  sectionTitle: adminSection.title,
+                  message: `"${adminAct.name}" es visible en DB pero no aparece para estudiantes`,
+                  detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 en la base de datos pero no aparece en la vista del estudiante.`,
+                  priority: 'medium',
+                  actionItem: 'Verificar permisos y visibilidad del recurso.',
+                })
+              } else {
+                console.log(
+                  `  "${adminAct.name}" (cmid ${cmid}): DB visible=1, no completion, gated section — skipping (supplementary resource)`,
+                )
               }
               continue
             }
