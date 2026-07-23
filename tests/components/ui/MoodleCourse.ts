@@ -425,6 +425,26 @@ export class MoodleCourse {
         const originalName = nameMatch[1]
         const nelthorEntry = nelthorData.get(originalName.toLowerCase())
         if (nelthorEntry && nelthorEntry.state === 1) {
+          // Only downgrade if the activity is visible to students in switch-role view.
+          // If nelthor completed it but students can't see it, the completion was
+          // admin-assisted (downloaded/viewed as admin, not as student).
+          if (student) {
+            const visibleInStudent = student.sections
+              .flatMap((s) => s.activities)
+              .some(
+                (a) =>
+                  a.name.toLowerCase().includes(originalName.toLowerCase()) ||
+                  originalName.toLowerCase().includes(a.name.toLowerCase()),
+              )
+            if (!visibleInStudent) {
+              console.log(
+                `  → nelthor completed "${originalName}" but it's NOT visible to students — completion was admin-assisted, NOT downgrading`,
+              )
+              finding.detail +=
+                ' [Nelthor completó esta actividad como administrador (no como estudiante). Los estudiantes no pueden verla ni completarla por sí mismos.]'
+              continue
+            }
+          }
           finding.severity = 'info'
           finding.priority = 'low'
           finding.detail +=
