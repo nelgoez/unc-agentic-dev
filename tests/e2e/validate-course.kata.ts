@@ -182,9 +182,79 @@ test.describe('Course Validation — Multi-Role Audit', () => {
       const criticalFindings = phantoms.filter((f) => f.severity === 'critical')
       const warningFindings = phantoms.filter((f) => f.severity === 'warning')
 
-      console.log(`\n=== FINDINGS ===`)
+      console.log(`\n=== FINDINGS (from findPhantoms) ===`)
       console.log(
         `Total: ${phantoms.length} | CRITICAL: ${criticalFindings.length} | WARNING: ${warningFindings.length}`,
+      )
+      for (const f of phantoms) {
+        console.log(`  [${f.severity.toUpperCase()}] ${f.sectionTitle}: ${f.message}`)
+      }
+
+      // Cross-reference: API breakdown conditions + DB visible flag vs student visibility
+      console.log(`\n=== API BREAKDOWN CROSS-REFERENCE ===`)
+      try {
+        const breakdown = await api.getAvailabilityJsonBreakdown(courseId)
+        const studentVisibleCmidSet = new Set<number>()
+        for (const section of switchRoleStudentView.sections) {
+          for (const act of section.activities) {
+            if (!act.href) continue
+            const cmidMatch = act.href.match(/[?&]id=(\d+)/)
+            if (cmidMatch) studentVisibleCmidSet.add(Number(cmidMatch[1]))
+          }
+        }
+        // Collect all cmids referenced in conditions
+        const referencedCmidSet = new Set<number>()
+        for (const section of breakdown.sections) {
+          for (const mod of section.modulesWithRestrictions ?? []) {
+            for (const cond of mod.conditions ?? []) {
+              if (cond.type === 'completion' && cond.cm) {
+                referencedCmidSet.add(cond.cm)
+              }
+            }
+          }
+        }
+        // Check each referenced cmid: is it visible in DB AND visible to student?
+        for (const cmid of referencedCmidSet) {
+          const modData = contents.flatMap((s) => s.modules).find((m) => m.id === cmid)
+          if (!modData) continue
+          const modName = modData.name
+          const dbVisible = modData.visible ?? 1
+          const inStudentView = studentVisibleCmidSet.has(cmid)
+          console.log(
+            `  cmid ${cmid} "${modName}": DB visible=${dbVisible}, inStudentView=${inStudentView}`,
+          )
+          if (dbVisible === 0 || !inStudentView) {
+            console.log(`  → VISIBILITY GAP: cmid ${cmid} "${modName}" not accessible to students`)
+            const nelthorEntry = nelthorData.get(modName.toLowerCase())
+            const severity: 'critical' | 'info' = nelthorEntry?.state === 1 ? 'info' : 'critical'
+            phantoms.push({
+              severity,
+              sectionNumber: 0,
+              sectionTitle: '',
+              message: `"${modName}" es requerida para progresar pero NO es accesible para estudiantes`,
+              detail:
+                `La actividad "${modName}" (cmid ${cmid}) es requerida por las condiciones de disponibilidad del curso, pero los estudiantes no pueden verla ni acceder a ella.` +
+                (dbVisible === 0
+                  ? ` En la base de datos tiene visible=0 (oculta).`
+                  : ` No aparece en la vista de estudiante a pesar de ser visible en DB.`) +
+                (nelthorEntry?.state === 1
+                  ? ' [Nelthor completó esta actividad sin problemas antes de ser administrador.]'
+                  : ''),
+              priority: 'high',
+              actionItem:
+                'Revisar visibilidad y permisos del recurso en la configuración del curso. Si debe estar disponible para estudiantes, cambiar visible=1 o ajustar la condición de disponibilidad.',
+            })
+          }
+        }
+      } catch (err) {
+        console.warn('⚠️ API breakdown cross-reference failed:', err)
+      }
+
+      console.log(`\n=== FINDINGS (final after cross-reference) ===`)
+      const finalCritical = phantoms.filter((f) => f.severity === 'critical')
+      const finalWarning = phantoms.filter((f) => f.severity === 'warning')
+      console.log(
+        `Total: ${phantoms.length} | CRITICAL: ${finalCritical.length} | WARNING: ${finalWarning.length}`,
       )
       for (const f of phantoms) {
         console.log(`  [${f.severity.toUpperCase()}] ${f.sectionTitle}: ${f.message}`)
