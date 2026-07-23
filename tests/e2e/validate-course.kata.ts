@@ -260,8 +260,9 @@ test.describe('Course Validation — Multi-Role Audit', () => {
         // Priority 2: Compare hrefs for activities with the SAME NAME in admin vs student.
         // If admin has a working link (href) and the student sees the same activity name
         // but WITHOUT a link, the resource access is broken for students (Lambda case).
-        // Only check sections WITHOUT restriction text — sections WITH restriction text
-        // are progression-gated and activities in them are expected to be locked.
+        // Check activities in ALL content sections for broken resource access.
+        // In sections WITHOUT restriction text (always open): compare hrefs directly.
+        // In sections WITH restriction text (gated): check API visible flag + student presence.
         console.log(`\n  === HREF-COMPARISON CROSS-REFERENCE ===`)
         const gatedSections = new Set(
           adminView.sections
@@ -273,46 +274,90 @@ test.describe('Course Validation — Multi-Role Audit', () => {
         )
         for (const adminSection of adminView.sections) {
           if (adminSection.number <= 0) continue
-          if (gatedSections.has(adminSection.number)) {
-            console.log(
-              `  Skipping section ${adminSection.number} ("${adminSection.title}") — gated by restriction text`,
-            )
-            continue
-          }
+          const isGated = gatedSections.has(adminSection.number)
           const studentSection = switchRoleStudentView.sections.find(
             (s) => s.number === adminSection.number,
           )
-          if (!studentSection) continue
           for (const adminAct of adminSection.activities) {
             if (!adminAct.href) continue
             const adminNorm = adminAct.name.toLowerCase()
-            const matchingStudentAct = studentSection.activities.find((sa) => {
+            const cmidMatch = adminAct.href.match(/[?&]id=(\d+)/)
+            const cmid = cmidMatch ? Number(cmidMatch[1]) : 0
+            // Get DB-level visible flag from API contents data
+            const modData = cmid
+              ? contents.flatMap((s) => s.modules).find((m) => m.id === cmid)
+              : undefined
+            const dbVisible = modData?.visible ?? 1
+
+            const matchingStudentAct = studentSection?.activities.find((sa) => {
               const sn = sa.name.toLowerCase()
               return sn.includes(adminNorm) || adminNorm.includes(sn)
             })
-            if (!matchingStudentAct) continue
-            if (matchingStudentAct.href) continue
-            // Admin has href, student sees same activity name but NO href → broken link
-            console.log(
-              `  "${adminAct.name}" href="${adminAct.href}": admin has link, student sees "${matchingStudentAct.name}" but NO link → BROKEN ACCESS`,
-            )
-            phantoms.push({
-              severity: 'critical',
-              sectionNumber: adminSection.number,
-              sectionTitle: adminSection.title,
-              message: `"${adminAct.name}" tiene enlace de descarga para admin pero NO para estudiantes`,
-              detail:
-                `El recurso "${adminAct.name}" (URL: ${adminAct.href}) aparece en la sección "${adminSection.title}" con un enlace funcional para el administrador, pero los estudiantes ven el mismo recurso sin enlace. No pueden descargarlo ni visualizarlo.` +
-                ' Si este recurso es necesario para avanzar, los estudiantes quedan bloqueados. La causa probable es que el tipo de archivo o la configuración del recurso no permite acceso para el rol de estudiante.',
-              priority: 'high',
-              actionItem:
-                'Revisar permisos del recurso. Si debe ser descargable por estudiantes, verificar la configuración de visibilidad y permisos del módulo de recurso.',
-            })
+
+            if (!matchingStudentAct) {
+              // Activity not in student view at all
+              if (dbVisible === 0) {
+                // DB says hidden — flag as DB-level visibility issue (Lambda case in gated sections)
+                console.log(
+                  `  "${adminAct.name}" (cmid ${cmid}): DB visible=0, not in student view, section ${isGated ? 'gated' : 'open'} → BLOCKER`,
+                )
+                phantoms.push({
+                  severity: 'critical',
+                  sectionNumber: adminSection.number,
+                  sectionTitle: adminSection.title,
+                  message: `"${adminAct.name}" tiene visible=0 en DB — oculto para estudiantes`,
+                  detail: `El recurso "${adminAct.name}" (cmid ${cmid}) está configurado como oculto en la base de datos (visible=0). Los estudiantes no pueden verlo ni acceder a él, incluso si la sección está disponible para ellos.`,
+                  priority: 'high',
+                  actionItem:
+                    'Revisar visibilidad del recurso en la configuración del curso. Si debe estar disponible para estudiantes, cambiar visible=1 en los ajustes del módulo.',
+                })
+              } else if (!isGated) {
+                // DB says visible but not in student view in an open section → weird, flag as warning
+                console.log(
+                  `  "${adminAct.name}" (cmid ${cmid}): DB visible=1, not in student view, section open → WARNING`,
+                )
+                phantoms.push({
+                  severity: 'warning',
+                  sectionNumber: adminSection.number,
+                  sectionTitle: adminSection.title,
+                  message: `"${adminAct.name}" es visible en DB pero no aparece para estudiantes`,
+                  detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 en la base de datos pero no aparece en la vista del estudiante en una sección abierta. Posible problema de permisos o configuración.`,
+                  priority: 'medium',
+                  actionItem: 'Verificar permisos y visibilidad del recurso.',
+                })
+              }
+              continue
+            }
+
+            // Activity IS in student view — check href status
+            if (isGated) {
+              // In gated sections, student seeing the name (even without href) is expected
+              if (!matchingStudentAct.href) {
+                console.log(
+                  `  "${adminAct.name}" (cmid ${cmid}): in gated section, student sees name but no link — expected behavior, skipping`,
+                )
+              }
+              continue
+            }
+
+            // Open section: admin has href, student has no href → broken link
+            if (!matchingStudentAct.href) {
+              console.log(
+                `  "${adminAct.name}" href="${adminAct.href}": admin has link, student sees name but NO link → BROKEN ACCESS`,
+              )
+              phantoms.push({
+                severity: 'critical',
+                sectionNumber: adminSection.number,
+                sectionTitle: adminSection.title,
+                message: `"${adminAct.name}" tiene enlace de descarga para admin pero NO para estudiantes`,
+                detail: `El recurso "${adminAct.name}" (URL: ${adminAct.href}) aparece en la sección "${adminSection.title}" con un enlace funcional para el administrador, pero los estudiantes ven el mismo recurso sin enlace. No pueden descargarlo ni visualizarlo.`,
+                priority: 'high',
+                actionItem:
+                  'Revisar permisos del recurso. Si debe ser descargable por estudiantes, verificar la configuración de visibilidad y permisos del módulo de recurso.',
+              })
+            }
           }
         }
-        // Note: we only check activities that appear in BOTH admin and student views
-        // with different href status. Activities only in admin view (truly hidden)
-        // are not flagged here — they're handled by the other checks.
       } catch (err) {
         console.warn('⚠️ Tree cross-reference failed:', err)
       }
