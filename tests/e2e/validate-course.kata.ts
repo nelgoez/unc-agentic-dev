@@ -257,6 +257,53 @@ test.describe('Course Validation — Multi-Role Audit', () => {
             })
           }
         }
+        // Priority 2: Activity Completion report entries not accessible to students
+        // The completion report (from Reports > Activity Completion, admin view) lists
+        // activities with completion tracking. If an activity is on this list but students
+        // can't see it, it's a real blocker regardless of conditions.
+        console.log(`\n  === COMPLETION REPORT CROSS-REFERENCE ===`)
+        const alreadyFlaggedCmidSet = new Set<number>()
+        for (const f of phantoms) {
+          const cmidMatch = f.message.match(/cmid (\d+)/)
+          if (cmidMatch) alreadyFlaggedCmidSet.add(Number(cmidMatch[1]))
+        }
+        for (const entry of completionReport) {
+          if (!entry.activityName) continue
+          const matchingMod = contents
+            .flatMap((s) => s.modules)
+            .find((m) => {
+              const ln = m.name?.toLowerCase() ?? ''
+              const en = entry.activityName.toLowerCase()
+              return ln.includes(en) || en.includes(ln)
+            })
+          if (!matchingMod) continue
+          const cmid = matchingMod.id
+          if (alreadyFlaggedCmidSet.has(cmid)) continue
+          if (adminCmidSet.has(cmid) && !studentVisibleCmidSet.has(cmid)) {
+            console.log(
+              `  "${entry.activityName}" (cmid ${cmid}): in completion report but NOT in student view → BLOCKER`,
+            )
+            const nelthorEntry = nelthorData.get(entry.activityName.toLowerCase())
+            const severity: 'critical' | 'info' = nelthorEntry?.state === 1 ? 'info' : 'critical'
+            phantoms.push({
+              severity,
+              sectionNumber: 0,
+              sectionTitle: '',
+              message: `"${entry.activityName}" (cmid ${cmid}) figura en el reporte de Activity Completion pero NO es accesible para estudiantes`,
+              detail:
+                `La actividad "${entry.activityName}" (cmid ${cmid}) aparece en el reporte de finalización del administrador, lo que indica que DEBERÍA ser completable, pero los estudiantes no pueden verla ni acceder a ella.` +
+                (matchingMod.visible === 0
+                  ? ` En la base de datos tiene visible=0 (oculta).`
+                  : ` No aparece en la vista de estudiante.`) +
+                (nelthorEntry?.state === 1
+                  ? ' [Nelthor completó esta actividad sin problemas antes de ser administrador.]'
+                  : ''),
+              priority: 'high',
+              actionItem:
+                'Revisar visibilidad y permisos del recurso en la configuración del curso. Si debe estar disponible para estudiantes, cambiar visible=1 o ajustar la finalización.',
+            })
+          }
+        }
       } catch (err) {
         console.warn('⚠️ Tree cross-reference failed:', err)
       }
