@@ -190,10 +190,10 @@ test.describe('Course Validation — Multi-Role Audit', () => {
         console.log(`  [${f.severity.toUpperCase()}] ${f.sectionTitle}: ${f.message}`)
       }
 
-      // Cross-reference: API breakdown conditions + DB visible flag vs student visibility
-      console.log(`\n=== API BREAKDOWN CROSS-REFERENCE ===`)
+      // Cross-reference: conditions + DB visible flag + admin-vs-student cmids
+      console.log(`\n=== CONDITIONAL TREE CROSS-REFERENCE ===`)
       try {
-        const breakdown = await api.getAvailabilityJsonBreakdown(courseId)
+        // Build student visible cmid set from switch-role view
         const studentVisibleCmidSet = new Set<number>()
         for (const section of switchRoleStudentView.sections) {
           for (const act of section.activities) {
@@ -202,7 +202,19 @@ test.describe('Course Validation — Multi-Role Audit', () => {
             if (cmidMatch) studentVisibleCmidSet.add(Number(cmidMatch[1]))
           }
         }
+        // Build admin visible cmid set
+        const adminCmidSet = new Set<number>()
+        for (const section of adminView.sections) {
+          for (const act of section.activities) {
+            if (!act.href) continue
+            const cmidMatch = act.href.match(/[?&]id=(\d+)/)
+            if (cmidMatch) adminCmidSet.add(Number(cmidMatch[1]))
+          }
+        }
+        // Collect all cmids present in ANY module of the course (from API contents)
+        const allCmidSet = new Set<number>(contents.flatMap((s) => s.modules).map((m) => m.id))
         // Collect all cmids referenced in conditions
+        const breakdown = await api.getAvailabilityJsonBreakdown(courseId)
         const referencedCmidSet = new Set<number>()
         for (const section of breakdown.sections) {
           for (const mod of section.modulesWithRestrictions ?? []) {
@@ -213,7 +225,10 @@ test.describe('Course Validation — Multi-Role Audit', () => {
             }
           }
         }
-        // Check each referenced cmid: is it visible in DB AND visible to student?
+        // Priority 1: referenced cmids that are DB-hidden (visible=0) or not in student view
+        // Priority 2: ALL modules with visible=0 in DB that are in a restricted section
+        // Priority 3: modules in admin view but NOT in student view (any section)
+        const checkedCmidSet = new Set<number>()
         for (const cmid of referencedCmidSet) {
           const modData = contents.flatMap((s) => s.modules).find((m) => m.id === cmid)
           if (!modData) continue
@@ -221,10 +236,10 @@ test.describe('Course Validation — Multi-Role Audit', () => {
           const dbVisible = modData.visible ?? 1
           const inStudentView = studentVisibleCmidSet.has(cmid)
           console.log(
-            `  cmid ${cmid} "${modName}": DB visible=${dbVisible}, inStudentView=${inStudentView}`,
+            `  cmid ${cmid} "${modName}": DB visible=${dbVisible}, inStudentView=${inStudentView}, referencedInConditions=true`,
           )
           if (dbVisible === 0 || !inStudentView) {
-            console.log(`  → VISIBILITY GAP: cmid ${cmid} "${modName}" not accessible to students`)
+            console.log(`  → REFERENCED CMID GAP: cmid ${cmid} "${modName}"`)
             const nelthorEntry = nelthorData.get(modName.toLowerCase())
             const severity: 'critical' | 'info' = nelthorEntry?.state === 1 ? 'info' : 'critical'
             phantoms.push({
@@ -245,9 +260,43 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                 'Revisar visibilidad y permisos del recurso en la configuración del curso. Si debe estar disponible para estudiantes, cambiar visible=1 o ajustar la condición de disponibilidad.',
             })
           }
+          checkedCmidSet.add(cmid)
+        }
+        // Also check modules with visible=0 in DB that admin sees but student doesn't
+        for (const mod of contents.flatMap((s) => s.modules)) {
+          if (checkedCmidSet.has(mod.id)) continue
+          const dbVisible = mod.visible ?? 1
+          if (dbVisible === 0) {
+            const inAdminView = adminCmidSet.has(mod.id)
+            const inStudentView = studentVisibleCmidSet.has(mod.id)
+            console.log(
+              `  cmid ${mod.id} "${mod.name}": DB visible=${dbVisible}, inAdminView=${inAdminView}, inStudentView=${inStudentView}`,
+            )
+            if (inAdminView && !inStudentView) {
+              console.log(
+                `  → DB-HIDDEN: cmid ${mod.id} "${mod.name}" (visible=0, not in student view)`,
+              )
+              const nelthorEntry = nelthorData.get(mod.name.toLowerCase())
+              const severity: 'critical' | 'info' = nelthorEntry?.state === 1 ? 'info' : 'critical'
+              phantoms.push({
+                severity,
+                sectionNumber: 0,
+                sectionTitle: '',
+                message: `"${mod.name}" tiene visible=0 en DB — no es accesible para estudiantes`,
+                detail:
+                  `El recurso "${mod.name}" (cmid ${mod.id}) está configurado como oculto en la base de datos (visible=0). Solo administradores pueden verlo. Los estudiantes no pueden acceder a él.` +
+                  (nelthorEntry?.state === 1
+                    ? ' [Nelthor completó esta actividad sin problemas antes de ser administrador.]'
+                    : ''),
+                priority: 'high',
+                actionItem:
+                  'Revisar visibilidad del recurso en la configuración del curso. Si debe estar disponible para estudiantes, cambiar visible=1 en los ajustes del módulo.',
+              })
+            }
+          }
         }
       } catch (err) {
-        console.warn('⚠️ API breakdown cross-reference failed:', err)
+        console.warn('⚠️ Tree cross-reference failed:', err)
       }
 
       console.log(`\n=== FINDINGS (final after cross-reference) ===`)
