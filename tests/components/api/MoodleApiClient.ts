@@ -102,6 +102,27 @@ export interface CohortSearchResult {
   cohorts: Array<{ id: number; name: string; idnumber: string; visible: boolean }>
 }
 
+export interface ModuleVisibility {
+  id: number
+  name: string
+  section: number
+  sectionName: string
+  visible: number
+  uservisible: boolean
+  hascompletion: boolean
+  isautomatic: boolean
+  groupmode: number
+}
+
+export interface ActivityCompletionAggregate {
+  cmid: number
+  name: string
+  sectionName: string
+  totalStudents: number
+  completedCount: number
+  completionRate: number
+}
+
 export class MoodleApiClient {
   private baseUrl: string
   private token: string
@@ -446,5 +467,94 @@ export class MoodleApiClient {
     const restrictedActivities = breakdown.reduce((s, b) => s + b.modulesWithRestrictions.length, 0)
 
     return { sections: breakdown, totalActivities, restrictedActivities }
+  }
+
+  @atc('MAC-13', { story: 'UNC-MVP-1', feature: 'Deep Audit' })
+  async getModuleVisibility(courseId: number | string): Promise<ModuleVisibility[]> {
+    try {
+      const sections = await this.getCourseContents(courseId)
+
+      return sections.flatMap((section) =>
+        section.modules.map((mod) => ({
+          id: mod.id,
+          name: mod.name,
+          section: section.section,
+          sectionName: section.name,
+          visible: mod.visible,
+          uservisible: mod.uservisible,
+          hascompletion: mod.completiondata?.hascompletion ?? mod.completion > 0,
+          isautomatic: mod.completiondata?.isautomatic ?? false,
+          groupmode: mod.groupmode,
+        })),
+      )
+    } catch (err) {
+      console.warn('⚠️ getModuleVisibility failed:', err instanceof Error ? err.message : err)
+      return []
+    }
+  }
+
+  @atc('MAC-14', { story: 'UNC-MVP-1', feature: 'Deep Audit' })
+  async getAllStudentCompletionStatus(
+    courseId: number | string,
+  ): Promise<ActivityCompletionAggregate[]> {
+    try {
+      const enrolled = await this.getEnrolledUsers(Number(courseId))
+      if (!enrolled || enrolled.length === 0) return []
+
+      const students = enrolled.filter(
+        (u) => u.roles && u.roles.some((r) => r.shortname === 'student'),
+      )
+      if (students.length === 0) return []
+
+      const cmMap = new Map<number, { name: string; sectionName: string }>()
+
+      const sections = await this.getCourseContents(courseId)
+      for (const section of sections) {
+        for (const mod of section.modules) {
+          cmMap.set(mod.id, { name: mod.name, sectionName: section.name })
+        }
+      }
+
+      const completionCounts = new Map<number, number>()
+
+      for (const student of students) {
+        try {
+          const statuses = await this.getActivitiesCompletionStatus(courseId, student.id)
+          for (const status of statuses) {
+            if (status.state === 1) {
+              completionCounts.set(status.cmid, (completionCounts.get(status.cmid) ?? 0) + 1)
+            }
+          }
+        } catch (err) {
+          console.warn(
+            `⚠️ Failed to get completion for user ${student.id}:`,
+            err instanceof Error ? err.message : err,
+          )
+        }
+      }
+
+      const totalStudents = students.length
+      const result: ActivityCompletionAggregate[] = []
+
+      for (const [cmid, completedCount] of completionCounts) {
+        const info = cmMap.get(cmid)
+        result.push({
+          cmid,
+          name: info?.name ?? `Activity ${cmid}`,
+          sectionName: info?.sectionName ?? '',
+          totalStudents,
+          completedCount,
+          completionRate: Math.round((completedCount / totalStudents) * 100 * 100) / 100,
+        })
+      }
+
+      return result.sort((a, b) => a.cmid - b.cmid)
+    } catch (err) {
+      console.warn(
+        '⚠️ getAllStudentCompletionStatus failed:',
+        err instanceof Error ? err.message : err,
+      )
+      return []
+    }
   }
 }
