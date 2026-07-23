@@ -23,6 +23,22 @@ async function main() {
   mkdirSync(outDir, { recursive: true })
 
   const contents = await api.getCourseContents(courseId)
+
+  const visibilityMap = new Map<
+    number,
+    { name: string; visible: number; uservisible: boolean; sectionName: string }
+  >()
+  for (const section of contents) {
+    for (const mod of section.modules) {
+      visibilityMap.set(mod.id, {
+        name: mod.name,
+        visible: mod.visible,
+        uservisible: mod.uservisible,
+        sectionName: section.name,
+      })
+    }
+  }
+
   const breakdown = await api.getAvailabilityJsonBreakdown(courseId)
   const orphans = await api.findOrphanedCmIds(contents)
 
@@ -126,6 +142,42 @@ async function main() {
     detail: string
   }> = []
 
+  // Fresh student completion cross-check
+  const freshStudentCheck: Array<{
+    name: string
+    cmid: number
+    section: string
+    expectedCompletion: number
+  }> = []
+  for (const section of breakdown.sections) {
+    for (const mod of section.modulesWithRestrictions) {
+      for (const cond of mod.conditions) {
+        if (cond.type === 'completion' && cond.cm) {
+          const visMod = visibilityMap.get(cond.cm)
+          if (visMod && visMod.visible === 0) continue
+          const refMod = breakdown.sections.flatMap((s) => s.modules).find((m) => m.id === cond.cm)
+          if (refMod && refMod.completion === 2) {
+            freshStudentCheck.push({
+              name: refMod.name,
+              cmid: cond.cm,
+              section: section.name,
+              expectedCompletion: 2,
+            })
+          }
+        }
+      }
+    }
+  }
+  if (freshStudentCheck.length > 0) {
+    apiFindings.push({
+      severity: 'info',
+      type: 'api-auto-completion-check',
+      section: freshStudentCheck[0].section,
+      message: `${freshStudentCheck.length} actividad(es) tienen finalización automática (completion=2) — deberían completarse al visualizar el contenido`,
+      detail: `Actividades: ${freshStudentCheck.map((m) => m.name).join(', ')}. Estas actividades tienen seguimiento automático y deberían marcarse como completadas cuando el estudiante las visualiza. Si no se completan, puede ser un problema de configuración de visibilidad.`,
+    })
+  }
+
   for (const o of orphans) {
     apiFindings.push({
       severity: 'critical',
@@ -152,6 +204,8 @@ async function main() {
           const exists = contents
             .flatMap((s: { modules: Array<{ id: number }> }) => s.modules)
             .some((m: { id: number }) => m.id === cond.cm)
+          const visMod = visibilityMap.get(cond.cm)
+          const targetName = visMod?.name ?? `cmid ${cond.cm}`
           if (!exists) {
             apiFindings.push({
               severity: 'critical',
@@ -159,6 +213,22 @@ async function main() {
               section: section.name,
               message: `"${mod.name}" requiere completion de cmid ${cond.cm} que no existe`,
               detail: `Actividad fantasma detectada a nivel de JSON de disponibilidad.`,
+            })
+          } else if (visMod && visMod.visible === 0) {
+            apiFindings.push({
+              severity: 'critical',
+              type: 'api-visibility-phantom',
+              section: section.name,
+              message: `"${mod.name}" requiere "${targetName}" que está oculto para estudiantes (visible=0 en DB)`,
+              detail: `El módulo "${mod.name}" tiene una condición de finalización que requiere "${targetName}" (cmid ${cond.cm}), pero ese recurso está configurado como oculto (visible=0) en la base de datos. Los estudiantes no pueden verlo ni completarlo.`,
+            })
+          } else if (visMod && visMod.visible === 1 && !visMod.uservisible) {
+            apiFindings.push({
+              severity: 'critical',
+              type: 'api-visibility-restricted',
+              section: section.name,
+              message: `"${mod.name}" requiere "${targetName}" que existe pero no es accesible para estudiantes (uservisible=false)`,
+              detail: `El módulo "${mod.name}" tiene una condición de finalización que requiere "${targetName}" (cmid ${cond.cm}), pero ese recurso no es visible para los estudiantes (uservisible=false) a pesar de estar configurado como visible.`,
             })
           }
         }

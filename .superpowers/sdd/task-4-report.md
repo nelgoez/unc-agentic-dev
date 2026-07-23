@@ -1,34 +1,30 @@
-# Task 4: Draft email body — Report
+# Task 4 Report — run-api-audit.ts — Visibility Cross-Reference
 
-## Status: DONE
+## Status
 
-## Deliverables
+✅ Completed
 
-- **Email body file:** `D:\Nahuel\Proyectos\UNC\unc-agentic-dev\reports\mvp-demo\EMAIL-BODY.md`
-- **Task report:** `D:\Nahuel\Proyectos\UNC\unc-agentic-dev\.superpowers\sdd\task-4-report.md`
+## What was implemented
 
-## Summary
+1. **Visibility map after `getCourseContents()`** — Builds a `visibilityMap` (`Map<number, { name, visible, uservisible, sectionName }>`) from the course contents API response.
 
-Created a copy-paste ready email body in Spanish, addressed to Ignacio and Patricia at UNC. The email covers:
+2. **Visibility checks in completion condition loop** — In the existing orphan/phantom detection loop, after the `!exists` check:
+   - `api-visibility-phantom` (critical): when `cond.cm` exists but `visible === 0` (hidden in DB)
+   - `api-visibility-restricted` (critical): when `cond.cm` exists with `visible === 1` but `uservisible === false`
 
-1. **Subject suggestion** — "Reporte de auditoría automatizada — Campus Virtual UNC"
-2. **Opening context** — References the original course 269 case and explains the refined methodology
-3. **Key findings** — Summary table of all 4 courses (all clean), with 127 activities and 0 phantom activities
-4. **nelthor clarification** — Explains that promoting nelthor to admin masked the bug; new methodology uses fresh student accounts for each audit
-5. **Value proposition** — Periodic automated auditing, phantom detection, student experience verification, interactive HTML reports
-6. **Invitation** — Asks for more course IDs to audit, offers a live demo
-7. **Professional closing** — Thanks and signature
+3. **Fresh student completion cross-check** — Iterates availability conditions and flags activities with automatic completion (`completion === 2`) that are referenced by restrictions, reporting as `api-auto-completion-check` (info).
 
-## Acceptance criteria verification
+## Files changed
 
-- [x] Ready to copy-paste
-- [x] Clear business language (for Ignacio/Patricia)
-- [x] Technical details in appendix format
-- [x] Asks for more course suggestions
+| File                       | Action                         |
+| -------------------------- | ------------------------------ |
+| `scripts/run-api-audit.ts` | Modified (multiple insertions) |
 
-## Notes
+## Verification
 
-- Contact names sourced from AGENTS.md (Ignacio Acuña, Tadeo Otaola → Patricia as per task brief)
-- Email uses "ustedes" register — professional but warm
-- Technical appendix at the bottom for anyone who wants details
-- Data table matches the 4-course audit results exactly
+- `bunx tsc --noEmit` — passed (0 errors)
+
+## Concerns
+
+- The fresh student check had to be moved after `apiFindings` declaration to resolve a "used before declaration" error. It lives between the declaration and the orphan loop, which is correct for data flow.
+- No runtime tests were run (requires live Moodle instance with API credentials).
