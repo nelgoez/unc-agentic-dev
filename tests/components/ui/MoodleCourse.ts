@@ -249,7 +249,7 @@ export class MoodleCourse {
   findPhantoms(
     admin: CourseStructure,
     student?: CourseStructure,
-    apiModuleData?: Map<string, { completion: number; isautomatic: boolean; groupmode: number }>,
+    apiModuleData?: Map<string, { completion: number; isautomatic: boolean }>,
   ): AuditFinding[] {
     const findings: AuditFinding[] = []
 
@@ -315,17 +315,19 @@ export class MoodleCourse {
           continue
         }
         let severity: 'critical' | 'warning' = 'critical'
+        let detail: string
         if (modData?.completion === 1) {
           severity = 'warning'
-        } else if (modData?.completion === 0) {
-          severity = 'critical'
+          detail = `Para desbloquear "${firstRestricted.title}" hace falta que "${required}" esté completada. El servidor indica que el seguimiento es manual (completion=1), pero la casilla de verificación no se renderiza en la página. Posible bug de interfaz o permiso faltante.`
+        } else {
+          detail = `Para desbloquear "${firstRestricted.title}" hace falta que "${required}" esté completada, pero al recorrer el curso como alumno nuevo no encontramos ninguna forma de marcarla como completada (no hay casilla de verificación ni progreso automático). Esto impide el avance a "${firstRestricted.title}" y a los módulos siguientes.`
         }
         findings.push({
           severity,
           sectionNumber: actSection?.number ?? firstRestricted.number,
           sectionTitle: actSection?.title ?? firstRestricted.title,
           message: `"${required}" está en "${actSection?.title ?? '?'}" pero no puede marcarse como completada`,
-          detail: `Para desbloquear "${firstRestricted.title}" hace falta que "${required}" esté completada, pero al recorrer el curso como alumno nuevo no encontramos ninguna forma de marcarla como completada (no hay casilla de verificación ni progreso automático). Esto impide el avance a "${firstRestricted.title}" y a los módulos siguientes. El usuario nelthor sí completó estas actividades antes de ser promovido a administrador, lo que sugiere que el seguimiento de finalización funcionaba en ese momento y luego se deshabilitó.`,
+          detail,
           priority: 'high',
           actionItem:
             'Agregar la actividad faltante o corregir la condición de disponibilidad en la configuración del módulo bloqueado.',
@@ -356,27 +358,43 @@ export class MoodleCourse {
           .filter((a) => a.isVisible)
           .map((a) => a.name.toLowerCase()),
       )
-      for (const finding of findings) {
-        const nameMatch = finding.message.match(/"([^"]+?)"/)
-        if (!nameMatch) continue
-        const referencedName = nameMatch[1].toLowerCase()
-        const existsInStudentSet = visibleStudentActivities.has(referencedName)
-        const existsByFuzzy = Array.from(visibleStudentActivities).some(
-          (v) => v.includes(referencedName) || referencedName.includes(v),
+
+      const visibilityPhantoms: AuditFinding[] = []
+      const checkedNames = new Set<string>()
+
+      for (const required of activityNames) {
+        const normalized = required.toLowerCase()
+        if (checkedNames.has(normalized)) continue
+        checkedNames.add(normalized)
+
+        const existsInAdmin = admin.sections
+          .flatMap((s) => s.activities)
+          .some(
+            (a) =>
+              a.name.toLowerCase().includes(normalized) ||
+              normalized.includes(a.name.toLowerCase()),
+          )
+        if (!existsInAdmin) continue
+
+        const existsInStudent = Array.from(visibleStudentActivities).some(
+          (v) => v.includes(normalized) || normalized.includes(v),
         )
-        if (!existsInStudentSet && !existsByFuzzy) {
-          findings.push({
+
+        if (!existsInStudent) {
+          visibilityPhantoms.push({
             severity: 'critical',
-            sectionNumber: finding.sectionNumber,
-            sectionTitle: finding.sectionTitle,
-            message: `"${nameMatch[1]}" existe en el curso pero NO es visible para estudiantes`,
-            detail: `El recurso "${nameMatch[1]}" aparece en la vista de administrador pero no está disponible para los estudiantes. Las condiciones de disponibilidad del módulo bloqueado requieren esta actividad, creando un punto muerto.`,
+            sectionNumber: firstRestricted.number,
+            sectionTitle: firstRestricted.title,
+            message: `"${required}" existe en el curso pero NO es visible para estudiantes`,
+            detail: `El recurso "${required}" aparece en la vista de administrador pero no está disponible para los estudiantes. Las condiciones de disponibilidad del módulo bloqueado requieren esta actividad, creando un punto muerto.`,
             actionItem:
               'Revisar visibilidad del recurso en la configuración del curso. Si debe estar disponible para estudiantes, cambiar visible=1 en los ajustes del módulo.',
             priority: 'high',
           })
         }
       }
+
+      findings.push(...visibilityPhantoms)
     }
 
     return findings
