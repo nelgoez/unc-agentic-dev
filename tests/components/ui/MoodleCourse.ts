@@ -40,6 +40,16 @@ export interface AuditFinding {
   sectionTitle: string
   message: string
   detail: string
+  actionItem?: string
+  priority?: 'high' | 'medium' | 'low'
+}
+
+export interface ActivityCompletionSummary {
+  activityName: string
+  sectionName: string
+  totalStudents: number
+  completedCount: number
+  completionRate: number
 }
 
 export class MoodleCourse {
@@ -236,7 +246,11 @@ export class MoodleCourse {
     return { courseName, courseUrl, tabs, sections }
   }
 
-  findPhantoms(admin: CourseStructure): AuditFinding[] {
+  findPhantoms(
+    admin: CourseStructure,
+    student?: CourseStructure,
+    apiModuleData?: Map<string, { completion: number; isautomatic: boolean; groupmode: number }>,
+  ): AuditFinding[] {
     const findings: AuditFinding[] = []
 
     const sectionsWithRestrictions = admin.sections.filter(
@@ -288,17 +302,33 @@ export class MoodleCourse {
           sectionTitle: firstRestricted.title,
           message: `Actividad requerida "${required}" no encontrada en el curso`,
           detail: `El módulo "${firstRestricted.title}" está bloqueado por "${required}" según su condición de disponibilidad, pero no existe ninguna actividad con ese nombre en el curso. Esto impide el avance de cualquier estudiante nuevo.`,
+          priority: 'high',
+          actionItem:
+            'Agregar la actividad faltante o corregir la condición de disponibilidad en la configuración del módulo bloqueado.',
         })
       } else if (!matchingActivity.hasCompletionTracking) {
         const actSection = admin.sections.find((s) =>
           s.activities.some((a) => a.name === matchingActivity.name),
         )
+        const modData = apiModuleData?.get(matchingActivity.name.toLowerCase())
+        if (modData?.isautomatic === true) {
+          continue
+        }
+        let severity: 'critical' | 'warning' = 'critical'
+        if (modData?.completion === 1) {
+          severity = 'warning'
+        } else if (modData?.completion === 0) {
+          severity = 'critical'
+        }
         findings.push({
-          severity: 'critical',
+          severity,
           sectionNumber: actSection?.number ?? firstRestricted.number,
           sectionTitle: actSection?.title ?? firstRestricted.title,
           message: `"${required}" está en "${actSection?.title ?? '?'}" pero no puede marcarse como completada`,
           detail: `Para desbloquear "${firstRestricted.title}" hace falta que "${required}" esté completada, pero al recorrer el curso como alumno nuevo no encontramos ninguna forma de marcarla como completada (no hay casilla de verificación ni progreso automático). Esto impide el avance a "${firstRestricted.title}" y a los módulos siguientes. El usuario nelthor sí completó estas actividades antes de ser promovido a administrador, lo que sugiere que el seguimiento de finalización funcionaba en ese momento y luego se deshabilitó.`,
+          priority: 'high',
+          actionItem:
+            'Agregar la actividad faltante o corregir la condición de disponibilidad en la configuración del módulo bloqueado.',
         })
       }
     }
@@ -314,9 +344,97 @@ export class MoodleCourse {
         sectionTitle: firstRestricted.title,
         message: `${cascadeCount} módulo(s) dependen de "${firstRestricted.title}"`,
         detail: `Los módulos ${cascadeNames} están bloqueados porque dependen de "${firstRestricted.title}". No es un error nuevo — es consecuencia de la restricción anterior.`,
+        priority: 'low',
+        actionItem: 'No requiere acción directa — es consecuencia del hallazgo anterior.',
       })
     }
 
+    if (student) {
+      const visibleStudentActivities = new Set(
+        student.sections
+          .flatMap((s) => s.activities)
+          .filter((a) => a.isVisible)
+          .map((a) => a.name.toLowerCase()),
+      )
+      for (const finding of findings) {
+        const nameMatch = finding.message.match(/"([^"]+?)"/)
+        if (!nameMatch) continue
+        const referencedName = nameMatch[1].toLowerCase()
+        const existsInStudentSet = visibleStudentActivities.has(referencedName)
+        const existsByFuzzy = Array.from(visibleStudentActivities).some(
+          (v) => v.includes(referencedName) || referencedName.includes(v),
+        )
+        if (!existsInStudentSet && !existsByFuzzy) {
+          findings.push({
+            severity: 'critical',
+            sectionNumber: finding.sectionNumber,
+            sectionTitle: finding.sectionTitle,
+            message: `"${nameMatch[1]}" existe en el curso pero NO es visible para estudiantes`,
+            detail: `El recurso "${nameMatch[1]}" aparece en la vista de administrador pero no está disponible para los estudiantes. Las condiciones de disponibilidad del módulo bloqueado requieren esta actividad, creando un punto muerto.`,
+            actionItem:
+              'Revisar visibilidad del recurso en la configuración del curso. Si debe estar disponible para estudiantes, cambiar visible=1 en los ajustes del módulo.',
+            priority: 'high',
+          })
+        }
+      }
+    }
+
     return findings
+  }
+
+  @atc('MC-8', { story: 'UNC-RE-1', feature: 'Course Scan' })
+  async getActivityCompletionReport(courseId: string): Promise<ActivityCompletionSummary[]> {
+    await this.page.goto(`${this.baseUrl}/report/completion/index.php?course=${courseId}`)
+    await this.page.waitForLoadState('load')
+    await this.page
+      .locator('table')
+      .first()
+      .waitFor({ state: 'visible', timeout: 15000 })
+      .catch(() => {})
+
+    return this.page.evaluate(() => {
+      const table = document.querySelector('table')
+      if (!table) return []
+
+      const rows = Array.from(table.querySelectorAll('tr'))
+      if (rows.length < 2) return []
+
+      const headerCells = rows[0].querySelectorAll('th, td')
+      const activityNames: string[] = []
+      const sectionNames: string[] = []
+      for (let c = 0; c < headerCells.length; c++) {
+        const text = headerCells[c].textContent?.trim() || ''
+        if (text && text !== 'Nombre' && text !== 'Apellido' && text !== 'Nombre/Apellido') {
+          const cellHtml = headerCells[c].innerHTML
+          const secMatch = cellHtml.match(/<br\s*\/?>\s*(.+?)(?:\s*<|$)/i)
+          sectionNames.push(secMatch ? secMatch[1].trim() : '')
+          activityNames.push(text.replace(/<br\s*\/?>.+$/i, '').trim())
+        }
+      }
+
+      const dataRows = rows.slice(1).filter((r) => r.querySelector('td, th'))
+      const totalStudents = dataRows.length
+      if (totalStudents === 0) return []
+
+      const completedCounts: number[] = new Array(activityNames.length).fill(0)
+      for (const row of dataRows) {
+        const cells = row.querySelectorAll('td, th')
+        let actCol = 0
+        const nameCols = cells.length - activityNames.length
+        for (let c = nameCols; c < cells.length && actCol < activityNames.length; c++, actCol++) {
+          const checkbox = cells[c].querySelector('input[type="checkbox"]:checked')
+          if (checkbox) completedCounts[actCol]++
+        }
+      }
+
+      return activityNames.map((name, i) => ({
+        activityName: name,
+        sectionName: sectionNames[i] || '',
+        totalStudents,
+        completedCount: completedCounts[i],
+        completionRate:
+          totalStudents > 0 ? Math.round((completedCounts[i] / totalStudents) * 10000) / 100 : 0,
+      }))
+    })
   }
 }
