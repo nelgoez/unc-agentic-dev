@@ -386,6 +386,13 @@ export class MoodleCourse {
         if (checkedNames.has(normalized)) continue
         checkedNames.add(normalized)
 
+        // Skip auto-completion activities — they work fine even if dimmed in UI
+        const actData = apiModuleData?.get(normalized)
+        if (actData?.isautomatic === true) {
+          console.log(`  → Visibility phantom: "${required}" is auto-complete, skipping`)
+          continue
+        }
+
         const existsInAdmin = admin.sections
           .flatMap((s) => s.activities)
           .some(
@@ -425,10 +432,14 @@ export class MoodleCourse {
         const originalName = nameMatch[1]
         const nelthorEntry = nelthorData.get(originalName.toLowerCase())
         if (nelthorEntry && nelthorEntry.state === 1) {
-          // Only downgrade if the activity is visible to students in switch-role view.
-          // If nelthor completed it but students can't see it, the completion was
-          // admin-assisted (downloaded/viewed as admin, not as student).
-          if (student) {
+          // Check if the activity is auto-complete — if so, trust nelthor's completion
+          // (auto-complete activities complete when viewed, so nelthor viewed them)
+          const isAutoComplete =
+            apiModuleData?.get(originalName.toLowerCase())?.isautomatic === true
+          if (!isAutoComplete && student) {
+            // Only downgrade if the activity is visible to students in switch-role view.
+            // If nelthor completed it but students can't see it, the completion was
+            // admin-assisted (downloaded/viewed as admin, not as student).
             const visibleInStudent = student.sections
               .flatMap((s) => s.activities)
               .some(

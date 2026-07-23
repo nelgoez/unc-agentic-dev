@@ -257,62 +257,52 @@ test.describe('Course Validation — Multi-Role Audit', () => {
             })
           }
         }
-        // Priority 2: Check ALL admin cmids from content sections (number > 0)
-        // against student view. Skip sections that are LOCKED in student view
-        // (activities behind progression gates aren't blockers — they're expected).
-        console.log(`\n  === ALL-CMID CROSS-REFERENCE ===`)
+        // Priority 2: Compare hrefs for activities with the SAME NAME in admin vs student.
+        // If admin has a working link (href) and the student sees the same activity name
+        // but WITHOUT a link, the resource access is broken for students (Lambda case).
+        console.log(`\n  === HREF-COMPARISON CROSS-REFERENCE ===`)
         const lockedSections = new Set(
           switchRoleStudentView.sections.filter((s) => s.isLocked).map((s) => s.number),
         )
-        console.log(
-          `  Locked sections in student view: ${Array.from(lockedSections).join(', ') || '(none)'}`,
-        )
-        const alreadyFlagged = new Set<number>()
-        for (const f of phantoms) {
-          const cmidMatch = f.message.match(/cmid (\d+)/)
-          if (cmidMatch) alreadyFlagged.add(Number(cmidMatch[1]))
-        }
         for (const adminSection of adminView.sections) {
           if (adminSection.number <= 0) continue
-          if (lockedSections.has(adminSection.number)) {
+          if (lockedSections.has(adminSection.number)) continue
+          const studentSection = switchRoleStudentView.sections.find(
+            (s) => s.number === adminSection.number,
+          )
+          if (!studentSection) continue
+          for (const adminAct of adminSection.activities) {
+            if (!adminAct.href) continue
+            const adminNorm = adminAct.name.toLowerCase()
+            const matchingStudentAct = studentSection.activities.find((sa) => {
+              const sn = sa.name.toLowerCase()
+              return sn.includes(adminNorm) || adminNorm.includes(sn)
+            })
+            if (!matchingStudentAct) continue
+            if (matchingStudentAct.href) continue
+            // Admin has href, student sees same activity name but NO href → broken link
             console.log(
-              `  Skipping section ${adminSection.number} ("${adminSection.title}") — locked in student view`,
+              `  "${adminAct.name}" href="${adminAct.href}": admin has link, student sees "${matchingStudentAct.name}" but NO link → BROKEN ACCESS`,
             )
-            continue
-          }
-          for (const act of adminSection.activities) {
-            if (!act.href) continue
-            const cmidMatch = act.href.match(/[?&]id=(\d+)/)
-            if (!cmidMatch) continue
-            const cmid = Number(cmidMatch[1])
-            if (alreadyFlagged.has(cmid)) continue
-            if (studentVisibleCmidSet.has(cmid)) continue
-            const modData = contents.flatMap((s) => s.modules).find((m) => m.id === cmid)
-            if (!modData) continue
-            console.log(
-              `  cmid ${cmid} "${modData.name}": in admin section ${adminSection.number} ("${adminSection.title}") but NOT in student view → BLOCKER`,
-            )
-            const nelthorEntry = nelthorData.get(modData.name.toLowerCase())
-            const severity: 'critical' | 'info' = nelthorEntry?.state === 1 ? 'info' : 'critical'
+            const cmidMatch = adminAct.href.match(/[?&]id=(\d+)/)
+            nelthorData.get(adminNorm)
             phantoms.push({
-              severity,
+              severity: 'critical',
               sectionNumber: adminSection.number,
               sectionTitle: adminSection.title,
-              message: `"${modData.name}" (cmid ${cmid}) está en "${adminSection.title}" pero NO es accesible para estudiantes`,
+              message: `"${adminAct.name}" tiene enlace de descarga para admin pero NO para estudiantes`,
               detail:
-                `La actividad "${modData.name}" (cmid ${cmid}) aparece en la sección "${adminSection.title}" del administrador (sección desbloqueada), pero los estudiantes no pueden verla ni acceder a ella.` +
-                (modData.visible === 0
-                  ? ` En la base de datos tiene visible=0 (oculta).`
-                  : ` No aparece en la vista de estudiante.`) +
-                (nelthorEntry?.state === 1
-                  ? ' [Nelthor completó esta actividad sin problemas antes de ser administrador.]'
-                  : ''),
+                `El recurso "${adminAct.name}" (URL: ${adminAct.href}) aparece en la sección "${adminSection.title}" con un enlace funcional para el administrador, pero los estudiantes ven el mismo recurso sin enlace. No pueden descargarlo ni visualizarlo.` +
+                ' Si este recurso es necesario para avanzar, los estudiantes quedan bloqueados. La causa probable es que el tipo de archivo o la configuración del recurso no permite acceso para el rol de estudiante.',
               priority: 'high',
               actionItem:
-                'Revisar visibilidad y permisos del recurso en la configuración del curso. Si debe estar disponible para estudiantes, cambiar visible=1 o ajustar la finalización.',
+                'Revisar permisos del recurso. Si debe ser descargable por estudiantes, verificar la configuración de visibilidad y permisos del módulo de recurso.',
             })
           }
         }
+        // Note: we only check activities that appear in BOTH admin and student views
+        // with different href status. Activities only in admin view (truly hidden)
+        // are not flagged here — they're handled by the other checks.
       } catch (err) {
         console.warn('⚠️ Tree cross-reference failed:', err)
       }
