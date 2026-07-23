@@ -250,7 +250,7 @@ export class MoodleCourse {
     admin: CourseStructure,
     student?: CourseStructure,
     apiModuleData?: Map<string, { completion: number; isautomatic: boolean }>,
-    nelthorData?: Map<string, { state: number }>,
+    nelthorData?: Map<string, { state: number; timecompleted?: number }>,
   ): AuditFinding[] {
     const findings: AuditFinding[] = []
 

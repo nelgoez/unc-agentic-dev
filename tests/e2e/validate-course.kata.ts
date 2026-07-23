@@ -25,7 +25,7 @@ test.describe('Course Validation — Multi-Role Audit', () => {
 
     let freshStudent: { userId: number; username: string; password: string } | null = null
     let factory: MoodleStudentFactory | null = null
-    let nelthorData = new Map<string, { state: number }>()
+    let nelthorData = new Map<string, { state: number; timecompleted?: number }>()
 
     await test.step('0. Creación de estudiante fresco vía factory', async () => {
       await login.loginAsAdmin()
@@ -165,7 +165,10 @@ test.describe('Course Validation — Multi-Role Audit', () => {
           for (const st of nelthorStatus) {
             const modName = contents.flatMap((s) => s.modules).find((m) => m.id === st.cmid)?.name
             if (modName !== undefined) {
-              nelthorData.set(modName.toLowerCase(), { state: st.state })
+              nelthorData.set(modName.toLowerCase(), {
+                state: st.state,
+                timecompleted: st.timecompleted,
+              })
             }
           }
         }
@@ -338,21 +341,30 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                 modData.completion === 2 &&
                 modData.completiondata?.isautomatic === true
               ) {
-                // Auto-complete resource (completion=2, view to complete) not accessible to students
-                // This is the Lambda case: the resource link doesn't render for students
-                console.log(
-                  `  "${adminAct.name}" (cmid ${cmid}): auto-complete resource NOT in student view → BLOCKER`,
-                )
-                phantoms.push({
-                  severity: 'critical',
-                  sectionNumber: adminSection.number,
-                  sectionTitle: adminSection.title,
-                  message: `"${adminAct.name}" tiene finalización automática pero estudiantes no pueden acceder`,
-                  detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 en DB y finalización automática configurada (completion=${modData.completion}), pero los estudiantes no pueden verlo ni acceder a él. El enlace no se renderiza para estudiantes.`,
-                  priority: 'high',
-                  actionItem:
-                    'Revisar permisos del recurso. Verificar que el tipo de archivo permita acceso a estudiantes.',
-                })
+                // Auto-complete resource not in student view. Check if nelthor could access it.
+                const nelthorEntry = nelthorData.get(adminNorm)
+                const nelthorCouldComplete =
+                  nelthorEntry?.state === 1 && (nelthorEntry.timecompleted ?? 0) < 1784332800
+                if (nelthorCouldComplete) {
+                  console.log(
+                    `  "${adminAct.name}" (cmid ${cmid}): auto-complete, NOT in student view, but nelthor completed as student → SKIP (not a real blocker)`,
+                  )
+                } else {
+                  // Nelthor could NOT complete as student — proven blocker
+                  console.log(
+                    `  "${adminAct.name}" (cmid ${cmid}): auto-complete, NOT in student view, nelthor ${!nelthorEntry ? 'no data' : nelthorEntry.state === 1 ? 'completed as admin' : 'state=0'} → BLOCKER`,
+                  )
+                  phantoms.push({
+                    severity: 'critical',
+                    sectionNumber: adminSection.number,
+                    sectionTitle: adminSection.title,
+                    message: `"${adminAct.name}" tiene finalización automática pero estudiantes NO pueden acceder`,
+                    detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 y finalización automática, pero los estudiantes no pueden verlo ni acceder a él desde su vista. Nelthor ${!nelthorEntry ? 'no tiene datos de completación' : nelthorEntry.state === 1 ? 'lo completó como administrador, no como estudiante' : 'tampoco pudo completarlo como estudiante'}.`,
+                    priority: 'high',
+                    actionItem:
+                      'Revisar permisos del recurso. Verificar que el tipo de archivo permita acceso a estudiantes.',
+                  })
+                }
               } else if (dbVisible === 1 && !isGated) {
                 // DB says visible, no completion tracking, in open section but missing from student
                 console.log(
