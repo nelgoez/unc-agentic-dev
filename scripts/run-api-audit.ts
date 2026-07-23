@@ -23,17 +23,36 @@ async function main() {
   mkdirSync(outDir, { recursive: true })
 
   const contents = await api.getCourseContents(courseId)
+
+  const visibilityMap = new Map<
+    number,
+    { name: string; visible: number; uservisible: boolean; sectionName: string }
+  >()
+  for (const section of contents) {
+    for (const mod of section.modules) {
+      visibilityMap.set(mod.id, {
+        name: mod.name,
+        visible: mod.visible,
+        uservisible: mod.uservisible,
+        sectionName: section.name,
+      })
+    }
+  }
+
   const breakdown = await api.getAvailabilityJsonBreakdown(courseId)
   const orphans = await api.findOrphanedCmIds(contents)
 
   let nelthor = null
   let progression = null
+  let nelthorCompletionStatus: Array<{ cmid: number; state: number; tracking: number }> | null =
+    null
   const dryRun = process.env.DRY_RUN !== 'false'
   try {
     const users = await api.getUsersByField('username', ['nelthor'])
     if (users[0]) {
       nelthor = { id: users[0].id, name: users[0].fullname }
-      const status = await api.getActivitiesCompletionStatus(courseId, users[0].id)
+      nelthorCompletionStatus = await api.getActivitiesCompletionStatus(courseId, users[0].id)
+      const status = nelthorCompletionStatus
       const tracked = status.filter((s: { tracking: number }) => s.tracking > 0)
       const incompleteMods = contents.flatMap(
         (s: { modules: Array<{ id: number; name: string }> }) =>
@@ -126,6 +145,57 @@ async function main() {
     detail: string
   }> = []
 
+  // Build cmid→completion lookup from nelthor data for cross-reference
+  const nelthorCompletionByCmid = new Map<number, { state: number; tracking: number }>()
+  if (progression && nelthorCompletionStatus) {
+    for (const st of nelthorCompletionStatus) {
+      nelthorCompletionByCmid.set(st.cmid, st)
+    }
+  }
+
+  // Fresh student cross-check: activities required by conditions but state=0 for existing student
+  const stuckAutoCompletions: Array<{
+    name: string
+    cmid: number
+    section: string
+    expectedCompletion: number
+    nelthorState: number
+  }> = []
+  for (const section of breakdown.sections) {
+    for (const mod of section.modulesWithRestrictions) {
+      for (const cond of mod.conditions) {
+        if (cond.type === 'completion' && cond.cm) {
+          const visMod = visibilityMap.get(cond.cm)
+          if (visMod && visMod.visible === 0) continue
+          const refMod = breakdown.sections.flatMap((s) => s.modules).find((m) => m.id === cond.cm)
+          if (!refMod) continue
+          const nelthorState = nelthorCompletionByCmid.get(cond.cm)?.state ?? -1
+          // Report if auto-completion enabled but nelthor also has state=0 (stuck)
+          if (refMod.completion === 2) {
+            if (nelthorState === 0) {
+              stuckAutoCompletions.push({
+                name: refMod.name,
+                cmid: cond.cm,
+                section: section.name,
+                expectedCompletion: 2,
+                nelthorState,
+              })
+            }
+          }
+        }
+      }
+    }
+  }
+  if (stuckAutoCompletions.length > 0) {
+    apiFindings.push({
+      severity: 'info',
+      type: 'api-auto-completion-check',
+      section: stuckAutoCompletions[0].section,
+      message: `${stuckAutoCompletions.length} actividad(es) con finalización automática (completion=2) no se completan para nelthor ni estudiantes nuevos`,
+      detail: `Actividades: ${stuckAutoCompletions.map((m) => `${m.name} (cmid ${m.cmid})`).join(', ')}. Estas actividades tienen seguimiento automático configurado pero nelthor (y probablemente estudiantes nuevos) no las tienen como completadas. Puede ser un problema de visibilidad o de configuración de finalización.`,
+    })
+  }
+
   for (const o of orphans) {
     apiFindings.push({
       severity: 'critical',
@@ -152,6 +222,8 @@ async function main() {
           const exists = contents
             .flatMap((s: { modules: Array<{ id: number }> }) => s.modules)
             .some((m: { id: number }) => m.id === cond.cm)
+          const visMod = visibilityMap.get(cond.cm)
+          const targetName = visMod?.name ?? `cmid ${cond.cm}`
           if (!exists) {
             apiFindings.push({
               severity: 'critical',
@@ -159,6 +231,22 @@ async function main() {
               section: section.name,
               message: `"${mod.name}" requiere completion de cmid ${cond.cm} que no existe`,
               detail: `Actividad fantasma detectada a nivel de JSON de disponibilidad.`,
+            })
+          } else if (visMod && visMod.visible === 0) {
+            apiFindings.push({
+              severity: 'critical',
+              type: 'api-visibility-phantom',
+              section: section.name,
+              message: `"${mod.name}" requiere "${targetName}" que existe pero está OCULTO para estudiantes (visible=0 en DB)`,
+              detail: `El módulo "${mod.name}" tiene una condición de finalización que requiere "${targetName}" (cmid ${cond.cm}), pero ese recurso está configurado como oculto (visible=0) en la base de datos. Los estudiantes no pueden verlo ni completarlo.`,
+            })
+          } else if (visMod && visMod.visible === 1 && !visMod.uservisible) {
+            apiFindings.push({
+              severity: 'critical',
+              type: 'api-visibility-restricted',
+              section: section.name,
+              message: `"${mod.name}" requiere "${targetName}" que existe pero no es accesible para estudiantes (uservisible=false)`,
+              detail: `El módulo "${mod.name}" tiene una condición de finalización que requiere "${targetName}" (cmid ${cond.cm}), pero ese recurso no es visible para los estudiantes (uservisible=false) a pesar de estar configurado como visible.`,
             })
           }
         }
