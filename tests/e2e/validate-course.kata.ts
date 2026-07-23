@@ -341,28 +341,51 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                 modData.completion === 2 &&
                 modData.completiondata?.isautomatic === true
               ) {
-                // Auto-complete resource not in student view. Check if nelthor could access it.
+                // Auto-complete resource not in student view. Check nelthor's state.
                 const nelthorEntry = nelthorData.get(adminNorm)
-                const nelthorCouldComplete =
-                  nelthorEntry?.state === 1 && (nelthorEntry.timecompleted ?? 0) < 1784332800
-                if (nelthorCouldComplete) {
+                if (nelthorEntry?.state === 0) {
+                  // Nelthor also couldn't complete — proven blocker
                   console.log(
-                    `  "${adminAct.name}" (cmid ${cmid}): auto-complete, NOT in student view, but nelthor completed as student → SKIP (not a real blocker)`,
-                  )
-                } else {
-                  // Nelthor could NOT complete as student — proven blocker
-                  console.log(
-                    `  "${adminAct.name}" (cmid ${cmid}): auto-complete, NOT in student view, nelthor ${!nelthorEntry ? 'no data' : nelthorEntry.state === 1 ? 'completed as admin' : 'state=0'} → BLOCKER`,
+                    `  "${adminAct.name}" (cmid ${cmid}): auto-complete, NOT in student view, nelthor state=0 → CRITICAL BLOCKER`,
                   )
                   phantoms.push({
                     severity: 'critical',
                     sectionNumber: adminSection.number,
                     sectionTitle: adminSection.title,
-                    message: `"${adminAct.name}" tiene finalización automática pero estudiantes NO pueden acceder`,
-                    detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 y finalización automática, pero los estudiantes no pueden verlo ni acceder a él desde su vista. Nelthor ${!nelthorEntry ? 'no tiene datos de completación' : nelthorEntry.state === 1 ? 'lo completó como administrador, no como estudiante' : 'tampoco pudo completarlo como estudiante'}.`,
+                    message: `"${adminAct.name}" no es accesible para estudiantes (nelthor tampoco pudo completarlo)`,
+                    detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene finalización automática pero los estudiantes no pueden verlo. Nelthor tampoco pudo completarlo como estudiante.`,
                     priority: 'high',
+                    actionItem: 'Revisar visibilidad y permisos del recurso.',
+                  })
+                } else if (nelthorEntry?.state === 1) {
+                  // Nelthor completed it — but was it as student or admin?
+                  // Check if visible to students in switch-role view
+                  console.log(
+                    `  "${adminAct.name}" (cmid ${cmid}): auto-complete, NOT in student view, nelthor state=1 → INFO (nelthor completed it, not visible to students anymore)`,
+                  )
+                  phantoms.push({
+                    severity: 'info',
+                    sectionNumber: adminSection.number,
+                    sectionTitle: adminSection.title,
+                    message: `"${adminAct.name}" fue completado por nelthor pero ya no es visible para estudiantes`,
+                    detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene finalización automática. Fue completado por nelthor en algún momento, pero actualmente los estudiantes no pueden verlo ni acceder a él. Puede ser un cambio posterior en la configuración.`,
+                    priority: 'low',
                     actionItem:
-                      'Revisar permisos del recurso. Verificar que el tipo de archivo permita acceso a estudiantes.',
+                      'Verificar si este recurso debe seguir siendo accesible para estudiantes.',
+                  })
+                } else {
+                  // No nelthora data — flag as warning
+                  console.log(
+                    `  "${adminAct.name}" (cmid ${cmid}): auto-complete, NOT in student view, no nelthora → WARNING`,
+                  )
+                  phantoms.push({
+                    severity: 'warning',
+                    sectionNumber: adminSection.number,
+                    sectionTitle: adminSection.title,
+                    message: `"${adminAct.name}" no es visible para estudiantes (sin datos de nelthor)`,
+                    detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene finalización automática pero los estudiantes no pueden verlo. No se tienen datos de completación de nelthor para este recurso.`,
+                    priority: 'medium',
+                    actionItem: 'Verificar visibilidad y permisos del recurso.',
                   })
                 }
               } else if (dbVisible === 1 && !isGated) {
