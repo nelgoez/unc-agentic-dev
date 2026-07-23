@@ -190,6 +190,31 @@ test.describe('Course Validation — Multi-Role Audit', () => {
         console.log(`  [${f.severity.toUpperCase()}] ${f.sectionTitle}: ${f.message}`)
       }
 
+      // DIAGNOSTIC: dump API data for Lambda cmid 6917 to understand why it's invisible
+      const lambdaMod = contents.flatMap((s) => s.modules).find((m) => m.id === 6917)
+      if (lambdaMod) {
+        console.log(`\n=== LAMBDA DIAGNOSTIC (cmid 6917) ===`)
+        console.log(`  name: "${lambdaMod.name}"`)
+        console.log(`  visible: ${lambdaMod.visible}`)
+        console.log(`  uservisible: ${lambdaMod.uservisible}`)
+        console.log(`  completion: ${lambdaMod.completion}`)
+        console.log(`  completiondata: ${JSON.stringify(lambdaMod.completiondata)}`)
+        console.log(`  availability: ${lambdaMod.availability?.substring(0, 200) || '(none)'}`)
+        console.log(`  groupmode: ${lambdaMod.groupmode}`)
+        console.log(`  modplural: "${lambdaMod.modplural}"`)
+        console.log(`  instance: ${lambdaMod.instance}`)
+        console.log(`  noviewlink: ${lambdaMod.noviewlink}`)
+        console.log(`  contents count: ${lambdaMod.contents?.length || 0}`)
+        if (lambdaMod.contents && lambdaMod.contents.length > 0) {
+          console.log(
+            `  first content: type=${lambdaMod.contents[0].type}, filename=${lambdaMod.contents[0].filename}`,
+          )
+        }
+        console.log(`  url: "${lambdaMod.url || '(none)'}"`)
+      } else {
+        console.log(`\n=== LAMBDA DIAGNOSTIC (cmid 6917) === NOT FOUND in API contents`)
+      }
+
       // Cross-reference: conditions + DB visible flag + admin-vs-student cmids
       console.log(`\n=== CONDITIONAL TREE CROSS-REFERENCE ===`)
       try {
