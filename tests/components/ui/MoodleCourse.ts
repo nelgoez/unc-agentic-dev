@@ -287,6 +287,18 @@ export class MoodleCourse {
 
     const cascadeCount = sectionsWithRestrictions.length - 1
 
+    console.log('\n=== PHANTOM DIAGNOSTIC ===')
+    console.log(`Section: "${firstRestricted.title}"`)
+    console.log(`Restriction text: "${firstRestricted.restrictionText}"`)
+    console.log(
+      `Activity names parsed: ${Array.from(activityNames)
+        .map((n) => `"${n}"`)
+        .join(', ')}`,
+    )
+    console.log(
+      `Admin activities: ${admin.sections.flatMap((s) => s.activities.map((a) => `"${a.name}"(visible=${a.isVisible}, completion=${a.hasCompletionTracking})`)).join(', ')}`,
+    )
+
     for (const required of activityNames) {
       const normalized = required.toLowerCase()
       const matchingActivity = admin.sections
@@ -295,6 +307,8 @@ export class MoodleCourse {
           (a) =>
             a.name.toLowerCase().includes(normalized) || normalized.includes(a.name.toLowerCase()),
         )
+
+      console.log(`Required: "${required}" → matched: "${matchingActivity?.name ?? '(none)'}"`)
 
       if (!matchingActivity) {
         findings.push({
@@ -312,7 +326,42 @@ export class MoodleCourse {
           s.activities.some((a) => a.name === matchingActivity.name),
         )
         const modData = apiModuleData?.get(matchingActivity.name.toLowerCase())
+        console.log(
+          `  apiModuleData for "${matchingActivity.name.toLowerCase()}": ${JSON.stringify(modData ?? '(none)')}`,
+        )
         if (modData?.isautomatic === true) {
+          console.log(`  → isautomatic=true, checking student visibility...`)
+          if (student) {
+            const visibleInStudent = student.sections
+              .flatMap((s) => s.activities)
+              .some(
+                (a) =>
+                  a.name.toLowerCase().includes(normalized) ||
+                  normalized.includes(a.name.toLowerCase()),
+              )
+            console.log(`  → visibleInStudent=${visibleInStudent} (student DOM has this activity)`)
+            if (!visibleInStudent) {
+              console.log(
+                `  → !visibleInStudent: auto-complete but student can't access => BLOCKER`,
+              )
+              const actSection = admin.sections.find((s) =>
+                s.activities.some((a) => a.name === matchingActivity.name),
+              )
+              findings.push({
+                severity: 'critical',
+                sectionNumber: actSection?.number ?? firstRestricted.number,
+                sectionTitle: actSection?.title ?? firstRestricted.title,
+                message: `"${required}" tiene finalización automática pero no es accesible para estudiantes`,
+                detail: `El recurso "${required}" tiene finalización automática (se completa al visualizarlo), pero los estudiantes no pueden acceder a la URL del recurso porque no aparece en su vista del curso. El enlace solo es visible para administradores. Esto impide el avance a módulos siguientes.`,
+                priority: 'high',
+                actionItem:
+                  'Revisar visibilidad y permisos del recurso. Si debe estar disponible para estudiantes, cambiar visible=1 en los ajustes del módulo.',
+              })
+            }
+          }
+          console.log(
+            `  → SKIPPED (isautomatic=true${student ? ', student can see it' : ', no student view to compare'})`,
+          )
           continue
         }
         let severity: 'critical' | 'warning' = 'critical'
@@ -382,6 +431,7 @@ export class MoodleCourse {
         )
 
         if (!existsInStudent) {
+          console.log(`  → Visibility phantom FIRED for "${required}"`)
           visibilityPhantoms.push({
             severity: 'critical',
             sectionNumber: firstRestricted.number,
