@@ -1,190 +1,188 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import process from 'node:process';
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { resolve } from 'node:path'
+import process from 'node:process'
 
 interface ActivityData {
-    name: string;
-    type: string;
-    href: string;
-    isVisible: boolean;
-    hasCompletionTracking: boolean;
-    isComplete: boolean;
-    availabilityInfo: string;
+  name: string
+  type: string
+  href: string
+  isVisible: boolean
+  hasCompletionTracking: boolean
+  isComplete: boolean
+  availabilityInfo: string
 }
 
 interface SectionData {
-    number: number;
-    title: string;
-    isLocked: boolean;
-    restrictionText: string;
-    activities: ActivityData[];
-    allVisibleComplete: boolean;
+  number: number
+  title: string
+  isLocked: boolean
+  restrictionText: string
+  activities: ActivityData[]
+  allVisibleComplete: boolean
 }
 
 interface CourseStructure {
-    courseName: string;
-    courseUrl: string;
-    tabs: { title: string; sectionNumber: number; isDisabled: boolean; restrictionText: string }[];
-    sections: SectionData[];
+  courseName: string
+  courseUrl: string
+  tabs: { title: string; sectionNumber: number; isDisabled: boolean; restrictionText: string }[]
+  sections: SectionData[]
 }
 
 interface AuditFinding {
-    severity: 'critical' | 'warning' | 'info';
-    sectionNumber: number;
-    sectionTitle: string;
-    message: string;
-    detail: string;
-    actionItem?: string;
-    priority?: 'high' | 'medium' | 'low';
+  severity: 'critical' | 'warning' | 'info'
+  sectionNumber: number
+  sectionTitle: string
+  message: string
+  detail: string
+  actionItem?: string
+  priority?: 'high' | 'medium' | 'low'
 }
 
 interface ApiAuditResults {
-    courseId: string;
-    timestamp: string;
-    courseName: string;
-    sections: number;
-    totalActivities: number;
-    restrictedActivities: number;
-    orphansFound: number;
-    apiFindings: Array<{
-        severity: string;
-        type: string;
-        section: string;
-        message: string;
-        detail: string;
-    }>;
-    breakdown: {
-        sections: Array<{
-            section: number;
-            name: string;
-            moduleCount: number;
-            hasSectionRestriction: boolean;
-            modulesWithRestrictions: Array<{
-                id: number;
-                name: string;
-                conditions: Array<{ type: string; cm?: number; id?: number; min?: number; max?: number }>;
-            }>;
-            modules: Array<{
-                id: number;
-                name: string;
-                completion: number;
-                completiondata: {
-                    state: number;
-                    timecompleted: number;
-                    overrideby: number | null;
-                    hascompletion: boolean;
-                    isautomatic: boolean;
-                    istrackeduser: boolean;
-                    uservisible: boolean;
-                } | null;
-                groupmode: number;
-                groupingid: number;
-            }>;
-        }>;
-        totalActivities: number;
-        restrictedActivities: number;
-    };
-    progression: {
-        user: string;
-        trackedActivities: number;
-        alreadyComplete: number;
-        autoProgressed: number;
-    } | null;
-    dbProbes?: {
-        enrollment: { total: number; students: number; teachers: number; status: string } | null;
-        gradeItems: { total: number; status: string } | null;
-        cohorts: { total: number; names: string[]; status: string } | null;
-    };
+  courseId: string
+  timestamp: string
+  courseName: string
+  sections: number
+  totalActivities: number
+  restrictedActivities: number
+  orphansFound: number
+  apiFindings: Array<{
+    severity: string
+    type: string
+    section: string
+    message: string
+    detail: string
+  }>
+  breakdown: {
+    sections: Array<{
+      section: number
+      name: string
+      moduleCount: number
+      hasSectionRestriction: boolean
+      modulesWithRestrictions: Array<{
+        id: number
+        name: string
+        conditions: Array<{ type: string; cm?: number; id?: number; min?: number; max?: number }>
+      }>
+      modules: Array<{
+        id: number
+        name: string
+        completion: number
+        completiondata: {
+          state: number
+          timecompleted: number
+          overrideby: number | null
+          hascompletion: boolean
+          isautomatic: boolean
+          istrackeduser: boolean
+          uservisible: boolean
+        } | null
+        groupmode: number
+        groupingid: number
+      }>
+    }>
+    totalActivities: number
+    restrictedActivities: number
+  }
+  progression: {
+    user: string
+    trackedActivities: number
+    alreadyComplete: number
+    autoProgressed: number
+  } | null
+  dbProbes?: {
+    enrollment: { total: number; students: number; teachers: number; status: string } | null
+    gradeItems: { total: number; status: string } | null
+    cohorts: { total: number; names: string[]; status: string } | null
+  }
 }
 
 interface AuditResults {
-    courseId: string;
-    courseName: string;
-    timestamp: string;
-    runUrl: string;
-    allureUrl: string;
-    adminView: CourseStructure;
-    studentView: CourseStructure;
-    teacherView: CourseStructure;
-    findings: AuditFinding[];
-    screenshots: { role: string; sectionNumber: number; data: string }[];
+  courseId: string
+  courseName: string
+  timestamp: string
+  runUrl: string
+  allureUrl: string
+  adminView: CourseStructure
+  studentView: CourseStructure
+  teacherView: CourseStructure
+  findings: AuditFinding[]
+  screenshots: { role: string; sectionNumber: number; data: string }[]
 }
 
 function loadJson<T>(filePath: string): T {
-    return JSON.parse(readFileSync(filePath, 'utf-8')) as T;
+  return JSON.parse(readFileSync(filePath, 'utf-8')) as T
 }
 
 function loadScreenshots(dir: string): { role: string; sectionNumber: number; data: string }[] {
-    if (!existsSync(dir))
-        return [];
-    return readdirSync(dir)
-        .filter(f => /course-\d+-(?:admin|teacher|student)-section-\d+\.png/.test(f))
-        .map((f) => {
-            const match = f.match(/course-\d+-(\w+)-section-(\d+)\.png/);
-            const role = match ? match[1] : 'unknown';
-            const sectionNumber = match ? Number.parseInt(match[2], 10) : 0;
-            const data = readFileSync(resolve(dir, f)).toString('base64');
-            return { role, sectionNumber, data };
-        });
+  if (!existsSync(dir)) return []
+  return readdirSync(dir)
+    .filter((f) => /course-\d+-(?:admin|teacher|student)-section-\d+\.png/.test(f))
+    .map((f) => {
+      const match = f.match(/course-\d+-(\w+)-section-(\d+)\.png/)
+      const role = match ? match[1] : 'unknown'
+      const sectionNumber = match ? Number.parseInt(match[2], 10) : 0
+      const data = readFileSync(resolve(dir, f)).toString('base64')
+      return { role, sectionNumber, data }
+    })
 }
 
 function severityInfo(severity: string): { icon: string; label: string } {
-    switch (severity) {
-        case 'critical':
-            return { icon: '🔴', label: 'BLOQUEA' };
-        case 'warning':
-            return { icon: '🟡', label: 'PRECAUCIÓN' };
-        case 'info':
-            return { icon: 'ℹ️', label: 'INFO' };
-        default:
-            return { icon: '⚪', label: 'Desconocido' };
-    }
+  switch (severity) {
+    case 'critical':
+      return { icon: '🔴', label: 'BLOQUEA' }
+    case 'warning':
+      return { icon: '🟡', label: 'PRECAUCIÓN' }
+    case 'info':
+      return { icon: 'ℹ️', label: 'INFO' }
+    default:
+      return { icon: '⚪', label: 'Desconocido' }
+  }
 }
 
 function priorityBadge(p: string): string {
-    const cls = p === 'high' ? 'priority-high' : p === 'medium' ? 'priority-med' : 'priority-low';
-    const label = p === 'high' ? 'ALTA' : p === 'medium' ? 'MEDIA' : 'BAJA';
-    return `<span class="priority-badge ${cls}">${label}</span>`;
+  const cls = p === 'high' ? 'priority-high' : p === 'medium' ? 'priority-med' : 'priority-low'
+  const label = p === 'high' ? 'ALTA' : p === 'medium' ? 'MEDIA' : 'BAJA'
+  return `<span class="priority-badge ${cls}">${label}</span>`
 }
 
 function buildFindingsLayer1(findings: AuditFinding[], apiResults: ApiAuditResults | null): string {
-    if (findings.length === 0)
-        return '';
-    const critical = findings.filter(f => f.severity === 'critical');
-    const warnings = findings.filter(f => f.severity === 'warning');
-    const info = findings.filter(f => f.severity === 'info');
-    let html = '';
+  if (findings.length === 0) return ''
+  const critical = findings.filter((f) => f.severity === 'critical')
+  const warnings = findings.filter((f) => f.severity === 'warning')
+  const info = findings.filter((f) => f.severity === 'info')
+  let html = ''
 
-    const renderCard = (f: AuditFinding): string => {
-        const si = severityInfo(f.severity);
-        let techHtml
-            = '<details class="tech-detail"><summary>🔧 Ver detalle técnico</summary><div class="tech-content">';
-        if (apiResults?.breakdown?.sections != null) {
-            for (const section of apiResults.breakdown.sections) {
-                for (const mod of section.modules ?? []) {
-                    if (f.message.toLowerCase().includes(mod.name.toLowerCase())) {
-                        techHtml += `<div class="data-source"><strong>DB:</strong> module.id=${mod.id} · completion=${mod.completion}</div>`;
-                        if (mod.completiondata != null) {
-                            techHtml += `<div class="data-source"><strong>API:</strong> core_course_get_contents → uservisible=${mod.completiondata.uservisible} · hascompletion=${mod.completiondata.hascompletion} · isautomatic=${mod.completiondata.isautomatic}</div>`;
-                        }
-                        techHtml += `<div class="data-source"><strong>UI:</strong> Admin: ✅ visible · Student role: ${mod.completiondata?.uservisible === false ? '❌ sin acceso' : '✅ visible'}</div>`;
-                    }
-                }
+  const renderCard = (f: AuditFinding): string => {
+    const si = severityInfo(f.severity)
+    let techHtml =
+      '<details class="tech-detail"><summary>🔧 Ver detalle técnico</summary><div class="tech-content">'
+    if (apiResults?.breakdown?.sections != null) {
+      for (const section of apiResults.breakdown.sections) {
+        for (const mod of section.modules ?? []) {
+          if (f.message.toLowerCase().includes(mod.name.toLowerCase())) {
+            techHtml += `<div class="data-source"><strong>DB:</strong> module.id=${mod.id} · completion=${mod.completion}</div>`
+            if (mod.completiondata != null) {
+              techHtml += `<div class="data-source"><strong>API:</strong> core_course_get_contents → uservisible=${mod.completiondata.uservisible} · hascompletion=${mod.completiondata.hascompletion} · isautomatic=${mod.completiondata.isautomatic}</div>`
             }
+            techHtml += `<div class="data-source"><strong>UI:</strong> Admin: ✅ visible · Student role: ${mod.completiondata?.uservisible === false ? '❌ sin acceso' : '✅ visible'}</div>`
+          }
         }
-        if (!techHtml.includes('module.id=')) {
-            techHtml
-                += '<div class="data-source"><em>Datos técnicos no disponibles para este hallazgo.</em></div>';
-        }
-        techHtml += '</div></details>';
+      }
+    }
+    if (!techHtml.includes('module.id=')) {
+      techHtml +=
+        '<div class="data-source"><em>Datos técnicos no disponibles para este hallazgo.</em></div>'
+    }
+    techHtml += '</div></details>'
 
-        const ai
-            = f.actionItem != null && f.actionItem !== ''
-                ? `<div class="action-item"><strong>👉 Qué hacer:</strong> ${esc(f.actionItem)}</div>`
-                : '';
-        const pb = f.priority ? priorityBadge(f.priority) : '';
+    const ai =
+      f.actionItem != null && f.actionItem !== ''
+        ? `<div class="action-item"><strong>👉 Qué hacer:</strong> ${esc(f.actionItem)}</div>`
+        : ''
+    const pb = f.priority ? priorityBadge(f.priority) : ''
 
-        return `<div class="finding-card" style="border-left:4px solid ${f.severity === 'critical' ? 'var(--bad)' : 'var(--warn)'};background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)">
+    return `<div class="finding-card" style="border-left:4px solid ${f.severity === 'critical' ? 'var(--bad)' : 'var(--warn)'};background:var(--surface);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:var(--shadow)">
       <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px">
         <span style="font-size:1.2em">${si.icon}</span>
         <span style="font-weight:700;font-size:0.85em;color:${f.severity === 'critical' ? 'var(--bad)' : '#92400e'};background:${f.severity === 'critical' ? '#fee2e2' : '#fef3c7'};padding:2px 8px;border-radius:4px">${si.label}</span>
@@ -194,173 +192,167 @@ function buildFindingsLayer1(findings: AuditFinding[], apiResults: ApiAuditResul
       <p style="font-size:0.9em;color:var(--text-2);margin-bottom:4px">${esc(f.detail)}</p>
       ${ai}
       ${techHtml}
-    </div>`;
-    };
+    </div>`
+  }
 
-    if (critical.length > 0) {
-        html += '<h3 class="section-subtitle">🔴 Bloqueos detectados</h3>';
-        html += critical.map(renderCard).join('');
-    }
-    if (warnings.length > 0) {
-        html += '<h3 class="section-subtitle">🟡 Precauciones</h3>';
-        html += warnings.map(renderCard).join('');
-    }
-    if (info.length > 0) {
-        html += `<details class="info-collapse" style="margin-top:16px">
+  if (critical.length > 0) {
+    html += '<h3 class="section-subtitle">🔴 Bloqueos detectados</h3>'
+    html += critical.map(renderCard).join('')
+  }
+  if (warnings.length > 0) {
+    html += '<h3 class="section-subtitle">🟡 Precauciones</h3>'
+    html += warnings.map(renderCard).join('')
+  }
+  if (info.length > 0) {
+    html += `<details class="info-collapse" style="margin-top:16px">
       <summary style="cursor:pointer;font-weight:600;font-size:0.95em;color:var(--text-2)">ℹ️ Más información (${info.length} items)</summary>
       <div style="margin-top:8px">${info.map(renderCard).join('')}</div>
-    </details>`;
-    }
-    return html;
+    </details>`
+  }
+  return html
 }
 
 function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = null): string {
-    const {
-        courseId,
-        courseName,
-        timestamp,
-        allureUrl,
-        findings,
-        adminView,
-        teacherView,
-        studentView,
-        screenshots,
-    } = results;
+  const {
+    courseId,
+    courseName,
+    timestamp,
+    allureUrl,
+    findings,
+    adminView,
+    teacherView,
+    studentView,
+    screenshots,
+  } = results
 
-    const screenshotMap = new Map<string, string>();
-    for (const s of screenshots) {
-        screenshotMap.set(`${s.role}|${s.sectionNumber}`, s.data);
-    }
+  const screenshotMap = new Map<string, string>()
+  for (const s of screenshots) {
+    screenshotMap.set(`${s.role}|${s.sectionNumber}`, s.data)
+  }
 
-    const triggerUrl = 'https://github.com/nelgoez/unc-agentic-dev/actions/workflows/audit-ci.yml';
-    const date = new Date(timestamp).toLocaleString('es-AR', {
-        timeZone: 'America/Argentina/Buenos_Aires',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
+  const triggerUrl = 'https://github.com/nelgoez/unc-agentic-dev/actions/workflows/audit-ci.yml'
+  const date = new Date(timestamp).toLocaleString('es-AR', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
 
-    // Filter Bienvenida false positives (completion tracking issues in Welcome section)
-    const bienvenidaFalsePositives = findings.filter(
-        f =>
-            f.sectionTitle.toLowerCase().includes('bienvenida')
-            && f.message.toLowerCase().includes('complet'),
-    );
-    const filteredFindings = findings.filter(f => !bienvenidaFalsePositives.includes(f));
+  // Filter Bienvenida false positives (completion tracking issues in Welcome section)
+  const bienvenidaFalsePositives = findings.filter(
+    (f) =>
+      f.sectionTitle.toLowerCase().includes('bienvenida') &&
+      f.message.toLowerCase().includes('complet'),
+  )
+  const filteredFindings = findings.filter((f) => !bienvenidaFalsePositives.includes(f))
 
-    // Status bar (replaces old summary cards)
-    const criticalCount2 = filteredFindings.filter(f => f.severity === 'critical').length;
-    const warningCount2 = filteredFindings.filter(f => f.severity === 'warning').length;
-    let statusClass: string, statusIcon: string, statusLabel: string, statusDetail: string;
-    if (criticalCount2 > 0) {
-        statusClass = 'blocked';
-        statusIcon = '🔴';
-        statusLabel = 'BLOQUEO';
-        statusDetail = `${criticalCount2} bloqueo(s)`;
-    }
-    else if (warningCount2 > 0) {
-        statusClass = 'warn';
-        statusIcon = '🟡';
-        statusLabel = 'ATENCIÓN';
-        statusDetail = `${warningCount2} precaución(es)`;
-    }
-    else {
-        statusClass = 'ok';
-        statusIcon = '🟢';
-        statusLabel = 'OK';
-        statusDetail = 'Sin problemas detectados';
-    }
+  // Status bar (replaces old summary cards)
+  const criticalCount2 = filteredFindings.filter((f) => f.severity === 'critical').length
+  const warningCount2 = filteredFindings.filter((f) => f.severity === 'warning').length
+  let statusClass: string, statusIcon: string, statusLabel: string, statusDetail: string
+  if (criticalCount2 > 0) {
+    statusClass = 'blocked'
+    statusIcon = '🔴'
+    statusLabel = 'BLOQUEO'
+    statusDetail = `${criticalCount2} bloqueo(s)`
+  } else if (warningCount2 > 0) {
+    statusClass = 'warn'
+    statusIcon = '🟡'
+    statusLabel = 'ATENCIÓN'
+    statusDetail = `${warningCount2} precaución(es)`
+  } else {
+    statusClass = 'ok'
+    statusIcon = '🟢'
+    statusLabel = 'OK'
+    statusDetail = 'Sin problemas detectados'
+  }
 
-    // Investigation note (replaces old resolved banner)
-    const investigationNote = `\
+  // Investigation note (replaces old resolved banner)
+  const investigationNote = `\
   <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;font-size:0.9em">
     <strong>⏳ En investigación:</strong> La actividad "Notebook Funcion-Lambda" existe en el curso pero es invisible para los estudiantes (visible=0). El recurso fue restaurado pero sigue sin ser accesible desde la vista de estudiante. Estamos trabajando con el equipo de Campus Virtual para determinar si esto requiere una acción adicional.
-  </div>`;
+  </div>`
 
-    // Layer 1 — findings with action items
-    const layer1HTML = buildFindingsLayer1(filteredFindings, apiResults);
+  // Layer 1 — findings with action items
+  const layer1HTML = buildFindingsLayer1(filteredFindings, apiResults)
 
-    // Visibility phantoms
-    let phantomHTML = '';
-    const phantomFindings = filteredFindings.filter(
-        f =>
-            f.message.toLowerCase().includes('visible')
-            || f.message.toLowerCase().includes('invisible')
-            || f.message.toLowerCase().includes('fantasma')
-            || f.message.toLowerCase().includes('phantom')
-            || f.message.toLowerCase().includes('ocult'),
-    );
-    if (phantomFindings.length > 0 || apiResults?.breakdown?.sections) {
-        phantomHTML = `<h2 class="section-title">🔍 Recursos ocultos (Visibility Phantoms)</h2>
+  // Visibility phantoms
+  let phantomHTML = ''
+  const phantomFindings = filteredFindings.filter(
+    (f) =>
+      f.message.toLowerCase().includes('visible') ||
+      f.message.toLowerCase().includes('invisible') ||
+      f.message.toLowerCase().includes('fantasma') ||
+      f.message.toLowerCase().includes('phantom') ||
+      f.message.toLowerCase().includes('ocult'),
+  )
+  if (phantomFindings.length > 0 || apiResults?.breakdown?.sections) {
+    phantomHTML = `<h2 class="section-title">🔍 Recursos ocultos (Visibility Phantoms)</h2>
     <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Actividades que existen en el curso pero son invisibles para los estudiantes.</p>
-    <ul style="margin-left:20px;line-height:1.8">`;
-        let phantomItems = 0;
-        if (apiResults?.breakdown?.sections != null) {
-            for (const section of apiResults.breakdown.sections) {
-                for (const mod of section.modules ?? []) {
-                    if (mod.completiondata != null && mod.completiondata.uservisible === false) {
-                        const apiVisible = mod.completiondata.uservisible;
-                        phantomHTML += `<li><strong>${esc(mod.name)}</strong> — DB: visible=${mod.completiondata.hascompletion ? '?' : '0'} · API: uservisible=${apiVisible} · UI: Admin ✅, Student ❌</li>`;
-                        phantomItems++;
-                    }
-                }
-            }
+    <ul style="margin-left:20px;line-height:1.8">`
+    let phantomItems = 0
+    if (apiResults?.breakdown?.sections != null) {
+      for (const section of apiResults.breakdown.sections) {
+        for (const mod of section.modules ?? []) {
+          if (mod.completiondata != null && mod.completiondata.uservisible === false) {
+            const apiVisible = mod.completiondata.uservisible
+            phantomHTML += `<li><strong>${esc(mod.name)}</strong> — DB: visible=N/A · API: uservisible=${apiVisible} · UI: Admin ✅, Student ❌</li>`
+            phantomItems++
+          }
         }
-        if (phantomItems === 0) {
-            phantomHTML += '<li><em>No se detectaron recursos ocultos en los datos del API.</em></li>';
-        }
-        phantomHTML += '</ul>';
+      }
     }
+    if (phantomItems === 0) {
+      phantomHTML += '<li><em>No se detectaron recursos ocultos en los datos del API.</em></li>'
+    }
+    phantomHTML += '</ul>'
+  }
 
-    // Bienvenida note — add to findings section if we filtered any
-    let bienvenidaNote = '';
-    if (bienvenidaFalsePositives.length > 0) {
-        bienvenidaNote = `<details class="info-collapse" style="margin-top:12px">
+  // Bienvenida note — add to findings section if we filtered any
+  let bienvenidaNote = ''
+  if (bienvenidaFalsePositives.length > 0) {
+    bienvenidaNote = `<details class="info-collapse" style="margin-top:12px">
       <summary style="cursor:pointer;font-weight:600;font-size:0.9em;color:var(--text-2)">ℹ️ Actividades de Bienvenida sin completar (${bienvenidaFalsePositives.length} items)</summary>
       <div style="margin-top:8px;padding:12px;background:#f8f9fa;border-radius:4px;font-size:0.85em;color:var(--text-2)">
         <p style="margin-bottom:8px">Las actividades de Bienvenida tienen finalización automática (completion=2) — al visualizar el contenido se marcan como completadas. Nelthor las completó sin problemas antes de ser admin.</p>
-        ${bienvenidaFalsePositives.map(f => `<p style="margin:4px 0">• ${esc(f.message)}: ${esc(f.detail)}</p>`).join('')}
+        ${bienvenidaFalsePositives.map((f) => `<p style="margin:4px 0">• ${esc(f.message)}: ${esc(f.detail)}</p>`).join('')}
       </div>
-    </details>`;
+    </details>`
+  }
+
+  // DB probes section
+  let dbProbesHTML = ''
+  if (apiResults?.dbProbes) {
+    const dp = apiResults.dbProbes
+    dbProbesHTML = `<h2 class="section-title">📋 Datos del curso</h2>
+    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Información general sobre el curso y sus participantes, obtenida desde el servidor.</p>`
+
+    if (dp.enrollment) {
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👥</span><span class="msg"><strong>Inscripciones:</strong> ${dp.enrollment.total} usuarios (${dp.enrollment.students} estudiantes, ${dp.enrollment.teachers} docentes)</span></div></div>`
+    } else {
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👥</span><span class="msg"><strong>Inscripciones:</strong> Datos no disponibles — función no agregada al servicio</span></div></div>`
     }
-
-    // DB probes section
-    let dbProbesHTML = '';
-    if (apiResults?.dbProbes) {
-        const dp = apiResults.dbProbes;
-        dbProbesHTML = `<h2 class="section-title">📋 Datos del curso</h2>
-    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Información general sobre el curso y sus participantes, obtenida desde el servidor.</p>`;
-
-        if (dp.enrollment) {
-            dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👥</span><span class="msg"><strong>Inscripciones:</strong> ${dp.enrollment.total} usuarios (${dp.enrollment.students} estudiantes, ${dp.enrollment.teachers} docentes)</span></div></div>`;
-        }
-        else {
-            dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👥</span><span class="msg"><strong>Inscripciones:</strong> Datos no disponibles — función no agregada al servicio</span></div></div>`;
-        }
-        if (dp.gradeItems) {
-            dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">📊</span><span class="msg"><strong>Notas y calificaciones:</strong> ${dp.gradeItems.total} items registrados</span></div></div>`;
-        }
-        else {
-            dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">📊</span><span class="msg"><strong>Notas y calificaciones:</strong> Datos no disponibles — función no agregada al servicio</span></div></div>`;
-        }
-        if (dp.cohorts && dp.cohorts.status === 'unavailable') {
-            dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Grupos (cohorts):</strong> No se encontraron cohorts para este curso — la función web funciona correctamente.</span></div></div>`;
-        }
-        else if (dp.cohorts) {
-            dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Grupos:</strong> ${dp.cohorts.total} (${dp.cohorts.names.join(', ')})</span></div></div>`;
-        }
-        else {
-            dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Grupos:</strong> Datos no disponibles</span></div></div>`;
-        }
+    if (dp.gradeItems) {
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">📊</span><span class="msg"><strong>Notas y calificaciones:</strong> ${dp.gradeItems.total} items registrados</span></div></div>`
+    } else {
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">📊</span><span class="msg"><strong>Notas y calificaciones:</strong> Datos no disponibles — función no agregada al servicio</span></div></div>`
     }
+    if (dp.cohorts && dp.cohorts.status === 'unavailable') {
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Grupos (cohorts):</strong> No se encontraron cohorts para este curso — la función web funciona correctamente.</span></div></div>`
+    } else if (dp.cohorts) {
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Grupos:</strong> ${dp.cohorts.total} (${dp.cohorts.names.join(', ')})</span></div></div>`
+    } else {
+      dbProbesHTML += `<div class="finding info"><div class="finding-header"><span class="icon">👪</span><span class="msg"><strong>Grupos:</strong> Datos no disponibles</span></div></div>`
+    }
+  }
 
-    // Progression / nelthor comparison
-    let progressionHTML = '';
-    if (apiResults?.progression) {
-        const p = apiResults.progression;
-        progressionHTML = `
+  // Progression / nelthor comparison
+  let progressionHTML = ''
+  if (apiResults?.progression) {
+    const p = apiResults.progression
+    progressionHTML = `
     <h2 class="section-title">🎓 Comparación: nelthor vs. estudiante nuevo</h2>
     <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Nelthor es un usuario que recorrió el curso ANTES de ser promovido a administrador, cuando el seguimiento de finalización funcionaba correctamente. Su progreso histórico (${p.alreadyComplete}/${p.trackedActivities}) muestra que el curso SÍ era funcional en ese momento. Un estudiante nuevo arranca desde cero y se encuentra con una configuración distinta.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
@@ -382,11 +374,11 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
           <p>Un estudiante que se inscribe HOY encuentra las 4 actividades de Bienvenida, pero no puede marcarlas como completadas. Alguien deshabilitó el seguimiento de finalización después de que nelthor las completara. Sin ese tracking, Módulo 1 nunca se desbloquea, y en cadena tampoco Módulo 2, Módulo 3 ni Cierre.</p>
         </div>
       </div>
-    </div>`;
-    }
+    </div>`
+  }
 
-    // Caveats / what we couldn't verify
-    const caveatsHTML = `
+  // Caveats / what we couldn't verify
+  const caveatsHTML = `
   <h2 class="section-title">⚠️ Cosas que no pudimos verificar</h2>
   <div style="background:var(--surface);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);margin-bottom:16px">
     <p style="margin-bottom:8px"><strong>Este análisis tiene limitaciones. No podemos confirmar:</strong></p>
@@ -399,25 +391,25 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     </ul>
     <p style="margin-top:12px;font-size:0.85em"><strong>📋 Para mejorar la cobertura:</strong> Actualmente no podemos auditar restricciones por cohorts si el curso las usa. Si algún curso usa cohorts para matricular o restringir acceso, avísenos para ajustar la detección.</p>
     <p style="margin-top:12px;font-size:0.85em;color:var(--text-2)">💡 Si encontrás un hallazgo que no coincide con la realidad del curso, <strong>avisanos</strong> para ajustar la detección. Esta herramienta mejora con cada feedback.</p>
-  </div>`;
+  </div>`
 
-    // Side-by-side: all sections from all 3 roles
-    let compareHTML = `<h2 class="section-title">Comparación visual: Admin · Teacher · Student</h2>
-  <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Cada sección del curso vista desde los tres roles. El admin es la fuente de verdad — lo que el estudiante NO ve está destacado.</p>`;
-    for (const section of adminView.sections) {
-        const teacherSection = teacherView.sections.find(s => s.number === section.number);
-        const studentSection = studentView.sections.find(s => s.number === section.number);
-        const tActs = teacherSection?.activities.length ?? 0;
-        const sActs = studentSection?.activities.length ?? 0;
-        const diffT = section.activities.length - tActs;
-        const diffS = section.activities.length - sActs;
-        const isLocked = studentSection?.isLocked ?? false;
+  // Side-by-side: all sections from all 3 roles
+  let compareHTML = `<h2 class="section-title">Comparación visual: Admin · Teacher · Student</h2>
+  <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Cada sección del curso vista desde los tres roles. El admin es la fuente de verdad — lo que el estudiante NO ve está destacado.</p>`
+  for (const section of adminView.sections) {
+    const teacherSection = teacherView.sections.find((s) => s.number === section.number)
+    const studentSection = studentView.sections.find((s) => s.number === section.number)
+    const tActs = teacherSection?.activities.length ?? 0
+    const sActs = studentSection?.activities.length ?? 0
+    const diffT = section.activities.length - tActs
+    const diffS = section.activities.length - sActs
+    const isLocked = studentSection?.isLocked ?? false
 
-        const adminScreenshot = screenshotMap.get(`admin|${section.number}`);
-        const teacherScreenshot = screenshotMap.get(`teacher|${section.number}`);
-        const studentScreenshot = screenshotMap.get(`student|${section.number}`);
+    const adminScreenshot = screenshotMap.get(`admin|${section.number}`)
+    const teacherScreenshot = screenshotMap.get(`teacher|${section.number}`)
+    const studentScreenshot = screenshotMap.get(`student|${section.number}`)
 
-        compareHTML += `
+    compareHTML += `
   <div class="finding ${isLocked ? 'critical' : diffS > 0 ? 'warning' : 'good'}">
     <div class="finding-header" onclick="this.parentElement.classList.toggle('open')">
       <span class="icon">${isLocked ? '🔒' : '👁️'}</span>
@@ -429,27 +421,27 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
         <div style="flex:1;min-width:180px;background:var(--bg);border-radius:var(--radius);padding:10px">
           <div style="font-weight:700;color:var(--accent);margin-bottom:4px">👤 Admin (${section.activities.length} act.)</div>
           ${adminScreenshot != null ? `<div class="screenshot" style="margin:0 0 4px"><img src="data:image/png;base64,${adminScreenshot}" alt="Admin sección ${section.number}"></div>` : ''}
-          <ul style="margin:4px 0 0 14px;font-size:0.8em">${section.activities.map(a => `<li>${a.isVisible ? '✅' : '👻'} ${esc(a.name)}${a.availabilityInfo ? `<br><span class="dim" style="font-size:0.85em">📋 ${esc(a.availabilityInfo)}</span>` : ''}</li>`).join('') || '<li>Sin actividades</li>'}</ul>
+          <ul style="margin:4px 0 0 14px;font-size:0.8em">${section.activities.map((a) => `<li>${a.isVisible ? '✅' : '👻'} ${esc(a.name)}${a.availabilityInfo ? `<br><span class="dim" style="font-size:0.85em">📋 ${esc(a.availabilityInfo)}</span>` : ''}</li>`).join('') || '<li>Sin actividades</li>'}</ul>
         </div>
         <div style="flex:1;min-width:180px;background:var(--bg);border-radius:var(--radius);padding:10px">
           <div style="font-weight:700;color:var(--warn);margin-bottom:4px">👩‍🏫 Teacher (${tActs} act.)</div>
           ${teacherScreenshot != null ? `<div class="screenshot" style="margin:0 0 4px"><img src="data:image/png;base64,${teacherScreenshot}" alt="Teacher sección ${section.number}"></div>` : ''}
-          <ul style="margin:4px 0 0 14px;font-size:0.8em">${(teacherSection?.activities ?? []).map(a => `<li>${a.isVisible ? '✅' : '👻'} ${esc(a.name)}</li>`).join('') || '<li>Sin actividades</li>'}</ul>
+          <ul style="margin:4px 0 0 14px;font-size:0.8em">${(teacherSection?.activities ?? []).map((a) => `<li>${a.isVisible ? '✅' : '👻'} ${esc(a.name)}</li>`).join('') || '<li>Sin actividades</li>'}</ul>
         </div>
         <div style="flex:1;min-width:180px;background:var(--bg);border-radius:var(--radius);padding:10px">
           <div style="font-weight:700;color:${isLocked ? 'var(--bad)' : 'var(--good)'};margin-bottom:4px">🎓 Student (${sActs} act.)${isLocked ? ' 🔒' : ''}</div>
           ${studentScreenshot != null ? `<div class="screenshot" style="margin:0 0 4px"><img src="data:image/png;base64,${studentScreenshot}" alt="Student sección ${section.number}"></div>` : ''}
-          <ul style="margin:4px 0 0 14px;font-size:0.8em">${(studentSection?.activities ?? []).map(a => `<li>${a.isVisible ? '✅' : '👻'} ${esc(a.name)}</li>`).join('') || '<li>Sin actividades</li>'}</ul>
+          <ul style="margin:4px 0 0 14px;font-size:0.8em">${(studentSection?.activities ?? []).map((a) => `<li>${a.isVisible ? '✅' : '👻'} ${esc(a.name)}</li>`).join('') || '<li>Sin actividades</li>'}</ul>
         </div>
       </div>
     </div>
-  </div>`;
-    }
+  </div>`
+  }
 
-    let devNote = '';
-    if (findings.length > 0) {
-        const lockedSection = studentView.sections.find(s => s.isLocked);
-        devNote = `
+  let devNote = ''
+  if (findings.length > 0) {
+    const lockedSection = studentView.sections.find((s) => s.isLocked)
+    devNote = `
     <h2 class="section-title">🧪 Cómo reproducir este hallazgo manualmente</h2>
     <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Seguí estos pasos con tu propio usuario admin para ver el mismo mismatch que detectó el test automatizado.</p>
     <div style="background:var(--surface);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);margin-bottom:16px">
@@ -501,10 +493,10 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
       Desde julio 2026, el pipeline crea un usuario nuevo vía API, lo enrola en el curso, ejecuta la auditoría como ese estudiante, y lo elimina al terminar. Esto reemplaza el approach anterior que usaba un usuario estático (nelthor).<br><br>
       <strong>🧪 ¿Por qué es importante?</strong> Nelthor fue promovido a administrador, por lo que su vista del curso ya no reflejaba la experiencia de un estudiante real. Esto podía generar falsos negativos: por ejemplo, el Módulo 3 de Python 1 aparecía bloqueado para nelthor (admin con role switch) pero la causa real solo se confirmó al usar un estudiante fresco.<br><br>
       <strong>👤 Estado de nelthor:</strong> Sigue siendo un usuario enrolado en Python 1 y su progresión en el curso sigue siendo válida. Usando cambio de rol o navegación directa desde su cuenta admin, aún puede acceder a su progreso histórico y completar actividades pendientes.
-    </div>`;
-    }
+    </div>`
+  }
 
-    return `<!doctype html>
+  return `<!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
@@ -745,85 +737,82 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     </div>
   </div>
 </body>
-</html>`;
+</html>`
 }
 
 function esc(s: string): string {
-    return s
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
 }
 
 function main(): void {
-    const args = process.argv.slice(2);
-    const resultsPath = resolve(args[0] || 'reports/audit/audit-results.json');
-    const screenshotDir = resolve(args[1] || 'reports/audit');
-    const outputDir = resolve(args[2] || 'audit-report');
-    const allureUrl = '/unc-agentic-dev/allure/';
-    const apiResultsIdx = args.indexOf('--api-results');
-    const apiResultsPath = apiResultsIdx !== -1 ? resolve(args[apiResultsIdx + 1]) : null;
+  const args = process.argv.slice(2)
+  const resultsPath = resolve(args[0] || 'reports/audit/audit-results.json')
+  const screenshotDir = resolve(args[1] || 'reports/audit')
+  const outputDir = resolve(args[2] || 'audit-report')
+  const allureUrl = '/unc-agentic-dev/allure/'
+  const apiResultsIdx = args.indexOf('--api-results')
+  const apiResultsPath = apiResultsIdx !== -1 ? resolve(args[apiResultsIdx + 1]) : null
 
-    let apiResults: ApiAuditResults | null = null;
-    if (apiResultsPath != null && existsSync(apiResultsPath)) {
-        try {
-            apiResults = loadJson<ApiAuditResults>(apiResultsPath);
-            console.log(`✅ API audit results loaded: ${apiResults.apiFindings.length} findings`);
-        }
-        catch (err) {
-            console.warn('⚠️ Failed to load API audit results:', err instanceof Error ? err.message : err);
-        }
+  let apiResults: ApiAuditResults | null = null
+  if (apiResultsPath != null && existsSync(apiResultsPath)) {
+    try {
+      apiResults = loadJson<ApiAuditResults>(apiResultsPath)
+      console.log(`✅ API audit results loaded: ${apiResults.apiFindings.length} findings`)
+    } catch (err) {
+      console.warn('⚠️ Failed to load API audit results:', err instanceof Error ? err.message : err)
     }
+  }
 
-    const runUrl
-        = process.env.GITHUB_SERVER_URL != null
-            && process.env.GITHUB_SERVER_URL !== ''
-            && process.env.GITHUB_REPOSITORY != null
-            && process.env.GITHUB_REPOSITORY !== ''
-            && process.env.GITHUB_RUN_ID != null
-            && process.env.GITHUB_RUN_ID !== ''
-            ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
-            : '';
+  const runUrl =
+    process.env.GITHUB_SERVER_URL != null &&
+    process.env.GITHUB_SERVER_URL !== '' &&
+    process.env.GITHUB_REPOSITORY != null &&
+    process.env.GITHUB_REPOSITORY !== '' &&
+    process.env.GITHUB_RUN_ID != null &&
+    process.env.GITHUB_RUN_ID !== ''
+      ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
+      : ''
 
-    let results: AuditResults;
-    if (existsSync(resultsPath)) {
-        results = {
-            ...loadJson<AuditResults>(resultsPath),
-            runUrl,
-            allureUrl,
-            screenshots: loadScreenshots(screenshotDir),
-        };
+  let results: AuditResults
+  if (existsSync(resultsPath)) {
+    results = {
+      ...loadJson<AuditResults>(resultsPath),
+      runUrl,
+      allureUrl,
+      screenshots: loadScreenshots(screenshotDir),
     }
-    else if (apiResults) {
-        console.log('⚠️ UI audit results not found — generating API-only report');
-        results = {
-            courseId: apiResults.courseId,
-            courseName: apiResults.courseName,
-            timestamp: apiResults.timestamp,
-            runUrl,
-            allureUrl,
-            adminView: { courseName: apiResults.courseName, courseUrl: '', tabs: [], sections: [] },
-            teacherView: { courseName: apiResults.courseName, courseUrl: '', tabs: [], sections: [] },
-            studentView: { courseName: apiResults.courseName, courseUrl: '', tabs: [], sections: [] },
-            findings: [],
-            screenshots: [],
-        };
+  } else if (apiResults) {
+    console.log('⚠️ UI audit results not found — generating API-only report')
+    results = {
+      courseId: apiResults.courseId,
+      courseName: apiResults.courseName,
+      timestamp: apiResults.timestamp,
+      runUrl,
+      allureUrl,
+      adminView: { courseName: apiResults.courseName, courseUrl: '', tabs: [], sections: [] },
+      teacherView: { courseName: apiResults.courseName, courseUrl: '', tabs: [], sections: [] },
+      studentView: { courseName: apiResults.courseName, courseUrl: '', tabs: [], sections: [] },
+      findings: [],
+      screenshots: [],
     }
-    else {
-        console.error(
-            `❌ No audit results found. Need either UI results at ${resultsPath} or API results at ${apiResultsPath}`,
-        );
-        process.exit(1);
-    }
+  } else {
+    console.error(
+      `❌ No audit results found. Need either UI results at ${resultsPath} or API results at ${apiResultsPath}`,
+    )
+    process.exit(1)
+  }
 
-    if (!existsSync(outputDir)) {
-        mkdirSync(outputDir, { recursive: true });
-    }
+  if (!existsSync(outputDir)) {
+    mkdirSync(outputDir, { recursive: true })
+  }
 
-    const html = buildHTML(results, apiResults);
-    writeFileSync(resolve(outputDir, 'index.html'), html, 'utf-8');
-    console.log(`✅ Reporte de auditoría generado: ${resolve(outputDir, 'index.html')}`);
+  const html = buildHTML(results, apiResults)
+  writeFileSync(resolve(outputDir, 'index.html'), html, 'utf-8')
+  console.log(`✅ Reporte de auditoría generado: ${resolve(outputDir, 'index.html')}`)
 }
 
-main();
+main()
