@@ -260,13 +260,25 @@ test.describe('Course Validation — Multi-Role Audit', () => {
         // Priority 2: Compare hrefs for activities with the SAME NAME in admin vs student.
         // If admin has a working link (href) and the student sees the same activity name
         // but WITHOUT a link, the resource access is broken for students (Lambda case).
+        // Only check sections WITHOUT restriction text — sections WITH restriction text
+        // are progression-gated and activities in them are expected to be locked.
         console.log(`\n  === HREF-COMPARISON CROSS-REFERENCE ===`)
-        const lockedSections = new Set(
-          switchRoleStudentView.sections.filter((s) => s.isLocked).map((s) => s.number),
+        const gatedSections = new Set(
+          adminView.sections
+            .filter((s) => s.restrictionText && s.restrictionText.trim().length > 3)
+            .map((s) => s.number),
+        )
+        console.log(
+          `  Gated sections (with restriction text): ${Array.from(gatedSections).join(', ') || '(none)'}`,
         )
         for (const adminSection of adminView.sections) {
           if (adminSection.number <= 0) continue
-          if (lockedSections.has(adminSection.number)) continue
+          if (gatedSections.has(adminSection.number)) {
+            console.log(
+              `  Skipping section ${adminSection.number} ("${adminSection.title}") — gated by restriction text`,
+            )
+            continue
+          }
           const studentSection = switchRoleStudentView.sections.find(
             (s) => s.number === adminSection.number,
           )
@@ -284,8 +296,6 @@ test.describe('Course Validation — Multi-Role Audit', () => {
             console.log(
               `  "${adminAct.name}" href="${adminAct.href}": admin has link, student sees "${matchingStudentAct.name}" but NO link → BROKEN ACCESS`,
             )
-            const cmidMatch = adminAct.href.match(/[?&]id=(\d+)/)
-            nelthorData.get(adminNorm)
             phantoms.push({
               severity: 'critical',
               sectionNumber: adminSection.number,
