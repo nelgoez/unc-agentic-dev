@@ -257,52 +257,51 @@ test.describe('Course Validation — Multi-Role Audit', () => {
             })
           }
         }
-        // Priority 2: Activity Completion report entries not accessible to students
-        // The completion report (from Reports > Activity Completion, admin view) lists
-        // activities with completion tracking. If an activity is on this list but students
-        // can't see it, it's a real blocker regardless of conditions.
-        console.log(`\n  === COMPLETION REPORT CROSS-REFERENCE ===`)
-        const alreadyFlaggedCmidSet = new Set<number>()
+        // Priority 2: Check ALL admin cmids from content sections (number > 0)
+        // against student view. Any activity in a real content section that admin sees
+        // but student doesn't is a potential blocker.
+        console.log(`\n  === ALL-CMID CROSS-REFERENCE ===`)
+        const contentAdminCmidSet = new Set<number>()
+        for (const section of adminView.sections) {
+          if (section.number <= 0) continue
+          for (const act of section.activities) {
+            if (!act.href) continue
+            const cmidMatch = act.href.match(/[?&]id=(\d+)/)
+            if (cmidMatch) contentAdminCmidSet.add(Number(cmidMatch[1]))
+          }
+        }
+        const alreadyFlagged = new Set<number>()
         for (const f of phantoms) {
           const cmidMatch = f.message.match(/cmid (\d+)/)
-          if (cmidMatch) alreadyFlaggedCmidSet.add(Number(cmidMatch[1]))
+          if (cmidMatch) alreadyFlagged.add(Number(cmidMatch[1]))
         }
-        for (const entry of completionReport) {
-          if (!entry.activityName) continue
-          const matchingMod = contents
-            .flatMap((s) => s.modules)
-            .find((m) => {
-              const ln = m.name?.toLowerCase() ?? ''
-              const en = entry.activityName.toLowerCase()
-              return ln.includes(en) || en.includes(ln)
-            })
-          if (!matchingMod) continue
-          const cmid = matchingMod.id
-          if (alreadyFlaggedCmidSet.has(cmid)) continue
-          if (adminCmidSet.has(cmid) && !studentVisibleCmidSet.has(cmid)) {
-            console.log(
-              `  "${entry.activityName}" (cmid ${cmid}): in completion report but NOT in student view → BLOCKER`,
-            )
-            const nelthorEntry = nelthorData.get(entry.activityName.toLowerCase())
-            const severity: 'critical' | 'info' = nelthorEntry?.state === 1 ? 'info' : 'critical'
-            phantoms.push({
-              severity,
-              sectionNumber: 0,
-              sectionTitle: '',
-              message: `"${entry.activityName}" (cmid ${cmid}) figura en el reporte de Activity Completion pero NO es accesible para estudiantes`,
-              detail:
-                `La actividad "${entry.activityName}" (cmid ${cmid}) aparece en el reporte de finalización del administrador, lo que indica que DEBERÍA ser completable, pero los estudiantes no pueden verla ni acceder a ella.` +
-                (matchingMod.visible === 0
-                  ? ` En la base de datos tiene visible=0 (oculta).`
-                  : ` No aparece en la vista de estudiante.`) +
-                (nelthorEntry?.state === 1
-                  ? ' [Nelthor completó esta actividad sin problemas antes de ser administrador.]'
-                  : ''),
-              priority: 'high',
-              actionItem:
-                'Revisar visibilidad y permisos del recurso en la configuración del curso. Si debe estar disponible para estudiantes, cambiar visible=1 o ajustar la finalización.',
-            })
-          }
+        for (const cmid of contentAdminCmidSet) {
+          if (alreadyFlagged.has(cmid)) continue
+          if (studentVisibleCmidSet.has(cmid)) continue
+          const modData = contents.flatMap((s) => s.modules).find((m) => m.id === cmid)
+          if (!modData) continue
+          console.log(
+            `  cmid ${cmid} "${modData.name}": in admin content section but NOT in student view → BLOCKER`,
+          )
+          const nelthorEntry = nelthorData.get(modData.name.toLowerCase())
+          const severity: 'critical' | 'info' = nelthorEntry?.state === 1 ? 'info' : 'critical'
+          phantoms.push({
+            severity,
+            sectionNumber: 0,
+            sectionTitle: '',
+            message: `"${modData.name}" (cmid ${cmid}) está en el curso pero NO es accesible para estudiantes`,
+            detail:
+              `La actividad "${modData.name}" (cmid ${cmid}) aparece en la sección de contenido del administrador, pero los estudiantes no pueden verla ni acceder a ella.` +
+              (modData.visible === 0
+                ? ` En la base de datos tiene visible=0 (oculta).`
+                : ` No aparece en la vista de estudiante.`) +
+              (nelthorEntry?.state === 1
+                ? ' [Nelthor completó esta actividad sin problemas antes de ser administrador.]'
+                : ''),
+            priority: 'high',
+            actionItem:
+              'Revisar visibilidad y permisos del recurso en la configuración del curso. Si debe estar disponible para estudiantes, cambiar visible=1 o ajustar la finalización.',
+          })
         }
       } catch (err) {
         console.warn('⚠️ Tree cross-reference failed:', err)
