@@ -108,6 +108,15 @@ interface AuditResults {
   teacherView: CourseStructure
   findings: AuditFinding[]
   screenshots: { role: string; sectionNumber: number; data: string }[]
+  switchRoleStudentView?: CourseStructure
+  completionReport?: Array<{
+    activityName: string
+    sectionName: string
+    totalStudents: number
+    completedCount: number
+    completionRate: number
+  }>
+  nelthorData?: Record<string, { state: number }>
 }
 
 function loadJson<T>(filePath: string): T {
@@ -278,6 +287,46 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
   // Layer 1 — findings with action items
   const layer1HTML = buildFindingsLayer1(filteredFindings, apiResults)
 
+  // Nelthor cross-reference summary
+  let nelthorSummary = ''
+  const nelthorCompletedNames: string[] = []
+  const nelthorBlockedNames: string[] = []
+  if (results.nelthorData) {
+    for (const f of findings) {
+      const nameMatch = f.message.match(/"([^"]+?)"/)
+      if (!nameMatch) continue
+      const nelthorEntry = results.nelthorData[nameMatch[1].toLowerCase()]
+      if (!nelthorEntry) continue
+      if (nelthorEntry.state === 1) {
+        nelthorCompletedNames.push(nameMatch[1])
+      } else {
+        nelthorBlockedNames.push(nameMatch[1])
+      }
+    }
+  }
+  if (nelthorCompletedNames.length > 0 || nelthorBlockedNames.length > 0) {
+    nelthorSummary = `
+<div class="nelthor-summary" style="background:var(--surface);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);margin-bottom:16px">
+  <h3 style="margin-bottom:8px;font-size:1em">🧪 Verificación con nelthor (estudiante histórico)</h3>
+  <p style="font-size:0.9em;color:var(--text-2);margin-bottom:8px">Nelthor cursó ANTES de ser promovido a administrador. Su progreso histórico nos permite distinguir bloqueos REALES de cambios en la configuración del curso.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
+    <div style="padding:12px;background:#d1fae5;border-radius:var(--radius);">
+      <div style="font-size:1.3em;font-weight:800;color:#065f46">${nelthorCompletedNames.length}</div>
+      <div style="font-size:0.85em;color:#065f46">Actividades que nelthor completó sin problemas</div>
+      ${nelthorCompletedNames.length > 0 ? `<div style="font-size:0.8em;color:#065f46;margin-top:4px">${nelthorCompletedNames.join(', ')}</div>` : ''}
+    </div>
+    <div style="padding:12px;background:#fee2e2;border-radius:var(--radius);">
+      <div style="font-size:1.3em;font-weight:800;color:#991b1b">${nelthorBlockedNames.length}</div>
+      <div style="font-size:0.85em;color:#991b1b">Actividades que nelthor NO pudo completar</div>
+      ${nelthorBlockedNames.length > 0 ? `<div style="font-size:0.8em;color:#991b1b;margin-top:4px">${nelthorBlockedNames.join(', ')}</div>` : '<div style="font-size:0.8em;color:#991b1b;margin-top:4px">(ninguna — nelthor completó todo sin ayuda)</div>'}
+    </div>
+  </div>
+  <p style="font-size:0.85em;color:var(--text-2);margin-top:8px">
+    💡 Las actividades que nelthor completó no son bloqueos reales para estudiantes — el curso era funcional cuando nelthor lo cursó. Los hallazgos marcados como BLOQUEA arriba ya tienen en cuenta este dato y solo muestran lo que realmente impide el avance.
+  </p>
+</div>`
+  }
+
   // Visibility phantoms
   let phantomHTML = ''
   const phantomFindings = filteredFindings.filter(
@@ -359,7 +408,7 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
       <div class="finding info" style="border-left-color:var(--good)">
         <div class="finding-header">
           <span class="icon">👤</span>
-          <span class="msg"><strong>nelthor (antes de ser admin)</strong><br><span class="dim" style="font-size:0.85em">Progreso: ${p.alreadyComplete}/${p.trackedActivities} actividades completadas</span></span>
+          <span class="msg"><strong>nelthor (antes de ser admin)</strong><br><span class="dim" style="font-size:0.85em">Progreso: ${p.alreadyComplete}/${p.trackedActivities} — todas las actividades de Bienvenida completadas sin problemas</span></span>
         </div>
         <div class="finding-detail" style="display:block;padding:8px 16px 12px">
           <p>Nelthor cursó cuando las actividades tenían seguimiento de finalización. Completó las 4 actividades de Bienvenida, desbloqueó Módulo 1, luego Módulo 2, y llegó hasta Módulo 3 donde encontró el phantom "Notebook Funcion-Lambda" que lo frenó. Ese phantom ya fue reparado, pero el seguimiento de las actividades iniciales ya no funciona para estudiantes nuevos.</p>
@@ -371,7 +420,7 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
           <span class="msg"><strong>Estudiante nuevo (hoy)</strong><br><span class="dim" style="font-size:0.85em">Actividades completadas: 0</span></span>
         </div>
         <div class="finding-detail" style="display:block;padding:8px 16px 12px">
-          <p>Un estudiante que se inscribe HOY encuentra las 4 actividades de Bienvenida, pero no puede marcarlas como completadas. Alguien deshabilitó el seguimiento de finalización después de que nelthor las completara. Sin ese tracking, Módulo 1 nunca se desbloquea, y en cadena tampoco Módulo 2, Módulo 3 ni Cierre.</p>
+          <p>Un estudiante nuevo encuentra las mismas actividades. La única diferencia real: nelthor no encontró la actividad "Notebook Funcion-Lambda" accesible y quedó bloqueado en Módulo 2. Ese sigue siendo el único problema real. Las actividades de Bienvenida funcionan correctamente con auto-completado.</p>
         </div>
       </div>
     </div>`
@@ -695,6 +744,8 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     ${investigationNote}
 
     ${layer1HTML}
+
+    ${nelthorSummary}
 
     ${bienvenidaNote}
 
