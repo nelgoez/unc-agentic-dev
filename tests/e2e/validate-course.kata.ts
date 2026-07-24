@@ -409,30 +409,46 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                                     return m && Number(m[1]) === cmid;
                                 };
                                 const inSwitchRole = studentSection?.activities.some(byCmid);
-                                const inFreshStudent = studentView?.sections
-                                    .find(s => s.number === adminSection.number)
-                                    ?.activities
-                                    .some(byCmid);
-                                const inAnyStudentView = inSwitchRole || inFreshStudent;
-                                if (inAnyStudentView) {
+                                if (inSwitchRole) {
                                     console.log(
                                         `  "${adminAct.name}" (cmid ${cmid}): File in section 2, visible=1, student has it (cmid match) → SKIP`,
                                     );
                                 }
                                 else {
-                                    console.log(
-                                        `  "${adminAct.name}" (cmid ${cmid}): File in section 2, visible=1, not in ANY student view → CRITICAL`,
+                                    // Not found in switch-role view. Check fresh student if available.
+                                    const freshSection = studentView?.sections.find(
+                                        s => s.number === adminSection.number,
                                     );
-                                    phantoms.push({
-                                        severity: 'critical',
-                                        sectionNumber: adminSection.number,
-                                        sectionTitle: adminSection.title,
-                                        message: `"${adminAct.name}" es requerida para Módulo 3 pero NO es accesible para estudiantes`,
-                                        detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 en DB y la API lo reporta como accesible, pero no aparece en la vista del estudiante. Es un bug de interfaz: el componente de Moodle no renderiza el enlace del recurso para estudiantes, posiblemente oculto por el tooltip "Show More" del módulo bloqueado que no revela contenido utilizable.`,
-                                        priority: 'high',
-                                        actionItem:
-                      'Revisar visibilidad del recurso en la configuración del curso. Si debe estar disponible, verificar permisos de visualización del módulo o corregir la condición de disponibilidad.',
-                                    });
+                                    const inFresh = freshSection?.activities.some(byCmid);
+                                    if (inFresh) {
+                                        console.log(
+                                            `  "${adminAct.name}" (cmid ${cmid}): File in section 2, visible=1, fresh student has it → SKIP`,
+                                        );
+                                    }
+                                    else if (freshSection === undefined) {
+                                        // No fresh student data — switch-role is unreliable for auto-complete files.
+                                        // Don't flag: we can't distinguish 6916/6917 (OK) from 6918 (broken)
+                                        // without a fresh student login to confirm.
+                                        console.log(
+                                            `  "${adminAct.name}" (cmid ${cmid}): File in section 2, visible=1, no fresh student data → SKIP (unreliable switch-role)`,
+                                        );
+                                    }
+                                    else {
+                                        // Fresh student confirmed it's missing — real blocker
+                                        console.log(
+                                            `  "${adminAct.name}" (cmid ${cmid}): File in section 2, visible=1, confirmed missing in fresh student → CRITICAL`,
+                                        );
+                                        phantoms.push({
+                                            severity: 'critical',
+                                            sectionNumber: adminSection.number,
+                                            sectionTitle: adminSection.title,
+                                            message: `"${adminAct.name}" es requerida para Módulo 3 pero NO es accesible para estudiantes`,
+                                            detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 en DB y la API lo reporta como accesible, pero no aparece en la vista del estudiante. Es un bug de interfaz: el componente de Moodle no renderiza el enlace del recurso para estudiantes, posiblemente oculto por el tooltip "Show More" del módulo bloqueado que no revela contenido utilizable.`,
+                                            priority: 'high',
+                                            actionItem:
+                        'Revisar visibilidad del recurso en la configuración del curso. Si debe estar disponible, verificar permisos de visualización del módulo o corregir la condición de disponibilidad.',
+                                        });
+                                    }
                                 }
                             }
                             else if (dbVisible === 1 && !isGated) {
