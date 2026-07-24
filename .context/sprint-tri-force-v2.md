@@ -20,6 +20,20 @@
 
 ## The Module 3 tooltip finding (last discovery, 24 Jul 2026)
 
+Quote from the exploration:
+
+> "give it time.. I just get back, untick 6916/17/18 again! for some reaon was ticked back on.
+> Went back to Student view and not only that still blocked to continue, click on "¡Avanzá al Módulo 1! 🚀" just refresh the page at Module 2, with a toaste message "Section outline — The section Módulo 3 is not currently available."; but, also the tooltip of Module 3 shows something intresting!
+>
+> module 3 tab is grayed out, so there's no suggestion that the tooltip is clickable.
+> And on click it shows:
+>
+> Information
+> <LockIcon> Not available unless: The activity Show More <downArrowIcon> <--- this is blue as if it will do something but does nothing! (on Admin view this open a dropdown) hiding the link to 6918
+> Notebook Funciones-CEF is marked complete ... ---> "Notebook Funciones-CEF" there links 6916, as well as "Funciones: definición y argumentos" under Notebook in biblioteca does
+>
+> is a combination of unfortunate events!"
+
 When clicking the grayed-out Module 3 tab as a student:
 
 1. A tooltip appears with: `<LockIcon> Not available unless: The activity Notebook Funciones-CEF is marked complete ... The activity Notebook Funcion-Lambda is marked complete`
