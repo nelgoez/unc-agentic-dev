@@ -400,22 +400,36 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                                 && modData.modplural === 'Files'
                                 && adminSection.number === 2
                             ) {
-                                // File resource in Module 2 — NOT in student view despite visible=1.
-                                // This is a UI/DOM rendering bug: the resource exists in DB+API but
-                                // the Moodle frontend doesn't render it for students.
-                                console.log(
-                                    `  "${adminAct.name}" (cmid ${cmid}): File in section 2, visible=1 but not in student view → CRITICAL (DOM bug)`,
-                                );
-                                phantoms.push({
-                                    severity: 'critical',
-                                    sectionNumber: adminSection.number,
-                                    sectionTitle: adminSection.title,
-                                    message: `"${adminAct.name}" es requerida para Módulo 3 pero NO es accesible para estudiantes`,
-                                    detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 en DB y la API lo reporta como accesible, pero no aparece en la vista del estudiante. Es un bug de interfaz: el componente de Moodle no renderiza el enlace del recurso para estudiantes, posiblemente oculto por el tooltip "Show More" del módulo bloqueado que no revela contenido utilizable.`,
-                                    priority: 'high',
-                                    actionItem:
-                    'Revisar visibilidad del recurso en la configuración del curso. Si debe estar disponible, verificar permisos de visualización del módulo o corregir la condición de disponibilidad.',
-                                });
+                                // File resource in Module 2 — check fresh student view before flagging.
+                                // Switch-role view is unreliable for auto-complete file resources.
+                                const inFreshStudentView = studentView?.sections
+                                    .find(s => s.number === adminSection.number)
+                                    ?.activities
+                                    .some(
+                                        sa =>
+                                            sa.name.toLowerCase().includes(adminNorm)
+                                            || adminNorm.includes(sa.name.toLowerCase()),
+                                    );
+                                if (inFreshStudentView) {
+                                    console.log(
+                                        `  "${adminAct.name}" (cmid ${cmid}): File in section 2, visible=1, fresh student HAS it → SKIP`,
+                                    );
+                                }
+                                else {
+                                    console.log(
+                                        `  "${adminAct.name}" (cmid ${cmid}): File in section 2, visible=1, not in ANY student view → CRITICAL`,
+                                    );
+                                    phantoms.push({
+                                        severity: 'critical',
+                                        sectionNumber: adminSection.number,
+                                        sectionTitle: adminSection.title,
+                                        message: `"${adminAct.name}" es requerida para Módulo 3 pero NO es accesible para estudiantes`,
+                                        detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 en DB y la API lo reporta como accesible, pero no aparece en la vista del estudiante. Es un bug de interfaz: el componente de Moodle no renderiza el enlace del recurso para estudiantes, posiblemente oculto por el tooltip "Show More" del módulo bloqueado que no revela contenido utilizable.`,
+                                        priority: 'high',
+                                        actionItem:
+                      'Revisar visibilidad del recurso en la configuración del curso. Si debe estar disponible, verificar permisos de visualización del módulo o corregir la condición de disponibilidad.',
+                                    });
+                                }
                             }
                             else if (dbVisible === 1 && !isGated) {
                                 // DB says visible, no completion tracking, in open section but missing from student
