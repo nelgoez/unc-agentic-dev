@@ -341,7 +341,7 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                 modData.completion === 2 &&
                 modData.completiondata?.isautomatic === true &&
                 modData.modplural === 'Files' &&
-                adminSection.number <= 2
+                adminSection.number === 2
               ) {
                 // File resource in sections 1-2 (pre-cascade). Module 2 has the Lambda
                 // and its duplicate. Module 3+ file resources are cascade.
