@@ -340,13 +340,13 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                 modData &&
                 modData.completion === 2 &&
                 modData.completiondata?.isautomatic === true &&
-                modData.modplural === 'Files'
+                modData.modplural === 'Files' &&
+                adminSection.number <= 2
               ) {
-                // File resource (notebook, PDF, etc.) not visible to students. All such
-                // resources are inaccessible — the student can see section headers but
-                // not the actual file download links. The Lambda is the first blocker.
+                // File resource in sections 1-2 (pre-cascade). Module 2 has the Lambda
+                // and its duplicate. Module 3+ file resources are cascade.
                 console.log(
-                  `  "${adminAct.name}" (cmid ${cmid}): File resource NOT in student view → CRITICAL`,
+                  `  "${adminAct.name}" (cmid ${cmid}): File in section ${adminSection.number} → CRITICAL`,
                 )
                 phantoms.push({
                   severity: 'critical',
