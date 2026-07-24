@@ -23,7 +23,7 @@
       "@schemas": ["./api/schemas/index.ts"]
     },
     "resolveJsonModule": true,
-    "types": ["node"],
+    "types": ["node", "bun"],
     "allowImportingTsExtensions": true,
     "allowJs": true,
     "strict": true,
