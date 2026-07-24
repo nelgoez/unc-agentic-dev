@@ -268,15 +268,21 @@ export class MoodleCourse {
 
     const activityNames = new Set<string>()
 
-    const enPattern = /the activity\s+([^,\."]+?)\s+is marked complete/gi
-    for (const m of cleanText.matchAll(enPattern)) {
-      activityNames.add(m[1].trim())
-    }
-
-    const esPattern =
-      /[Ll]a actividad\s+([^,\."]+?)\s+(est[ée] marcada como completada|debe marcarse como completada|este[ée] completada)/gi
-    for (const m of cleanText.matchAll(esPattern)) {
-      activityNames.add(m[1].trim())
+    const conditionSegments = cleanText.split(/\.\.\.\s*/)
+    for (const segment of conditionSegments) {
+      const enPattern = /[Tt]he activity\s+([^,\."]+?)\s+is marked complete/gi
+      for (const m of segment.matchAll(enPattern)) {
+        activityNames.add(m[1].trim())
+      }
+      const passedPattern = /[Tt]he activity\s+([^,\."]+?)\s+is complete and passed/gi
+      for (const m of segment.matchAll(passedPattern)) {
+        activityNames.add(m[1].trim())
+      }
+      const esPattern =
+        /[Ll]a actividad\s+([^,\."]+?)\s+(est[ée] marcada como completada|debe marcarse como completada|este[ée] completada)/gi
+      for (const m of segment.matchAll(esPattern)) {
+        activityNames.add(m[1].trim())
+      }
     }
 
     const quotePattern = /["""]([^"""]+?)["""]/g

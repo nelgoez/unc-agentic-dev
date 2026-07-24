@@ -267,6 +267,21 @@ test.describe('Course Validation — Multi-Role Audit', () => {
             }
           }
         } catch {}
+        // Build gated sections set (sections with restriction text — switch-role unreliable there)
+        const gatedSections = new Set(
+          adminView.sections
+            .filter((s) => s.restrictionText && s.restrictionText.trim().length > 3)
+            .map((s) => s.number),
+        )
+        // Build cmid → section number map from admin view
+        const cmidToSectionMap = new Map<number, number>()
+        for (const section of adminView.sections) {
+          for (const act of section.activities) {
+            if (!act.href) continue
+            const cmidMatch = act.href.match(/[?&]id=(\d+)/)
+            if (cmidMatch) cmidToSectionMap.set(Number(cmidMatch[1]), section.number)
+          }
+        }
         // Priority: check each referenced cmid against DB visibility + student view
         for (const cmid of referencedCmidSet) {
           const modData = contents.flatMap((s) => s.modules).find((m) => m.id === cmid)
@@ -275,30 +290,43 @@ test.describe('Course Validation — Multi-Role Audit', () => {
           const dbVisible = modData.visible ?? 1
           const inAdminView = adminCmidSet.has(cmid)
           const inStudentView = studentVisibleCmidSet.has(cmid)
+          const sectionNum = cmidToSectionMap.get(cmid)
+          const isGatedSection = sectionNum !== undefined && gatedSections.has(sectionNum)
           console.log(
-            `  cmid ${cmid} "${modName}": DB visible=${dbVisible}, inAdminView=${inAdminView}, inStudentView=${inStudentView}`,
+            `  cmid ${cmid} "${modName}": DB visible=${dbVisible}, inAdminView=${inAdminView}, inStudentView=${inStudentView}, section=${sectionNum}, gated=${isGatedSection}`,
           )
           if (inAdminView && !inStudentView) {
-            console.log(`  → REFERENCED CMID NOT IN STUDENT VIEW: cmid ${cmid} "${modName}"`)
-            const nelthorEntry = nelthorData.get(modName.toLowerCase())
-            const severity: 'critical' | 'info' = nelthorEntry?.state === 1 ? 'info' : 'critical'
-            phantoms.push({
-              severity,
-              sectionNumber: 0,
-              sectionTitle: '',
-              message: `"${modName}" es requerida para progresar pero NO es accesible para estudiantes`,
-              detail:
-                `La actividad "${modName}" (cmid ${cmid}) es requerida por las condiciones de disponibilidad del curso, pero los estudiantes no pueden verla ni acceder a ella.` +
-                (dbVisible === 0
-                  ? ` En la base de datos tiene visible=0 (oculta).`
-                  : ` No aparece en la vista de estudiante a pesar de ser visible en DB.`) +
-                (nelthorEntry?.state === 1
-                  ? ' [Nelthor completó esta actividad sin problemas antes de ser administrador.]'
-                  : ''),
-              priority: 'high',
-              actionItem:
-                'Revisar visibilidad y permisos del recurso en la configuración del curso. Si debe estar disponible para estudiantes, cambiar visible=1 o ajustar la condición de disponibilidad.',
-            })
+            if (isGatedSection && dbVisible === 1) {
+              // Gated section + visible=1 → switch-role view is unreliable. Skip.
+              console.log(
+                `  → SKIP cmid ${cmid} "${modName}": in gated section, visible=1 — switch-role unreliable`,
+              )
+            } else if (dbVisible === 0) {
+              // Confirmed hidden at DB level
+              console.log(`  → DB VISIBLE=0: cmid ${cmid} "${modName}"`)
+              phantoms.push({
+                severity: 'critical',
+                sectionNumber: sectionNum ?? 0,
+                sectionTitle: '',
+                message: `"${modName}" tiene visible=0 en DB — bloquea el avance`,
+                detail: `La actividad "${modName}" (cmid ${cmid}) está oculta en la base de datos (visible=0). Las condiciones de disponibilidad la exigen, creando un punto muerto. Además, el tooltip del módulo bloqueado muestra el nombre pero el enlace de detalle no funciona para estudiantes.`,
+                priority: 'high',
+                actionItem:
+                  'Hacer visible el recurso (visible=1) o corregir la condición de disponibilidad.',
+              })
+            } else {
+              // DB visible=1, not in gated section, but not in student view → real issue
+              phantoms.push({
+                severity: 'critical',
+                sectionNumber: sectionNum ?? 0,
+                sectionTitle: '',
+                message: `"${modName}" es visible en DB pero no aparece para estudiantes`,
+                detail: `La actividad "${modName}" (cmid ${cmid}) tiene visible=1 en la base de datos pero los estudiantes no pueden verla. Puede ser un bug de interfaz (el tooltip del módulo bloqueado oculta el enlace) o de permisos de Moodle.`,
+                priority: 'high',
+                actionItem:
+                  'Verificar visibilidad y permisos del recurso en la configuración del curso.',
+              })
+            }
           }
         }
         // Priority 2: Compare hrefs for activities with the SAME NAME in admin vs student.
@@ -308,11 +336,6 @@ test.describe('Course Validation — Multi-Role Audit', () => {
         // In sections WITHOUT restriction text (always open): compare hrefs directly.
         // In sections WITH restriction text (gated): check API visible flag + student presence.
         console.log(`\n  === HREF-COMPARISON CROSS-REFERENCE ===`)
-        const gatedSections = new Set(
-          adminView.sections
-            .filter((s) => s.restrictionText && s.restrictionText.trim().length > 3)
-            .map((s) => s.number),
-        )
         console.log(
           `  Gated sections (with restriction text): ${Array.from(gatedSections).join(', ') || '(none)'}`,
         )
@@ -359,44 +382,22 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                 modData.modplural === 'Files' &&
                 adminSection.number === 2
               ) {
-                // File resource in Module 2 (Lambda section). Check if nelthor completed it.
-                const nelthorEntry = nelthorData.get(adminNorm)
-                if (nelthorEntry?.state === 0) {
-                  // Nelthor couldn't complete it either — proven blocker (only cmid 6918)
-                  console.log(
-                    `  "${adminAct.name}" (cmid ${cmid}): File in section 2, nelthor state=0 → CRITICAL (only real blocker)`,
-                  )
-                  phantoms.push({
-                    severity: 'critical',
-                    sectionNumber: adminSection.number,
-                    sectionTitle: adminSection.title,
-                    message: `"${adminAct.name}" es un archivo descargable NO accesible para estudiantes`,
-                    detail: `El recurso "${adminAct.name}" (cmid ${cmid}) es un archivo con finalización automática que los estudiantes no pueden descargar. Nelthor tampoco pudo acceder a este archivo como estudiante.`,
-                    priority: 'high',
-                    actionItem:
-                      'Revisar permisos del archivo. Verificar que estudiantes puedan descargar archivos de este tipo.',
-                  })
-                } else if (nelthorEntry?.state === 1) {
-                  // Nelthor completed it as a student — resource works (cmids 6916, 6917)
-                  console.log(
-                    `  "${adminAct.name}" (cmid ${cmid}): File in section 2, nelthor state=1 → SKIP (nelthor accessed it as student, works fine)`,
-                  )
-                } else {
-                  // No nelthora data — flag as warning
-                  console.log(
-                    `  "${adminAct.name}" (cmid ${cmid}): File in section 2, no nelthora → WARNING`,
-                  )
-                  phantoms.push({
-                    severity: 'warning',
-                    sectionNumber: adminSection.number,
-                    sectionTitle: adminSection.title,
-                    message: `"${adminAct.name}" es un archivo no verificado — puede no ser accesible`,
-                    detail: `El recurso "${adminAct.name}" (cmid ${cmid}) es un archivo con finalización automática que no se pudo verificar con nelthora.`,
-                    priority: 'medium',
-                    actionItem:
-                      'Verificar manualmente si estudiantes pueden descargar este archivo.',
-                  })
-                }
+                // File resource in Module 2 — NOT in student view despite visible=1.
+                // This is a UI/DOM rendering bug: the resource exists in DB+API but
+                // the Moodle frontend doesn't render it for students.
+                console.log(
+                  `  "${adminAct.name}" (cmid ${cmid}): File in section 2, visible=1 but not in student view → CRITICAL (DOM bug)`,
+                )
+                phantoms.push({
+                  severity: 'critical',
+                  sectionNumber: adminSection.number,
+                  sectionTitle: adminSection.title,
+                  message: `"${adminAct.name}" es requerida para Módulo 3 pero NO es accesible para estudiantes`,
+                  detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 en DB y la API lo reporta como accesible, pero no aparece en la vista del estudiante. Es un bug de interfaz: el componente de Moodle no renderiza el enlace del recurso para estudiantes, posiblemente oculto por el tooltip "Show More" del módulo bloqueado que no revela contenido utilizable.`,
+                  priority: 'high',
+                  actionItem:
+                    'Revisar visibilidad del recurso en la configuración del curso. Si debe estar disponible, verificar permisos de visualización del módulo o corregir la condición de disponibilidad.',
+                })
               } else if (dbVisible === 1 && !isGated) {
                 // DB says visible, no completion tracking, in open section but missing from student
                 console.log(
@@ -448,8 +449,64 @@ test.describe('Course Validation — Multi-Role Audit', () => {
             }
           }
         }
+
+        // Priority 3: Full resource scan — compare ALL admin activities against student view
+        // This catches resources invisible to students even without being in conditions.
+        console.log(`\n  === FULL RESOURCE SCAN ===`)
+        // Build student cmid set from switch-role view (prefer fresh student if available)
+        const studentAllCmidSet = new Set<number>()
+        const studentSource = studentView || switchRoleStudentView
+        for (const section of studentSource.sections) {
+          for (const act of section.activities) {
+            if (!act.href) continue
+            const m = act.href.match(/[?&]id=(\d+)/)
+            if (m) studentAllCmidSet.add(Number(m[1]))
+          }
+        }
+        for (const adminSection of adminView.sections) {
+          if (adminSection.number <= 0) continue
+          if (gatedSections.has(adminSection.number)) continue
+          for (const adminAct of adminSection.activities) {
+            if (!adminAct.href) continue
+            const m = adminAct.href.match(/[?&]id=(\d+)/)
+            if (!m) continue
+            const cmid = Number(m[1])
+            if (studentAllCmidSet.has(cmid)) continue
+            // Already flagged by a higher-priority check?
+            const alreadyFlagged = phantoms.some(
+              (f) => f.message.includes(adminAct.name) && f.severity === 'critical',
+            )
+            if (alreadyFlagged) continue
+            const modData = contents.flatMap((s) => s.modules).find((md) => md.id === cmid)
+            const dbVisible = modData?.visible ?? 1
+            const hasCompletion = (modData?.completion ?? 0) > 0
+            if (!hasCompletion) {
+              console.log(`  SKIP (supplementary): cmid ${cmid} "${adminAct.name}"`)
+              continue
+            }
+            console.log(
+              `  FLAGGING: cmid ${cmid} "${adminAct.name}" — admin has it, student doesn't`,
+            )
+            phantoms.push({
+              severity: 'critical',
+              sectionNumber: adminSection.number,
+              sectionTitle: adminSection.title,
+              message:
+                dbVisible === 0
+                  ? `"${adminAct.name}" tiene visible=0 en DB — oculto para estudiantes`
+                  : `"${adminAct.name}" existe en DB/API pero NO aparece para estudiantes`,
+              detail:
+                dbVisible === 0
+                  ? `El recurso "${adminAct.name}" (cmid ${cmid}) está oculto en la base de datos (visible=0).`
+                  : `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 en DB y la API lo reporta como accesible, pero no aparece en la vista del estudiante. Es un bug de interfaz: Moodle no renderiza el recurso para estudiantes a pesar de estar correctamente configurado en el servidor. El tooltip "Show More" del módulo bloqueado no revela contenido utilizable.`,
+              priority: 'high',
+              actionItem:
+                'Revisar visibilidad y permisos del recurso en la configuración del curso.',
+            })
+          }
+        }
       } catch (err) {
-        console.warn('⚠️ Tree cross-reference failed:', err)
+        console.warn('⚠️ Cross-reference/full scan failed:', err)
       }
 
       console.log(`\n=== FINDINGS (final after cross-reference) ===`)
