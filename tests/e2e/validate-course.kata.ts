@@ -400,21 +400,23 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                                 && modData.modplural === 'Files'
                                 && adminSection.number === 2
                             ) {
-                                // File resource in Module 2 — check fresh student view before flagging.
-                                // Switch-role view is unreliable for auto-complete file resources.
-                                // Use CMID matching (href) not name matching — student may see
-                                // different display names (e.g. "Funciones: definición y argumentos"
-                                // vs admin's "Notebook Funciones-CEF").
-                                const inFreshStudentView = studentView?.sections
+                                // File resource in Module 2 — check by CMID (href) not by name.
+                                // Student sees these with different display names (e.g.
+                                // "Funciones: definición y argumentos" vs admin's "Notebook Funciones-CEF").
+                                // Check both switch-role and fresh student views by cmid.
+                                const byCmid = (sa: { href?: string }) => {
+                                    const m = sa.href?.match(/[?&]id=(\d+)/);
+                                    return m && Number(m[1]) === cmid;
+                                };
+                                const inSwitchRole = studentSection?.activities.some(byCmid);
+                                const inFreshStudent = studentView?.sections
                                     .find(s => s.number === adminSection.number)
                                     ?.activities
-                                    .some((sa) => {
-                                        const m = sa.href?.match(/[?&]id=(\d+)/);
-                                        return m && Number(m[1]) === cmid;
-                                    });
-                                if (inFreshStudentView) {
+                                    .some(byCmid);
+                                const inAnyStudentView = inSwitchRole || inFreshStudent;
+                                if (inAnyStudentView) {
                                     console.log(
-                                        `  "${adminAct.name}" (cmid ${cmid}): File in section 2, visible=1, fresh student HAS it → SKIP`,
+                                        `  "${adminAct.name}" (cmid ${cmid}): File in section 2, visible=1, student has it (cmid match) → SKIP`,
                                     );
                                 }
                                 else {
