@@ -275,25 +275,16 @@ export class MoodleCourse {
 
         const conditionSegments = cleanText.split(/\.\.\.\s*/);
         for (const segment of conditionSegments) {
-            const namePattern = /[^,."\s]+(?:\s+[^,."\s]+)*/;
-            const enPattern = new RegExp(
-                `The activity\\s+(${namePattern.source})\\s+is marked complete`,
-                'gi',
-            );
+            const enPattern = /The activity\s+([^,."]+?)\s+is marked complete/gi;
             for (const m of segment.matchAll(enPattern)) {
                 activityNames.add(m[1].trim());
             }
-            const passedPattern = new RegExp(
-                `The activity\\s+(${namePattern.source})\\s+is complete and passed`,
-                'gi',
-            );
+            const passedPattern = /The activity\s+([^,."]+?)\s+is complete and passed/gi;
             for (const m of segment.matchAll(passedPattern)) {
                 activityNames.add(m[1].trim());
             }
-            const esPattern = new RegExp(
-                `La actividad\\s+(${namePattern.source})\\s+(?:est[ée] marcada como completada|debe marcarse como completada|este[ée] completada)`,
-                'gi',
-            );
+            const esPattern
+                = /La actividad\s+([^,."]+?)\s+(?:est[ée] marcada como completada|debe marcarse como completada|este[ée] completada)/gi;
             for (const m of segment.matchAll(esPattern)) {
                 activityNames.add(m[1].trim());
             }

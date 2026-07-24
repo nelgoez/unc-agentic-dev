@@ -254,9 +254,17 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     });
 
     // Filter Bienvenida false positives (completion tracking issues in Welcome section)
+    const bienvenidaKeywords = [
+        'sobre los docentes',
+        'sobre los objetivos',
+        'actividad individual',
+        'presentaciones de bienvenida',
+        'encuesta de diagnóstico',
+    ];
     const bienvenidaFalsePositives = findings.filter(
         f =>
-            f.sectionTitle.toLowerCase().includes('bienvenida')
+            (f.sectionTitle.toLowerCase().includes('bienvenida')
+                || bienvenidaKeywords.some(k => f.message.toLowerCase().includes(k)))
             && f.message.toLowerCase().includes('complet'),
     );
     const filteredFindings = findings.filter(f => !bienvenidaFalsePositives.includes(f));
