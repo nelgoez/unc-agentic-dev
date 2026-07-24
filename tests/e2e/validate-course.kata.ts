@@ -239,7 +239,7 @@ test.describe('Course Validation — Multi-Role Audit', () => {
             if (cmidMatch) adminCmidSet.add(Number(cmidMatch[1]))
           }
         }
-        // Collect all cmids referenced in conditions
+        // Collect all cmids referenced in conditions (module-level + section-level)
         const breakdown = await api.getAvailabilityJsonBreakdown(courseId)
         const referencedCmidSet = new Set<number>()
         for (const section of breakdown.sections) {
@@ -251,6 +251,22 @@ test.describe('Course Validation — Multi-Role Audit', () => {
             }
           }
         }
+        // Also parse section-level availability JSON for conditions (e.g., Module 3's
+        // restriction referencing 6918 at the section level, not module level)
+        try {
+          for (const sec of contents) {
+            if (sec.availability && sec.availability !== 'null') {
+              const tree = JSON.parse(sec.availability)
+              if (tree.c && Array.isArray(tree.c)) {
+                const traverseSection = (node: any) => {
+                  if (node.type === 'completion' && node.cm) referencedCmidSet.add(node.cm)
+                  if (node.c && Array.isArray(node.c)) node.c.forEach(traverseSection)
+                }
+                tree.c.forEach(traverseSection)
+              }
+            }
+          }
+        } catch {}
         // Priority: check each referenced cmid against DB visibility + student view
         for (const cmid of referencedCmidSet) {
           const modData = contents.flatMap((s) => s.modules).find((m) => m.id === cmid)
