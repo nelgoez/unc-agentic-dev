@@ -402,14 +402,16 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                             ) {
                                 // File resource in Module 2 — check fresh student view before flagging.
                                 // Switch-role view is unreliable for auto-complete file resources.
+                                // Use CMID matching (href) not name matching — student may see
+                                // different display names (e.g. "Funciones: definición y argumentos"
+                                // vs admin's "Notebook Funciones-CEF").
                                 const inFreshStudentView = studentView?.sections
                                     .find(s => s.number === adminSection.number)
                                     ?.activities
-                                    .some(
-                                        sa =>
-                                            sa.name.toLowerCase().includes(adminNorm)
-                                            || adminNorm.includes(sa.name.toLowerCase()),
-                                    );
+                                    .some((sa) => {
+                                        const m = sa.href?.match(/[?&]id=(\d+)/);
+                                        return m && Number(m[1]) === cmid;
+                                    });
                                 if (inFreshStudentView) {
                                     console.log(
                                         `  "${adminAct.name}" (cmid ${cmid}): File in section 2, visible=1, fresh student HAS it → SKIP`,
