@@ -343,21 +343,44 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                 modData.modplural === 'Files' &&
                 adminSection.number === 2
               ) {
-                // File resource in sections 1-2 (pre-cascade). Module 2 has the Lambda
-                // and its duplicate. Module 3+ file resources are cascade.
-                console.log(
-                  `  "${adminAct.name}" (cmid ${cmid}): File in section ${adminSection.number} → CRITICAL`,
-                )
-                phantoms.push({
-                  severity: 'critical',
-                  sectionNumber: adminSection.number,
-                  sectionTitle: adminSection.title,
-                  message: `"${adminAct.name}" es un archivo descargable NO accesible para estudiantes`,
-                  detail: `El recurso "${adminAct.name}" (cmid ${cmid}) es un archivo con finalización automática. Los estudiantes ven el nombre de la sección pero NO el enlace de descarga del archivo. Nelthor tampoco pudo acceder a este archivo antes de ser administrador.`,
-                  priority: 'high',
-                  actionItem:
-                    'Revisar permisos del archivo. Verificar que estudiantes puedan descargar archivos de este tipo.',
-                })
+                // File resource in Module 2 (Lambda section). Check if nelthor completed it.
+                const nelthorEntry = nelthorData.get(adminNorm)
+                if (nelthorEntry?.state === 0) {
+                  // Nelthor couldn't complete it either — proven blocker (only cmid 6918)
+                  console.log(
+                    `  "${adminAct.name}" (cmid ${cmid}): File in section 2, nelthor state=0 → CRITICAL (only real blocker)`,
+                  )
+                  phantoms.push({
+                    severity: 'critical',
+                    sectionNumber: adminSection.number,
+                    sectionTitle: adminSection.title,
+                    message: `"${adminAct.name}" es un archivo descargable NO accesible para estudiantes`,
+                    detail: `El recurso "${adminAct.name}" (cmid ${cmid}) es un archivo con finalización automática que los estudiantes no pueden descargar. Nelthor tampoco pudo acceder a este archivo como estudiante.`,
+                    priority: 'high',
+                    actionItem:
+                      'Revisar permisos del archivo. Verificar que estudiantes puedan descargar archivos de este tipo.',
+                  })
+                } else if (nelthorEntry?.state === 1) {
+                  // Nelthor completed it as a student — resource works (cmids 6916, 6917)
+                  console.log(
+                    `  "${adminAct.name}" (cmid ${cmid}): File in section 2, nelthor state=1 → SKIP (nelthor accessed it as student, works fine)`,
+                  )
+                } else {
+                  // No nelthora data — flag as warning
+                  console.log(
+                    `  "${adminAct.name}" (cmid ${cmid}): File in section 2, no nelthora → WARNING`,
+                  )
+                  phantoms.push({
+                    severity: 'warning',
+                    sectionNumber: adminSection.number,
+                    sectionTitle: adminSection.title,
+                    message: `"${adminAct.name}" es un archivo no verificado — puede no ser accesible`,
+                    detail: `El recurso "${adminAct.name}" (cmid ${cmid}) es un archivo con finalización automática que no se pudo verificar con nelthora.`,
+                    priority: 'medium',
+                    actionItem:
+                      'Verificar manualmente si estudiantes pueden descargar este archivo.',
+                  })
+                }
               } else if (dbVisible === 1 && !isGated) {
                 // DB says visible, no completion tracking, in open section but missing from student
                 console.log(
