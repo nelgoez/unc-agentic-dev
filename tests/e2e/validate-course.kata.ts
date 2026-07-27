@@ -198,22 +198,49 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                     catch {}
                 }
             }
-            // Also include cmids from gated sections with completion tracking.
-            // Gated sections detect via admin view's restriction text (UI-based).
-            // Section-level conditions like "complete all activities in section 2"
-            // don't reference specific cmids, but every activity with completion
-            // tracking in a gated section is effectively condition-referenced.
-            const gatedSectionNumbers = new Set(
-                adminView.sections
-                    .filter(s => s.restrictionText && s.restrictionText.trim().length > 3)
-                    .map(s => s.number),
+            // Also include cmids in the same section as condition-referenced cmids
+            // that have similar normalized names. This catches duplicates of
+            // condition-referenced activities (e.g., 6918 is a duplicate of 6917).
+            const conditionModSectionMap = new Map<number, number>();
+            for (const s of contents) {
+                for (const m of s.modules) {
+                    if (referencedCmidSet.has(m.id)) {
+                        conditionModSectionMap.set(m.id, s.section);
+                    }
+                }
+            }
+            const conditionSectionNumbers = new Set(conditionModSectionMap.values());
+            const normName = (n: string) =>
+                n
+                    .toLowerCase()
+                    .replace(/[_-]/g, ' ')
+                    .replace(/[^a-z0-9\s]/g, '')
+                    .trim();
+            const conditionNormNames = new Set(
+                Array.from(referencedCmidSet)
+                    .map((cmid) => {
+                        const mod = contents.flatMap(s => s.modules).find(m => m.id === cmid);
+                        return mod?.name ? normName(mod.name) : undefined;
+                    })
+                    .filter((s): s is string => s !== undefined && s.length > 0),
             );
             for (const sec of contents) {
-                if (!gatedSectionNumbers.has(sec.section))
+                if (!conditionSectionNumbers.has(sec.section))
                     continue;
                 for (const mod of sec.modules) {
-                    if ((mod.completion ?? 0) > 0) {
+                    if ((mod.completion ?? 0) === 0)
+                        continue;
+                    if (referencedCmidSet.has(mod.id))
+                        continue;
+                    const mName = mod.name ? normName(mod.name) : '';
+                    const isRelated = Array.from(conditionNormNames).some(
+                        cn => cn.includes(mName) || mName.includes(cn),
+                    );
+                    if (isRelated) {
                         referencedCmidSet.add(mod.id);
+                        console.log(
+                            `  → Added cmid ${mod.id} "${mod.name}" as related to condition-referenced activity in section ${sec.section}`,
+                        );
                     }
                 }
             }
