@@ -1,0 +1,5 @@
+bun run test:unit
+bun run vars:check
+bun run types:check
+
+# Note: full e2e audits require Moodle credentials and are triggered by CI on push.

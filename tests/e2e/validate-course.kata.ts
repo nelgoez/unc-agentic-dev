@@ -3,7 +3,9 @@ import { resolve } from 'node:path';
 import process from 'node:process';
 import { test } from '@playwright/test';
 import { MoodleApiClient } from '../components/api/MoodleApiClient';
+import { CourseDependencyGraph } from '../components/shared/CourseDependencyGraph';
 import { MoodleStudentFactory } from '../components/shared/MoodleStudentFactory';
+import { TreeOverlayAnalyzer } from '../components/shared/TreeOverlayAnalyzer';
 import { MoodleCourse } from '../components/ui/MoodleCourse';
 import { MoodleLogin } from '../components/ui/MoodleLogin';
 import { MoodleRoleSwitch } from '../components/ui/MoodleRoleSwitch';
@@ -140,21 +142,11 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                 return report;
             });
 
-        const findings = await test.step('10. Detección de actividades fantasma', async () => {
+        const findings = await test.step('10. Análisis estructural (Tree Overlay)', async () => {
             const api = new MoodleApiClient(moodleBaseUrl, moodleWsToken);
             const contents = await api.getCourseContents(courseId);
-            const apiModuleData = new Map<string, { completion: number; isautomatic: boolean }>();
-            for (const section of contents) {
-                for (const mod of section.modules) {
-                    if (mod.name) {
-                        apiModuleData.set(mod.name.toLowerCase(), {
-                            completion: mod.completion ?? 0,
-                            isautomatic: mod.completiondata?.isautomatic ?? false,
-                        });
-                    }
-                }
-            }
 
+            // Fetch nelthor reference data for report
             nelthorData = new Map<string, { state: number }>();
             try {
                 const nelthorUsers = await api.getUsersByField('username', ['nelthor']);
@@ -178,410 +170,135 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                 console.warn('⚠️ Nelthor data fetch failed:', err);
             }
 
-            const phantoms = course.findPhantoms(
-                adminView,
-                switchRoleStudentView,
-                apiModuleData,
-                nelthorData,
+            // Build referenced cmid set from section-level + module-level conditions
+            const breakdown = await api.getAvailabilityJsonBreakdown(courseId);
+            const referencedCmidSet = new Set<number>();
+            for (const section of breakdown.sections) {
+                for (const mod of section.modulesWithRestrictions ?? []) {
+                    for (const cond of mod.conditions ?? []) {
+                        if (cond.type === 'completion' && cond.cm) {
+                            referencedCmidSet.add(cond.cm);
+                        }
+                    }
+                }
+            }
+            for (const sec of contents) {
+                if (sec.availability && sec.availability !== 'null') {
+                    try {
+                        const tree = JSON.parse(sec.availability);
+                        const traverse = (node: any) => {
+                            if (node.type === 'completion' && node.cm)
+                                referencedCmidSet.add(node.cm);
+                            if (node.c && Array.isArray(node.c))
+                                node.c.forEach(traverse);
+                        };
+                        if (tree.c && Array.isArray(tree.c))
+                            tree.c.forEach(traverse);
+                    }
+                    catch {}
+                }
+            }
+
+            // 1. Fetch fresh student's API completion status
+            let freshStudentCompletionStatuses: Array<{
+                cmid: number;
+                state: number;
+                tracking: number;
+                timecompleted: number;
+            }> = [];
+            if (freshStudent?.userId) {
+                try {
+                    const statuses = await api.getActivitiesCompletionStatus(
+                        Number(courseId),
+                        freshStudent.userId,
+                    );
+                    freshStudentCompletionStatuses = statuses;
+                    console.log(`\n📊 Fresh student API completion: ${statuses.length} activities tracked`);
+                }
+                catch (err) {
+                    console.warn('⚠️ Fresh student completion fetch failed:', err);
+                }
+            }
+
+            // 2. Build 4 trees
+            console.log('\n=== TREE OVERLAY ANALYSIS ===');
+
+            const adminGraph = CourseDependencyGraph.fromAdminUI(adminView);
+            console.log(`Admin UI tree: ${adminGraph.nodes.size} nodes, ${adminGraph.edges.length} edges`);
+
+            const studentUiGraph = CourseDependencyGraph.fromStudentUI(
+                studentView || switchRoleStudentView,
             );
+            console.log(
+                `Student UI tree: ${studentUiGraph.nodes.size} nodes, ${studentUiGraph.edges.length} edges`,
+            );
+
+            const apiGraph = CourseDependencyGraph.fromApi(contents, referencedCmidSet);
+            console.log(`API tree: ${apiGraph.nodes.size} nodes, ${apiGraph.edges.length} edges`);
+
+            const allModules = contents.flatMap(s =>
+                s.modules.map(m => ({
+                    id: m.id,
+                    name: m.name,
+                    section: s.section,
+                    sectionName: s.name,
+                    modplural: m.modplural,
+                    completion: m.completion,
+                    visible: m.visible,
+                })),
+            );
+            const studentApiGraph = CourseDependencyGraph.fromStudentApiCompletion(
+                freshStudentCompletionStatuses,
+                allModules,
+            );
+            console.log(`Student API tree: ${studentApiGraph.nodes.size} nodes`);
+
+            // 3. Run overlay analyzer
+            const overlayFindings = TreeOverlayAnalyzer.compare(
+                adminGraph,
+                apiGraph,
+                studentApiGraph,
+                studentUiGraph,
+                { verbose: true },
+            );
+
+            // 4. Convert overlay findings to AuditFinding format
+            const phantoms = overlayFindings.map(f => ({
+                severity: f.severity,
+                sectionNumber: f.sectionNumber,
+                sectionTitle: f.sectionTitle,
+                message: f.message,
+                detail: f.detail,
+                priority: f.priority ?? ('medium'),
+                actionItem: f.actionItem,
+            }));
+
             const criticalFindings = phantoms.filter(f => f.severity === 'critical');
             const warningFindings = phantoms.filter(f => f.severity === 'warning');
+            const infoFindings = phantoms.filter(f => f.severity === 'info');
+            const allReferenced = Array.from(referencedCmidSet);
+            const inStudentApi = allReferenced.filter(c => studentApiGraph.nodes.has(c));
+            const notInStudentApi = allReferenced.filter(c => !studentApiGraph.nodes.has(c));
 
-            console.log(`\n=== FINDINGS (from findPhantoms) ===`);
+            console.log(`\n=== OVERLAY FINDINGS ===`);
             console.log(
-                `Total: ${phantoms.length} | CRITICAL: ${criticalFindings.length} | WARNING: ${warningFindings.length}`,
+                `CRITICAL: ${criticalFindings.length} | WARNING: ${warningFindings.length} | INFO: ${infoFindings.length}`,
             );
-            for (const f of phantoms) {
-                console.log(`  [${f.severity.toUpperCase()}] ${f.sectionTitle}: ${f.message}`);
-            }
-
-            // DIAGNOSTIC: dump API data for Lambda cmid 6917 to understand why it's invisible
-            const lambdaMod = contents.flatMap(s => s.modules).find(m => m.id === 6917);
-            if (lambdaMod) {
-                console.log(`\n=== LAMBDA DIAGNOSTIC (cmid 6917) ===`);
-                console.log(`  name: "${lambdaMod.name}"`);
-                console.log(`  visible: ${lambdaMod.visible}`);
-                console.log(`  uservisible: ${lambdaMod.uservisible}`);
-                console.log(`  completion: ${lambdaMod.completion}`);
-                console.log(`  completiondata: ${JSON.stringify(lambdaMod.completiondata)}`);
-                console.log(`  availability: ${lambdaMod.availability?.substring(0, 200) || '(none)'}`);
-                console.log(`  groupmode: ${lambdaMod.groupmode}`);
-                console.log(`  modplural: "${lambdaMod.modplural}"`);
-                console.log(`  instance: ${lambdaMod.instance}`);
-                console.log(`  noviewlink: ${lambdaMod.noviewlink}`);
-                console.log(`  contents count: ${lambdaMod.contents?.length || 0}`);
-                if (lambdaMod.contents && lambdaMod.contents.length > 0) {
-                    console.log(
-                        `  first content: type=${lambdaMod.contents[0].type}, filename=${lambdaMod.contents[0].filename}`,
-                    );
-                }
-                console.log(`  url: "${lambdaMod.url || '(none)'}"`);
-            }
-            else {
-                console.log(`\n=== LAMBDA DIAGNOSTIC (cmid 6917) === NOT FOUND in API contents`);
-            }
-
-            // Cross-reference: conditions + DB visible flag + admin-vs-student cmids
-            console.log(`\n=== CONDITIONAL TREE CROSS-REFERENCE ===`);
-            try {
-                // Build student visible cmid set from switch-role view
-                const studentVisibleCmidSet = new Set<number>();
-                for (const section of switchRoleStudentView.sections) {
-                    for (const act of section.activities) {
-                        if (!act.href)
-                            continue;
-                        const cmidMatch = act.href.match(/[?&]id=(\d+)/);
-                        if (cmidMatch)
-                            studentVisibleCmidSet.add(Number(cmidMatch[1]));
-                    }
-                }
-                // Build admin visible cmid set
-                const adminCmidSet = new Set<number>();
-                for (const section of adminView.sections) {
-                    for (const act of section.activities) {
-                        if (!act.href)
-                            continue;
-                        const cmidMatch = act.href.match(/[?&]id=(\d+)/);
-                        if (cmidMatch)
-                            adminCmidSet.add(Number(cmidMatch[1]));
-                    }
-                }
-                // Collect all cmids referenced in conditions (module-level + section-level)
-                const breakdown = await api.getAvailabilityJsonBreakdown(courseId);
-                const referencedCmidSet = new Set<number>();
-                for (const section of breakdown.sections) {
-                    for (const mod of section.modulesWithRestrictions ?? []) {
-                        for (const cond of mod.conditions ?? []) {
-                            if (cond.type === 'completion' && cond.cm) {
-                                referencedCmidSet.add(cond.cm);
-                            }
-                        }
-                    }
-                }
-                // Also parse section-level availability JSON for conditions (e.g., Module 3's
-                // restriction referencing 6918 at the section level, not module level)
-                try {
-                    for (const sec of contents) {
-                        if (sec.availability && sec.availability !== 'null') {
-                            const tree = JSON.parse(sec.availability);
-                            if (tree.c && Array.isArray(tree.c)) {
-                                const traverseSection = (node: any) => {
-                                    if (node.type === 'completion' && node.cm)
-                                        referencedCmidSet.add(node.cm);
-                                    if (node.c && Array.isArray(node.c))
-                                        node.c.forEach(traverseSection);
-                                };
-                                tree.c.forEach(traverseSection);
-                            }
-                        }
-                    }
-                }
-                catch {}
-                // Build gated sections set (sections with restriction text — switch-role unreliable there)
-                const gatedSections = new Set(
-                    adminView.sections
-                        .filter(s => s.restrictionText && s.restrictionText.trim().length > 3)
-                        .map(s => s.number),
-                );
-                // Build cmid → section number map from admin view
-                const cmidToSectionMap = new Map<number, number>();
-                for (const section of adminView.sections) {
-                    for (const act of section.activities) {
-                        if (!act.href)
-                            continue;
-                        const cmidMatch = act.href.match(/[?&]id=(\d+)/);
-                        if (cmidMatch)
-                            cmidToSectionMap.set(Number(cmidMatch[1]), section.number);
-                    }
-                }
-                // Priority: check each referenced cmid against DB visibility + student view
-                for (const cmid of referencedCmidSet) {
-                    const modData = contents.flatMap(s => s.modules).find(m => m.id === cmid);
-                    if (!modData)
-                        continue;
-                    const modName = modData.name;
-                    const dbVisible = modData.visible ?? 1;
-                    const inAdminView = adminCmidSet.has(cmid);
-                    const inStudentView = studentVisibleCmidSet.has(cmid);
-                    const sectionNum = cmidToSectionMap.get(cmid);
-                    const isGatedSection = sectionNum !== undefined && gatedSections.has(sectionNum);
-                    console.log(
-                        `  cmid ${cmid} "${modName}": DB visible=${dbVisible}, inAdminView=${inAdminView}, inStudentView=${inStudentView}, section=${sectionNum}, gated=${isGatedSection}`,
-                    );
-                    if (inAdminView && !inStudentView) {
-                        if (isGatedSection && dbVisible === 1) {
-                            // Gated section + visible=1 → switch-role view is unreliable. Skip.
-                            console.log(
-                                `  → SKIP cmid ${cmid} "${modName}": in gated section, visible=1 — switch-role unreliable`,
-                            );
-                        }
-                        else if (dbVisible === 0) {
-                            // Confirmed hidden at DB level
-                            console.log(`  → DB VISIBLE=0: cmid ${cmid} "${modName}"`);
-                            phantoms.push({
-                                severity: 'critical',
-                                sectionNumber: sectionNum ?? 0,
-                                sectionTitle: '',
-                                message: `"${modName}" tiene visible=0 en DB — bloquea el avance`,
-                                detail: `La actividad "${modName}" (cmid ${cmid}) está oculta en la base de datos (visible=0). Las condiciones de disponibilidad la exigen, creando un punto muerto. Además, el tooltip del módulo bloqueado muestra el nombre pero el enlace de detalle no funciona para estudiantes.`,
-                                priority: 'high',
-                                actionItem:
-                  'Hacer visible el recurso (visible=1) o corregir la condición de disponibilidad.',
-                            });
-                        }
-                        else {
-                            // DB visible=1, not in gated section, but not in student view → real issue
-                            phantoms.push({
-                                severity: 'critical',
-                                sectionNumber: sectionNum ?? 0,
-                                sectionTitle: '',
-                                message: `"${modName}" es visible en DB pero no aparece para estudiantes`,
-                                detail: `La actividad "${modName}" (cmid ${cmid}) tiene visible=1 en la base de datos pero los estudiantes no pueden verla. Puede ser un bug de interfaz (el tooltip del módulo bloqueado oculta el enlace) o de permisos de Moodle.`,
-                                priority: 'high',
-                                actionItem:
-                  'Verificar visibilidad y permisos del recurso en la configuración del curso.',
-                            });
-                        }
-                    }
-                }
-                // Priority 2: Compare hrefs for activities with the SAME NAME in admin vs student.
-                // If admin has a working link (href) and the student sees the same activity name
-                // but WITHOUT a link, the resource access is broken for students (Lambda case).
-                // Check activities in ALL content sections for broken resource access.
-                // In sections WITHOUT restriction text (always open): compare hrefs directly.
-                // In sections WITH restriction text (gated): check API visible flag + student presence.
-                console.log(`\n  === HREF-COMPARISON CROSS-REFERENCE ===`);
+            for (const f of overlayFindings) {
                 console.log(
-                    `  Gated sections (with restriction text): ${Array.from(gatedSections).join(', ') || '(none)'}`,
+                    `  [${f.severity.toUpperCase()}] (conf:${f.confidence.level}) ${f.sectionTitle}: ${f.message}`,
                 );
-                for (const adminSection of adminView.sections) {
-                    if (adminSection.number <= 0)
-                        continue;
-                    const isGated = gatedSections.has(adminSection.number);
-                    const studentSection = switchRoleStudentView.sections.find(
-                        s => s.number === adminSection.number,
+                if (f.confidence.score > 0) {
+                    console.log(
+                        `    Evidence: adminUI=${f.evidence.inAdminUI} api=${f.evidence.inAPI} studentAPI=${f.evidence.inStudentAPI} studentUI=${f.evidence.inStudentUI}`,
                     );
-                    for (const adminAct of adminSection.activities) {
-                        if (!adminAct.href)
-                            continue;
-                        const adminNorm = adminAct.name.toLowerCase();
-                        const cmidMatch = adminAct.href.match(/[?&]id=(\d+)/);
-                        const cmid = cmidMatch ? Number(cmidMatch[1]) : 0;
-                        // Get DB-level visible flag from API contents data
-                        const modData = cmid
-                            ? contents.flatMap(s => s.modules).find(m => m.id === cmid)
-                            : undefined;
-                        const dbVisible = modData?.visible ?? 1;
-
-                        const matchingStudentAct = studentSection?.activities.find((sa) => {
-                            const sn = sa.name.toLowerCase();
-                            return sn.includes(adminNorm) || adminNorm.includes(sn);
-                        });
-
-                        if (!matchingStudentAct) {
-                            // Activity not in student view at all
-                            if (dbVisible === 0) {
-                                console.log(`  "${adminAct.name}" (cmid ${cmid}): DB visible=0 → BLOCKER`);
-                                phantoms.push({
-                                    severity: 'critical',
-                                    sectionNumber: adminSection.number,
-                                    sectionTitle: adminSection.title,
-                                    message: `"${adminAct.name}" tiene visible=0 en DB — oculto para estudiantes`,
-                                    detail: `El recurso "${adminAct.name}" (cmid ${cmid}) está configurado como oculto en la base de datos (visible=0). Los estudiantes no pueden verlo ni acceder a él.`,
-                                    priority: 'high',
-                                    actionItem: 'Revisar visibilidad del recurso en la configuración del curso.',
-                                });
-                            }
-                            else if (
-                                dbVisible === 1
-                                && modData
-                                && modData.completion === 2
-                                && modData.completiondata?.isautomatic === true
-                                && modData.modplural === 'Files'
-                                && adminSection.number === 2
-                            ) {
-                                // File resource in Module 2 — check by CMID (href) not by name.
-                                // Student sees these with different display names (e.g.
-                                // "Funciones: definición y argumentos" vs admin's "Notebook Funciones-CEF").
-                                // Check both switch-role and fresh student views by cmid.
-                                const byCmid = (sa: { href?: string }) => {
-                                    const m = sa.href?.match(/[?&]id=(\d+)/);
-                                    return m && Number(m[1]) === cmid;
-                                };
-                                const inSwitchRole = studentSection?.activities.some(byCmid);
-                                if (inSwitchRole) {
-                                    console.log(
-                                        `  "${adminAct.name}" (cmid ${cmid}): File in section 2, visible=1, student has it (cmid match) → SKIP`,
-                                    );
-                                }
-                                else {
-                                    // Not found in switch-role view. Check fresh student if available.
-                                    const freshSection = studentView?.sections.find(
-                                        s => s.number === adminSection.number,
-                                    );
-                                    const inFresh = freshSection?.activities.some(byCmid);
-                                    if (inFresh) {
-                                        console.log(
-                                            `  "${adminAct.name}" (cmid ${cmid}): File in section 2, visible=1, fresh student has it → SKIP`,
-                                        );
-                                    }
-                                    else if (freshSection === undefined) {
-                                        // No fresh student data — switch-role is unreliable for auto-complete files.
-                                        // Don't flag: we can't distinguish 6916/6917 (OK) from 6918 (broken)
-                                        // without a fresh student login to confirm.
-                                        console.log(
-                                            `  "${adminAct.name}" (cmid ${cmid}): File in section 2, visible=1, no fresh student data → SKIP (unreliable switch-role)`,
-                                        );
-                                    }
-                                    else {
-                                        // Fresh student confirmed it's missing — real blocker
-                                        console.log(
-                                            `  "${adminAct.name}" (cmid ${cmid}): File in section 2, visible=1, confirmed missing in fresh student → CRITICAL`,
-                                        );
-                                        phantoms.push({
-                                            severity: 'critical',
-                                            sectionNumber: adminSection.number,
-                                            sectionTitle: adminSection.title,
-                                            message: `"${adminAct.name}" es requerida para Módulo 3 pero NO es accesible para estudiantes`,
-                                            detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 en DB y la API lo reporta como accesible, pero no aparece en la vista del estudiante. Es un bug de interfaz: el componente de Moodle no renderiza el enlace del recurso para estudiantes, posiblemente oculto por el tooltip "Show More" del módulo bloqueado que no revela contenido utilizable.`,
-                                            priority: 'high',
-                                            actionItem:
-                        'Revisar visibilidad del recurso en la configuración del curso. Si debe estar disponible, verificar permisos de visualización del módulo o corregir la condición de disponibilidad.',
-                                        });
-                                    }
-                                }
-                            }
-                            else if (dbVisible === 1 && !isGated) {
-                                // DB says visible, no completion tracking, in open section but missing from student
-                                console.log(
-                                    `  "${adminAct.name}" (cmid ${cmid}): DB visible=1, no completion, not in student view, open section → WARNING`,
-                                );
-                                phantoms.push({
-                                    severity: 'warning',
-                                    sectionNumber: adminSection.number,
-                                    sectionTitle: adminSection.title,
-                                    message: `"${adminAct.name}" es visible en DB pero no aparece para estudiantes`,
-                                    detail: `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 en la base de datos pero no aparece en la vista del estudiante.`,
-                                    priority: 'medium',
-                                    actionItem: 'Verificar permisos y visibilidad del recurso.',
-                                });
-                            }
-                            else {
-                                console.log(
-                                    `  "${adminAct.name}" (cmid ${cmid}): DB visible=1, no completion, gated section — skipping (supplementary resource)`,
-                                );
-                            }
-                            continue;
-                        }
-
-                        // Activity IS in student view — check href status
-                        if (isGated) {
-                            // In gated sections, student seeing the name (even without href) is expected
-                            if (!matchingStudentAct.href) {
-                                console.log(
-                                    `  "${adminAct.name}" (cmid ${cmid}): in gated section, student sees name but no link — expected behavior, skipping`,
-                                );
-                            }
-                            continue;
-                        }
-
-                        // Open section: admin has href, student has no href → broken link
-                        if (!matchingStudentAct.href) {
-                            console.log(
-                                `  "${adminAct.name}" href="${adminAct.href}": admin has link, student sees name but NO link → BROKEN ACCESS`,
-                            );
-                            phantoms.push({
-                                severity: 'critical',
-                                sectionNumber: adminSection.number,
-                                sectionTitle: adminSection.title,
-                                message: `"${adminAct.name}" tiene enlace de descarga para admin pero NO para estudiantes`,
-                                detail: `El recurso "${adminAct.name}" (URL: ${adminAct.href}) aparece en la sección "${adminSection.title}" con un enlace funcional para el administrador, pero los estudiantes ven el mismo recurso sin enlace. No pueden descargarlo ni visualizarlo.`,
-                                priority: 'high',
-                                actionItem:
-                  'Revisar permisos del recurso. Si debe ser descargable por estudiantes, verificar la configuración de visibilidad y permisos del módulo de recurso.',
-                            });
-                        }
-                    }
-                }
-
-                // Priority 3: Full resource scan — compare ALL admin activities against student view
-                // This catches resources invisible to students even without being in conditions.
-                console.log(`\n  === FULL RESOURCE SCAN ===`);
-                // Build student cmid set from switch-role view (prefer fresh student if available)
-                const studentAllCmidSet = new Set<number>();
-                const studentSource = studentView || switchRoleStudentView;
-                for (const section of studentSource.sections) {
-                    for (const act of section.activities) {
-                        if (!act.href)
-                            continue;
-                        const m = act.href.match(/[?&]id=(\d+)/);
-                        if (m)
-                            studentAllCmidSet.add(Number(m[1]));
-                    }
-                }
-                for (const adminSection of adminView.sections) {
-                    if (adminSection.number <= 0)
-                        continue;
-                    if (gatedSections.has(adminSection.number))
-                        continue;
-                    for (const adminAct of adminSection.activities) {
-                        if (!adminAct.href)
-                            continue;
-                        const m = adminAct.href.match(/[?&]id=(\d+)/);
-                        if (!m)
-                            continue;
-                        const cmid = Number(m[1]);
-                        if (studentAllCmidSet.has(cmid))
-                            continue;
-                        // Already flagged by a higher-priority check?
-                        const alreadyFlagged = phantoms.some(
-                            f => f.message.includes(adminAct.name) && f.severity === 'critical',
-                        );
-                        if (alreadyFlagged)
-                            continue;
-                        const modData = contents.flatMap(s => s.modules).find(md => md.id === cmid);
-                        const dbVisible = modData?.visible ?? 1;
-                        const hasCompletion = (modData?.completion ?? 0) > 0;
-                        if (!hasCompletion) {
-                            console.log(`  SKIP (supplementary): cmid ${cmid} "${adminAct.name}"`);
-                            continue;
-                        }
-                        console.log(
-                            `  FLAGGING: cmid ${cmid} "${adminAct.name}" — admin has it, student doesn't`,
-                        );
-                        phantoms.push({
-                            severity: 'critical',
-                            sectionNumber: adminSection.number,
-                            sectionTitle: adminSection.title,
-                            message:
-                dbVisible === 0
-                    ? `"${adminAct.name}" tiene visible=0 en DB — oculto para estudiantes`
-                    : `"${adminAct.name}" existe en DB/API pero NO aparece para estudiantes`,
-                            detail:
-                dbVisible === 0
-                    ? `El recurso "${adminAct.name}" (cmid ${cmid}) está oculto en la base de datos (visible=0).`
-                    : `El recurso "${adminAct.name}" (cmid ${cmid}) tiene visible=1 en DB y la API lo reporta como accesible, pero no aparece en la vista del estudiante. Es un bug de interfaz: Moodle no renderiza el recurso para estudiantes a pesar de estar correctamente configurado en el servidor. El tooltip "Show More" del módulo bloqueado no revela contenido utilizable.`,
-                            priority: 'high',
-                            actionItem:
-                'Revisar visibilidad y permisos del recurso en la configuración del curso.',
-                        });
-                    }
                 }
             }
-            catch (err) {
-                console.warn('⚠️ Cross-reference/full scan failed:', err);
-            }
+            console.log(`\n  Condition-referenced cmids: ${allReferenced.length}`);
+            console.log(`  In student API: ${inStudentApi.length}`);
+            console.log(`  NOT in student API: ${notInStudentApi.join(', ') || '(none)'}`);
 
-            console.log(`\n=== FINDINGS (final after cross-reference) ===`);
-            const finalCritical = phantoms.filter(f => f.severity === 'critical');
-            const finalWarning = phantoms.filter(f => f.severity === 'warning');
-            console.log(
-                `Total: ${phantoms.length} | CRITICAL: ${finalCritical.length} | WARNING: ${finalWarning.length}`,
-            );
-            for (const f of phantoms) {
-                console.log(`  [${f.severity.toUpperCase()}] ${f.sectionTitle}: ${f.message}`);
-            }
-
+            // 5. Annotations for CI
             if (criticalFindings.length > 0) {
                 test.info().annotations.push({
                     type: 'critical-findings',
@@ -590,16 +307,19 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                         .join('\n'),
                 });
             }
-            if (adminView.sections.length !== studentView.sections.length) {
+            if (
+                adminView.sections.length
+                !== (studentView?.sections.length ?? switchRoleStudentView.sections.length)
+            ) {
                 test.info().annotations.push({
                     type: 'visibility-gap',
-                    description: `Admin sees ${adminView.sections.length} sections, student sees ${studentView.sections.length} — ${adminView.sections.length - studentView.sections.length} hidden`,
+                    description: `Admin sees ${adminView.sections.length} sections, student sees ${studentView?.sections.length ?? switchRoleStudentView.sections.length}`,
                 });
             }
 
             console.log(`\n=== AUDIT COMPLETE ===`);
             console.log(
-                `Admin: ${adminView.sections.length} | Teacher: ${teacherView.sections.length} | Student: ${studentView.sections.length} | Findings: ${phantoms.length}`,
+                `Admin: ${adminView.sections.length} | Teacher: ${teacherView.sections.length} | Student: ${(studentView ?? switchRoleStudentView).sections.length} | Findings: ${phantoms.length}`,
             );
 
             return phantoms;
