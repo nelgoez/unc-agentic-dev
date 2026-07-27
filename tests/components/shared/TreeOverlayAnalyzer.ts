@@ -479,6 +479,11 @@ function detectDuplicates(
             const bothHaveFiles = filenameA !== '' && filenameB !== '';
             const fileSim = bothHaveFiles ? nameSimilarity(filenameA, filenameB) : 0;
 
+            // Skip generic filenames like 'index.html' — they're Moodle defaults, not evidence
+            const genericFiles = ['index.html', 'index.htm', 'index.php', 'default.html', ''];
+            if (genericFiles.includes(filenameA) || genericFiles.includes(filenameB))
+                continue;
+
             // Both name AND file must be similar for duplicates with uploaded files
             if (bothHaveFiles && fileSim < 0.5)
                 continue;

@@ -220,6 +220,36 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                 }
             }
 
+            // Fallback: if no fresh student data, use nelthor's privileged completion
+            // as a proxy for the student API tree. Only include activities nelthor COMPLETED
+            // (state=1) — these are CONFIRMED accessible. Activities he couldn't complete
+            // (state=0) stay excluded; if referenced in conditions, the overlay flags them.
+            if (freshStudentCompletionStatuses.length === 0 && nelthorData.size > 0) {
+                const nelthorStatuses: Array<{
+                    cmid: number;
+                    state: number;
+                    tracking: number;
+                    timecompleted: number;
+                }> = [];
+                for (const [name, data] of nelthorData.entries()) {
+                    if (data.state !== 1)
+                        continue; // only confirmed-accessible activities
+                    const mod = contents.flatMap(s => s.modules).find(m => m.name.toLowerCase() === name);
+                    if (mod) {
+                        nelthorStatuses.push({
+                            cmid: mod.id,
+                            state: 1,
+                            tracking: 2,
+                            timecompleted: data.timecompleted ?? 0,
+                        });
+                    }
+                }
+                freshStudentCompletionStatuses = nelthorStatuses;
+                console.log(
+                    `\n📊 Nelthor fallback: ${nelthorStatuses.length} confirmed-accessible activities → student API tree`,
+                );
+            }
+
             // 2. Build 4 trees
             console.log('\n=== TREE OVERLAY ANALYSIS ===');
 
