@@ -474,19 +474,20 @@ function detectDuplicates(
                 continue;
 
             const sim = nameSimilarity(a.name, b.name);
+            const filenameA = String(a.metadata?.firstContentFilename ?? '');
+            const filenameB = String(b.metadata?.firstContentFilename ?? '');
+            const bothHaveFiles = filenameA !== '' && filenameB !== '';
+            const fileSim = bothHaveFiles ? nameSimilarity(filenameA, filenameB) : 0;
 
-            // Require at least 0.7 similarity (stricter) OR both have uploaded files
-            const bothHaveFiles
-                = String(a.metadata?.firstContentFilename ?? '') !== ''
-                    && String(b.metadata?.firstContentFilename ?? '') !== '';
-            if (sim < 0.7 && !bothHaveFiles)
+            // Both name AND file must be similar for duplicates with uploaded files
+            if (bothHaveFiles && fileSim < 0.5)
                 continue;
 
-            // Require at least 50% word overlap even with files
-            if (bothHaveFiles && sim < 0.5)
+            // Name similarity must be >= 0.7, or file similarity >= 0.8
+            if (sim < 0.7 && fileSim < 0.8)
                 continue;
 
-            // Skip short names with few words — they're probably not real duplicates
+            // Skip short generic names (<3 meaningful words, no files)
             const wordsA = new Set(
                 a.name
                     .toLowerCase()
@@ -506,9 +507,8 @@ function detectDuplicates(
             const meaningfulWords = Math.max(wordsA.size, wordsB.size);
             if (meaningfulWords < 3 && !bothHaveFiles)
                 continue;
-
-            const filenameA = String(a.metadata?.firstContentFilename ?? '');
-            const filenameB = String(b.metadata?.firstContentFilename ?? '');
+            if (meaningfulWords < 2 && bothHaveFiles)
+                continue;
 
             result.push({
                 cmidA: a.cmid,
