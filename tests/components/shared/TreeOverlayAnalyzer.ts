@@ -27,6 +27,7 @@ export interface OverlayFinding {
 export interface OverlayOptions {
     verbose?: boolean;
     nelthorData?: Map<string, { state: number; timecompleted?: number }>;
+    conditionReferencedCmids?: Set<number>;
 }
 
 export class TreeOverlayAnalyzer {
@@ -49,11 +50,27 @@ export class TreeOverlayAnalyzer {
 
         // 1. Admin UI vs Student API: activities in design that student API doesn't know about
         //    BUT only if student API has data. Empty tree = no evidence.
+        //    Only condition-referenced cmids produce CRITICAL/WARNING — non-condition items
+        //    (navigation, decorative, supplementary) are INFO at most.
         if (studentApiAvailable) {
             const adminVsStudentApi = adminGraph.overlay(studentApiGraph);
             for (const missing of adminVsStudentApi.missingNodes) {
                 if (missing.cmid === 0)
                     continue;
+
+                const isConditionReferenced = options?.conditionReferencedCmids
+                    ? options.conditionReferencedCmids.has(missing.cmid)
+                    : true;
+
+                // Non-condition items are supplementary — skip severity entirely
+                if (!isConditionReferenced) {
+                    if (options?.verbose) {
+                        console.log(
+                            `[TreeOverlay] "${missing.name}" (cmid ${missing.cmid}): not in conditions — SKIP (supplementary)`,
+                        );
+                    }
+                    continue;
+                }
 
                 const inAPI = apiGraph.nodes.has(missing.cmid);
                 const inStudentUI = studentUiGraph.nodes.has(missing.cmid);
@@ -179,6 +196,20 @@ export class TreeOverlayAnalyzer {
             for (const missing of adminVsStudentUi.missingNodes) {
                 if (missing.cmid === 0)
                     continue;
+
+                const isConditionReferenced = options?.conditionReferencedCmids
+                    ? options.conditionReferencedCmids.has(missing.cmid)
+                    : true;
+
+                // Non-condition items (navigation, decorative, supplementary) are skipped
+                if (!isConditionReferenced) {
+                    if (options?.verbose) {
+                        console.log(
+                            `[TreeOverlay] "${missing.name}" (cmid ${missing.cmid}): not in conditions — SKIP (supplementary)`,
+                        );
+                    }
+                    continue;
+                }
 
                 const apiNode = apiGraph.nodes.get(missing.cmid);
                 const isAutoCompleteFile
@@ -443,7 +474,37 @@ function detectDuplicates(
                 continue;
 
             const sim = nameSimilarity(a.name, b.name);
-            if (sim < 0.5)
+
+            // Require at least 0.7 similarity (stricter) OR both have uploaded files
+            const bothHaveFiles
+                = String(a.metadata?.firstContentFilename ?? '') !== ''
+                    && String(b.metadata?.firstContentFilename ?? '') !== '';
+            if (sim < 0.7 && !bothHaveFiles)
+                continue;
+
+            // Require at least 50% word overlap even with files
+            if (bothHaveFiles && sim < 0.5)
+                continue;
+
+            // Skip short names with few words — they're probably not real duplicates
+            const wordsA = new Set(
+                a.name
+                    .toLowerCase()
+                    .replace(/[_-]/g, ' ')
+                    .replace(/[^a-z0-9\s]/g, '')
+                    .split(/\s+/)
+                    .filter(Boolean),
+            );
+            const wordsB = new Set(
+                b.name
+                    .toLowerCase()
+                    .replace(/[_-]/g, ' ')
+                    .replace(/[^a-z0-9\s]/g, '')
+                    .split(/\s+/)
+                    .filter(Boolean),
+            );
+            const meaningfulWords = Math.max(wordsA.size, wordsB.size);
+            if (meaningfulWords < 3 && !bothHaveFiles)
                 continue;
 
             const filenameA = String(a.metadata?.firstContentFilename ?? '');

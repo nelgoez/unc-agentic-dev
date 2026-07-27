@@ -259,7 +259,7 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                 apiGraph,
                 studentApiGraph,
                 studentUiGraph,
-                { verbose: true, nelthorData },
+                { verbose: true, nelthorData, conditionReferencedCmids: referencedCmidSet },
             );
 
             // 4. Convert overlay findings to AuditFinding format
