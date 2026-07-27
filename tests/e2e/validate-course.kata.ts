@@ -198,6 +198,22 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                     catch {}
                 }
             }
+            // Also include cmids from gated sections with completion tracking.
+            // Section-level conditions like "complete all activities in section 2"
+            // don't reference specific cmids, but every activity with completion
+            // tracking in a gated section is effectively condition-referenced.
+            const gatedSections = new Set(
+                contents.filter(s => s.availability && s.availability !== 'null').map(s => s.section),
+            );
+            for (const sec of contents) {
+                if (!gatedSections.has(sec.section))
+                    continue;
+                for (const mod of sec.modules) {
+                    if ((mod.completion ?? 0) > 0) {
+                        referencedCmidSet.add(mod.id);
+                    }
+                }
+            }
 
             // 1. Fetch fresh student's API completion status
             let freshStudentCompletionStatuses: Array<{
