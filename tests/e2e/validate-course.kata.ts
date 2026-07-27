@@ -199,14 +199,17 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                 }
             }
             // Also include cmids from gated sections with completion tracking.
+            // Gated sections detect via admin view's restriction text (UI-based).
             // Section-level conditions like "complete all activities in section 2"
             // don't reference specific cmids, but every activity with completion
             // tracking in a gated section is effectively condition-referenced.
-            const gatedSections = new Set(
-                contents.filter(s => s.availability && s.availability !== 'null').map(s => s.section),
+            const gatedSectionNumbers = new Set(
+                adminView.sections
+                    .filter(s => s.restrictionText && s.restrictionText.trim().length > 3)
+                    .map(s => s.number),
             );
             for (const sec of contents) {
-                if (!gatedSections.has(sec.section))
+                if (!gatedSectionNumbers.has(sec.section))
                     continue;
                 for (const mod of sec.modules) {
                     if ((mod.completion ?? 0) > 0) {
