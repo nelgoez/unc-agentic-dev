@@ -170,7 +170,11 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                 console.warn('⚠️ Nelthor data fetch failed:', err);
             }
 
-            // Build referenced cmid set from section-level + module-level conditions
+            // Build referenced cmid set from module-level conditions only.
+            // Section-level conditions ("complete all activities in section 2")
+            // are intentionally excluded — they produce false positives in gated
+            // sections when fresh student data is unavailable. The 6917≈6918
+            // duplicate is caught by the overlay's duplicate detection instead.
             const breakdown = await api.getAvailabilityJsonBreakdown(courseId);
             const referencedCmidSet = new Set<number>();
             for (const section of breakdown.sections) {
@@ -182,68 +186,9 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                     }
                 }
             }
-            for (const sec of contents) {
-                if (sec.availability && sec.availability !== 'null') {
-                    try {
-                        const tree = JSON.parse(sec.availability);
-                        const traverse = (node: any) => {
-                            if (node.type === 'completion' && node.cm)
-                                referencedCmidSet.add(node.cm);
-                            if (node.c && Array.isArray(node.c))
-                                node.c.forEach(traverse);
-                        };
-                        if (tree.c && Array.isArray(tree.c))
-                            tree.c.forEach(traverse);
-                    }
-                    catch {}
-                }
-            }
-            // Also include cmids in the same section as condition-referenced cmids
-            // that have similar normalized names. This catches duplicates of
-            // condition-referenced activities (e.g., 6918 is a duplicate of 6917).
-            const conditionModSectionMap = new Map<number, number>();
-            for (const s of contents) {
-                for (const m of s.modules) {
-                    if (referencedCmidSet.has(m.id)) {
-                        conditionModSectionMap.set(m.id, s.section);
-                    }
-                }
-            }
-            const conditionSectionNumbers = new Set(conditionModSectionMap.values());
-            const normName = (n: string) =>
-                n
-                    .toLowerCase()
-                    .replace(/[_-]/g, ' ')
-                    .replace(/[^a-z0-9\s]/g, '')
-                    .trim();
-            const conditionNormNames = new Set(
-                Array.from(referencedCmidSet)
-                    .map((cmid) => {
-                        const mod = contents.flatMap(s => s.modules).find(m => m.id === cmid);
-                        return mod?.name ? normName(mod.name) : undefined;
-                    })
-                    .filter((s): s is string => s !== undefined && s.length > 0),
+            console.log(
+                `  Module-level condition-referenced cmids: ${Array.from(referencedCmidSet).join(', ') || '(none)'}`,
             );
-            for (const sec of contents) {
-                if (!conditionSectionNumbers.has(sec.section))
-                    continue;
-                for (const mod of sec.modules) {
-                    if ((mod.completion ?? 0) === 0)
-                        continue;
-                    if (referencedCmidSet.has(mod.id))
-                        continue;
-                    const mName = mod.name ? normName(mod.name) : '';
-                    const isRelated = Array.from(conditionNormNames).some(
-                        cn => cn.includes(mName) || mName.includes(cn),
-                    );
-                    if (isRelated) {
-                        referencedCmidSet.add(mod.id);
-                        console.log(
-                            `  → Added cmid ${mod.id} "${mod.name}" as related to condition-referenced activity in section ${sec.section}`,
-                        );
-                    }
-                }
-            }
 
             // 1. Fetch fresh student's API completion status
             let freshStudentCompletionStatuses: Array<{
