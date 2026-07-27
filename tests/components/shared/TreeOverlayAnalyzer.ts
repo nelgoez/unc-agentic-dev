@@ -20,7 +20,13 @@ export interface OverlayFinding {
         inAPI: boolean;
         inStudentAPI: boolean;
         inStudentUI: boolean;
+        inNelthorCompleted?: boolean;
     };
+}
+
+export interface OverlayOptions {
+    verbose?: boolean;
+    nelthorData?: Map<string, { state: number; timecompleted?: number }>;
 }
 
 export class TreeOverlayAnalyzer {
@@ -29,9 +35,7 @@ export class TreeOverlayAnalyzer {
         apiGraph: CourseDependencyGraph,
         studentApiGraph: CourseDependencyGraph,
         studentUiGraph: CourseDependencyGraph,
-        options?: {
-            verbose?: boolean;
-        },
+        options?: OverlayOptions,
     ): OverlayFinding[] {
         const findings: OverlayFinding[] = [];
 
@@ -167,7 +171,8 @@ export class TreeOverlayAnalyzer {
             }
         }
         else {
-            // Student API not available — fallback: compare admin vs student UI only
+            // Student API not available — fallback: compare admin vs student UI only,
+            // using nelthor's privileged access data as additional evidence.
             // Auto-complete File resources are known to not render hrefs in student DOM,
             // so we skip them when we can't verify via API.
             const adminVsStudentUi = adminGraph.overlay(studentUiGraph);
@@ -179,7 +184,21 @@ export class TreeOverlayAnalyzer {
                 const isAutoCompleteFile
                     = apiNode?.isautomatic === true && apiNode?.visible === 1 && apiNode?.metadata?.hasContent;
 
+                // Check nelthor's completion data as privileged evidence
+                const nelthorEntry = options?.nelthorData?.get(missing.name.toLowerCase());
+                const nelthorCompleted = nelthorEntry?.state === 1;
+                const nelthorEvidence = nelthorEntry !== undefined;
+
                 if (isAutoCompleteFile) {
+                    if (nelthorCompleted) {
+                        // nelthor confirmed this is accessible via switch-role → skip
+                        if (options?.verbose) {
+                            console.log(
+                                `[TreeOverlay] "${apiNode?.name || missing.name}" (cmid ${missing.cmid}): isautomatic file, nelthor completed it → SKIP (accessible)`,
+                            );
+                        }
+                        continue;
+                    }
                     if (options?.verbose) {
                         console.log(
                             `[TreeOverlay] "${apiNode?.name || missing.name}" (cmid ${missing.cmid}): isautomatic file, no student API data — SKIP (unreliable DOM)`,
@@ -188,6 +207,74 @@ export class TreeOverlayAnalyzer {
                     continue;
                 }
 
+                if (nelthorCompleted) {
+                    // nelthor confirmed access via switch-role → downgrade to INFO
+                    if (options?.verbose) {
+                        console.log(
+                            `[TreeOverlay] "${missing.name}" (cmid ${missing.cmid}): nelthor completed it → INFO (accessible via switch-role)`,
+                        );
+                    }
+                    findings.push({
+                        severity: 'info',
+                        sectionNumber: missing.sectionNumber,
+                        sectionTitle: missing.sectionName,
+                        message: `"${missing.name}" es accesible (confirmado por nelthor) pero no visible en vista estudiante estándar`,
+                        detail:
+              `El recurso "${missing.name}" (cmid ${missing.cmid}) tiene visible=1 en DB. `
+              + 'nelthor (administrador con cambio de rol) pudo completarlo, confirmando que es accesible. '
+              + 'No aparece en la UI de estudiante estándar, pero el acceso está disponible.',
+                        priority: 'low',
+                        actionItem: 'Monitorear si estudiantes reportan problemas de acceso.',
+                        confidence: buildConfidence(
+                            3,
+                            'Admin UI y API confirman, y nelthor completó la actividad',
+                        ),
+                        evidence: {
+                            inAdminUI: true,
+                            inAPI: apiGraph.nodes.has(missing.cmid),
+                            inStudentAPI: false,
+                            inStudentUI: false,
+                            inNelthorCompleted: true,
+                        },
+                    });
+                    continue;
+                }
+
+                if (nelthorEvidence) {
+                    // nelthor has data but state is 0 (couldn't complete) → real blocker
+                    if (options?.verbose) {
+                        console.log(
+                            `[TreeOverlay] "${missing.name}" (cmid ${missing.cmid}): nelthor FAILED to complete → CRITICAL`,
+                        );
+                    }
+                    findings.push({
+                        severity: 'critical',
+                        sectionNumber: missing.sectionNumber,
+                        sectionTitle: missing.sectionName,
+                        message: `"${missing.name}" no es accesible incluso para nelthor (admin con switch-role)`,
+                        detail:
+              `El recurso "${missing.name}" (cmid ${missing.cmid}) tiene visible=1 en DB. `
+              + 'Nelthor (administrador con cambio de rol a estudiante) NO pudo completarlo. '
+              + 'Esto indica que es un bloqueador real: ni estudiantes ni admins con switch-role pueden acceder.',
+                        priority: 'high',
+                        actionItem:
+              'Revisar visibilidad, permisos y condiciones de disponibilidad del recurso.',
+                        confidence: buildConfidence(
+                            3,
+                            'Admin UI y API confirman, y nelthor no pudo completarlo',
+                        ),
+                        evidence: {
+                            inAdminUI: true,
+                            inAPI: apiGraph.nodes.has(missing.cmid),
+                            inStudentAPI: false,
+                            inStudentUI: false,
+                            inNelthorCompleted: false,
+                        },
+                    });
+                    continue;
+                }
+
+                // No nelthor data, no student API — limited evidence
                 if (options?.verbose) {
                     console.log(
                         `[TreeOverlay] "${missing.name}" (cmid ${missing.cmid}): not in student UI, no student API — WARNING`,
@@ -201,7 +288,7 @@ export class TreeOverlayAnalyzer {
                     message: `"${missing.name}" no se confirma como accesible para estudiantes`,
                     detail:
             `El recurso "${missing.name}" (cmid ${missing.cmid}) tiene visible=1 en DB pero no aparece en la vista del estudiante. `
-            + 'No hay datos de API del estudiante para confirmar. '
+            + 'No hay datos de API del estudiante ni de nelthor para confirmar. '
             + 'Se recomienda verificación manual.',
                     priority: 'medium',
                     actionItem: 'Verificar manualmente si el recurso es accesible para estudiantes.',

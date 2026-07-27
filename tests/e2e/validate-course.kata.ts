@@ -259,7 +259,7 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                 apiGraph,
                 studentApiGraph,
                 studentUiGraph,
-                { verbose: true },
+                { verbose: true, nelthorData },
             );
 
             // 4. Convert overlay findings to AuditFinding format
@@ -269,7 +269,7 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                 sectionTitle: f.sectionTitle,
                 message: f.message,
                 detail: f.detail,
-                priority: f.priority ?? ('medium'),
+                priority: f.priority ?? 'medium',
                 actionItem: f.actionItem,
             }));
 

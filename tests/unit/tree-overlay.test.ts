@@ -715,4 +715,133 @@ describe('TreeOverlayAnalyzer — fallback when fresh student unavailable', () =
         const warnings = findings.filter(f => f.severity === 'warning');
         expect(warnings.length).toBeGreaterThanOrEqual(1);
     });
+
+    it('should skip auto-complete files when nelthor completed them (empty student API)', () => {
+        const adminStruct = makeCourseStruct([
+            makeSection(2, 'Módulo 2', [
+                makeAct('Notebook Funcion-Lambda', '/mod/resource/view.php?id=6918'),
+            ]),
+        ]);
+        const adminGraph = CourseDependencyGraph.fromAdminUI(adminStruct);
+
+        const apiSections = [
+            makeMoodleSection(2, 'Módulo 2', [
+                makeMod(6918, 'Notebook Funcion-Lambda', 2, {
+                    completion: 2,
+                    visible: 1,
+                    isautomatic: true,
+                    modplural: 'Files',
+                    contents: [{ type: 'file', filename: 'lambda.ipynb' }],
+                }),
+            ]),
+        ];
+        const apiGraph = CourseDependencyGraph.fromApi(apiSections);
+
+        const studentApiGraph = CourseDependencyGraph.fromStudentApiCompletion([], []);
+        const studentUiGraph = CourseDependencyGraph.fromStudentUI(
+            makeCourseStruct([makeSection(2, 'Módulo 2', [])]),
+        );
+
+        // Nelthor data confirms this activity IS accessible
+        const nelthorData = new Map<string, { state: number }>();
+        nelthorData.set('notebook funcion-lambda', { state: 1 });
+
+        const findings = TreeOverlayAnalyzer.compare(
+            adminGraph,
+            apiGraph,
+            studentApiGraph,
+            studentUiGraph,
+            { nelthorData },
+        );
+
+        // Should NOT be flagged — nelthor confirmed access
+        const findingsAbout6918 = findings.filter(
+            f => f.message.includes('6918') || f.message.includes('Funcion-Lambda'),
+        );
+        expect(findingsAbout6918.length).toBe(0);
+    });
+
+    it('should downgrade non-auto-complete activity to INFO when nelthor completed it', () => {
+        const adminStruct = makeCourseStruct([
+            makeSection(2, 'Módulo 2', [makeAct('Actividad Grupal', '/mod/assign/view.php?id=500')]),
+        ]);
+        const adminGraph = CourseDependencyGraph.fromAdminUI(adminStruct);
+
+        const apiSections = [
+            makeMoodleSection(2, 'Módulo 2', [
+                makeMod(500, 'Actividad Grupal', 2, {
+                    completion: 1,
+                    visible: 1,
+                    modplural: 'Assignments',
+                }),
+            ]),
+        ];
+        const apiGraph = CourseDependencyGraph.fromApi(apiSections);
+
+        const studentApiGraph = CourseDependencyGraph.fromStudentApiCompletion([], []);
+        const studentUiGraph = CourseDependencyGraph.fromStudentUI(
+            makeCourseStruct([makeSection(2, 'Módulo 2', [])]),
+        );
+
+        // Nelthor completed this activity — it IS accessible
+        const nelthorData = new Map<string, { state: number }>();
+        nelthorData.set('actividad grupal', { state: 1 });
+
+        const findings = TreeOverlayAnalyzer.compare(
+            adminGraph,
+            apiGraph,
+            studentApiGraph,
+            studentUiGraph,
+            { nelthorData, verbose: true },
+        );
+
+        const criticals = findings.filter(f => f.severity === 'critical');
+        expect(criticals.length).toBe(0);
+
+        // Should have an INFO finding showing nelthor-completed
+        const infoFindings = findings.filter(f => f.severity === 'info');
+        expect(infoFindings.length).toBeGreaterThanOrEqual(1);
+        expect(infoFindings.some(f => f.evidence.inNelthorCompleted === true)).toBe(true);
+    });
+
+    it('should flag as CRITICAL when nelthor FAILED to complete (state=0, empty student API)', () => {
+        const adminStruct = makeCourseStruct([
+            makeSection(2, 'Módulo 2', [makeAct('Actividad Bloqueada', '/mod/assign/view.php?id=999')]),
+        ]);
+        const adminGraph = CourseDependencyGraph.fromAdminUI(adminStruct);
+
+        const apiSections = [
+            makeMoodleSection(2, 'Módulo 2', [
+                makeMod(999, 'Actividad Bloqueada', 2, {
+                    completion: 1,
+                    visible: 1,
+                    modplural: 'Assignments',
+                }),
+            ]),
+        ];
+        const apiGraph = CourseDependencyGraph.fromApi(apiSections);
+
+        const studentApiGraph = CourseDependencyGraph.fromStudentApiCompletion([], []);
+        const studentUiGraph = CourseDependencyGraph.fromStudentUI(
+            makeCourseStruct([makeSection(2, 'Módulo 2', [])]),
+        );
+
+        // Nelthor could NOT complete this activity → real blocker
+        const nelthorData = new Map<string, { state: number }>();
+        nelthorData.set('actividad bloqueada', { state: 0 });
+
+        const findings = TreeOverlayAnalyzer.compare(
+            adminGraph,
+            apiGraph,
+            studentApiGraph,
+            studentUiGraph,
+            { nelthorData, verbose: true },
+        );
+
+        const criticals = findings.filter(f => f.severity === 'critical');
+        expect(criticals.length).toBeGreaterThanOrEqual(1);
+        const blockerFinding = criticals.find(f => f.message.includes('Actividad Bloqueada'));
+        expect(blockerFinding).toBeDefined();
+        expect(blockerFinding!.evidence.inNelthorCompleted).toBe(false);
+    });
 });
