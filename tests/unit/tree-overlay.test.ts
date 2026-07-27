@@ -630,3 +630,89 @@ describe('TreeOverlayAnalyzer — no findings for clean course', () => {
         expect(criticals.length).toBe(0);
     });
 });
+
+describe('TreeOverlayAnalyzer — fallback when fresh student unavailable', () => {
+    it('should NOT flag auto-complete files as CRITICAL when student API tree is empty', () => {
+    // Simulates the real-world scenario: fresh student creation failed,
+    // so student API tree has 0 nodes.
+        const adminStruct = makeCourseStruct([
+            makeSection(2, 'Módulo 2', [
+                makeAct('Notebook Funcion-Lambda', '/mod/resource/view.php?id=6918'),
+            ]),
+        ]);
+        const adminGraph = CourseDependencyGraph.fromAdminUI(adminStruct);
+
+        const apiSections = [
+            makeMoodleSection(2, 'Módulo 2', [
+                makeMod(6918, 'Notebook Funcion-Lambda', 2, {
+                    completion: 2,
+                    visible: 1,
+                    isautomatic: true,
+                    modplural: 'Files',
+                    contents: [{ type: 'file', filename: 'lambda.ipynb' }],
+                }),
+            ]),
+        ];
+        const apiGraph = CourseDependencyGraph.fromApi(apiSections);
+
+        // STUDENT API IS EMPTY (fresh student wasn't created)
+        const studentApiGraph = CourseDependencyGraph.fromStudentApiCompletion([], []);
+
+        // Student UI doesn't show the resource either
+        const studentStruct = makeCourseStruct([
+            makeSection(2, 'Módulo 2', [makeAct('Actividades', '/mod/forum/view.php?id=600')]),
+        ]);
+        const studentUiGraph = CourseDependencyGraph.fromStudentUI(studentStruct);
+
+        const findings = TreeOverlayAnalyzer.compare(
+            adminGraph,
+            apiGraph,
+            studentApiGraph,
+            studentUiGraph,
+        );
+
+        // With empty student API, auto-complete files should be SKIPPED, not CRITICAL
+        const criticals = findings.filter(f => f.severity === 'critical');
+        expect(criticals.length).toBe(0);
+
+        // Should have 0 findings about 6918 at all (auto-complete files are skipped)
+        const findingsAbout6918 = findings.filter(f => f.message.includes('6918'));
+        expect(findingsAbout6918.length).toBe(0);
+    });
+
+    it('should flag non-auto-complete missing activities as WARNING when student API is empty', () => {
+        const adminStruct = makeCourseStruct([
+            makeSection(2, 'Módulo 2', [makeAct('Quiz importante', '/mod/quiz/view.php?id=500')]),
+        ]);
+        const adminGraph = CourseDependencyGraph.fromAdminUI(adminStruct);
+
+        const apiSections = [
+            makeMoodleSection(2, 'Módulo 2', [
+                makeMod(500, 'Quiz importante', 2, {
+                    completion: 1,
+                    visible: 1,
+                    modplural: 'Quizzes',
+                }),
+            ]),
+        ];
+        const apiGraph = CourseDependencyGraph.fromApi(apiSections);
+
+        const studentApiGraph = CourseDependencyGraph.fromStudentApiCompletion([], []);
+        const studentUiGraph = CourseDependencyGraph.fromStudentUI(
+            makeCourseStruct([makeSection(2, 'Módulo 2', [])]),
+        );
+
+        const findings = TreeOverlayAnalyzer.compare(
+            adminGraph,
+            apiGraph,
+            studentApiGraph,
+            studentUiGraph,
+        );
+
+        const criticals = findings.filter(f => f.severity === 'critical');
+        expect(criticals.length).toBe(0);
+
+        const warnings = findings.filter(f => f.severity === 'warning');
+        expect(warnings.length).toBeGreaterThanOrEqual(1);
+    });
+});

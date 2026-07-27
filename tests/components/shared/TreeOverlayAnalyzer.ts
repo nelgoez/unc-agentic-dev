@@ -35,37 +35,74 @@ export class TreeOverlayAnalyzer {
     ): OverlayFinding[] {
         const findings: OverlayFinding[] = [];
 
-        // 1. Admin UI vs Student API: activities in design that student API doesn't know about
-        const adminVsStudentApi = adminGraph.overlay(studentApiGraph);
-        for (const missing of adminVsStudentApi.missingNodes) {
-            if (missing.cmid === 0)
-                continue;
+        const studentApiAvailable = studentApiGraph.nodes.size > 0;
 
-            const inAPI = apiGraph.nodes.has(missing.cmid);
-            const inStudentUI = studentUiGraph.nodes.has(missing.cmid);
-            const inAdminUI = true;
-            const inStudentAPI = false;
-
-            const agreementCount = [inAdminUI, inAPI, inStudentAPI, inStudentUI].filter(Boolean).length;
-            const confidence = buildConfidence(
-                agreementCount,
-                'Admin UI y API confirman que existe, pero API del estudiante no lo reporta',
+        if (!studentApiAvailable && options?.verbose) {
+            console.log(
+                '[TreeOverlay] Student API tree is empty — cannot use API absence as evidence of invisibility. Falling back to admin-vs-UI comparison.',
             );
+        }
 
-            // Check if the API says it's auto-complete with visible=1 — these are
-            // typically accessible under different display names in sidebar blocks
-            const apiNode = apiGraph.nodes.get(missing.cmid);
-            const isAutoCompleteFile
-                = apiNode?.isautomatic === true && apiNode?.visible === 1 && apiNode?.metadata?.hasContent;
+        // 1. Admin UI vs Student API: activities in design that student API doesn't know about
+        //    BUT only if student API has data. Empty tree = no evidence.
+        if (studentApiAvailable) {
+            const adminVsStudentApi = adminGraph.overlay(studentApiGraph);
+            for (const missing of adminVsStudentApi.missingNodes) {
+                if (missing.cmid === 0)
+                    continue;
 
-            if (isAutoCompleteFile && inAPI && !inStudentAPI) {
-                if (!inStudentUI) {
+                const inAPI = apiGraph.nodes.has(missing.cmid);
+                const inStudentUI = studentUiGraph.nodes.has(missing.cmid);
+                const inAdminUI = true;
+                const inStudentAPI = false;
+
+                const agreementCount = [inAdminUI, inAPI, inStudentAPI, inStudentUI].filter(Boolean).length;
+                const confidence = buildConfidence(
+                    agreementCount,
+                    'Admin UI y API confirman que existe, pero API del estudiante no lo reporta',
+                );
+
+                const apiNode = apiGraph.nodes.get(missing.cmid);
+                const isAutoCompleteFile
+                    = apiNode?.isautomatic === true && apiNode?.visible === 1 && apiNode?.metadata?.hasContent;
+
+                if (isAutoCompleteFile && inAPI && !inStudentAPI) {
+                    if (!inStudentUI) {
+                        const modName = apiNode?.name || missing.name;
+                        const sectionName = missing.sectionName;
+
+                        if (options?.verbose) {
+                            console.log(
+                                `[TreeOverlay] "${modName}" (cmid ${missing.cmid}): isautomatic file, API confirms student has no access → CRITICAL`,
+                            );
+                        }
+
+                        findings.push({
+                            severity: 'critical',
+                            sectionNumber: missing.sectionNumber,
+                            sectionTitle: sectionName,
+                            message: `"${modName}" es requerida para continuar pero NO es accesible para estudiantes`,
+                            detail:
+                `El recurso "${modName}" (cmid ${missing.cmid}) es un archivo con finalización automática. `
+                + 'La API del estudiante no lo reporta y no aparece en la vista del navegador. '
+                + 'Las condiciones de disponibilidad lo exigen, creando un punto muerto. '
+                + 'Además, el tooltip "Show More" del módulo bloqueado muestra el nombre '
+                + 'pero el enlace de detalle no expande el contenido para estudiantes.',
+                            priority: 'high',
+                            actionItem:
+                'Hacer visible el recurso (visible=1) o corregir la condición de disponibilidad.',
+                            confidence,
+                            evidence: { inAdminUI, inAPI, inStudentAPI, inStudentUI },
+                        });
+                    }
+                }
+                else if (!inStudentAPI && !inStudentUI) {
                     const modName = apiNode?.name || missing.name;
                     const sectionName = missing.sectionName;
 
                     if (options?.verbose) {
                         console.log(
-                            `[TreeOverlay] "${modName}" (cmid ${missing.cmid}): isautomatic file, API confirms student has no access → CRITICAL`,
+                            `[TreeOverlay] "${modName}" (cmid ${missing.cmid}): missing in both student trees → CRITICAL`,
                         );
                     }
 
@@ -73,51 +110,87 @@ export class TreeOverlayAnalyzer {
                         severity: 'critical',
                         sectionNumber: missing.sectionNumber,
                         sectionTitle: sectionName,
-                        message: `"${modName}" es requerida para continuar pero NO es accesible para estudiantes`,
+                        message: `"${modName}" existe en el curso pero estudiantes no pueden verlo`,
                         detail:
-              `El recurso "${modName}" (cmid ${missing.cmid}) es un archivo con finalización automática. `
-              + 'La API del estudiante no lo reporta y no aparece en la vista del navegador. '
-              + 'Las condiciones de disponibilidad lo exigen, creando un punto muerto. '
-              + 'Además, el tooltip "Show More" del módulo bloqueado muestra el nombre '
-              + 'pero el enlace de detalle no expande el contenido para estudiantes.',
+              `La actividad "${modName}" (cmid ${missing.cmid}) tiene visible=1 en DB y la API lo reporta, `
+              + 'pero no aparece para estudiantes en ninguna fuente (API ni UI). '
+              + 'Es un bug de interfaz o de permisos.',
                         priority: 'high',
                         actionItem:
-              'Hacer visible el recurso (visible=1) o corregir la condición de disponibilidad.',
+              'Verificar visibilidad y permisos del recurso en la configuración del curso.',
                         confidence,
                         evidence: { inAdminUI, inAPI, inStudentAPI, inStudentUI },
                     });
                 }
-            }
-            else if (!inStudentAPI && !inStudentUI) {
-                const modName = apiNode?.name || missing.name;
-                const sectionName = missing.sectionName;
+                else if (!inStudentAPI && !inStudentUI) {
+                    const modName = apiNode?.name || missing.name;
+                    if (options?.verbose) {
+                        console.log(
+                            `[TreeOverlay] "${modName}" (cmid ${missing.cmid}): not in student trees → WARNING`,
+                        );
+                    }
 
-                if (options?.verbose) {
-                    console.log(
-                        `[TreeOverlay] "${modName}" (cmid ${missing.cmid}): missing in both student trees → CRITICAL`,
-                    );
+                    findings.push({
+                        severity: 'warning',
+                        sectionNumber: missing.sectionNumber,
+                        sectionTitle: missing.sectionName,
+                        message: `"${modName}" no se confirma como accesible para estudiantes`,
+                        detail:
+              `El recurso "${modName}" (cmid ${missing.cmid}) no aparece en API ni UI del estudiante. `
+              + 'No se confirma que sea accesible.',
+                        confidence,
+                        actionItem: 'Verificar manualmente si el recurso es accesible.',
+                        evidence: { inAdminUI, inAPI, inStudentAPI, inStudentUI },
+                    });
+                }
+                else if (!inStudentUI && inStudentAPI) {
+                    if (options?.verbose) {
+                        console.log(
+                            `[TreeOverlay] "${missing.name}" (cmid ${missing.cmid}): API student confirms access but not in UI → INFO`,
+                        );
+                    }
+                    findings.push({
+                        severity: 'info',
+                        sectionNumber: missing.sectionNumber,
+                        sectionTitle: missing.sectionName,
+                        message: `"${missing.name}" es accesible vía API pero no se renderiza en UI de estudiante`,
+                        detail:
+              `El recurso "${missing.name}" (cmid ${missing.cmid}) aparece en la API del estudiante `
+              + '(confirmando que es accesible), pero el DOM del estudiante no renderiza un enlace. '
+              + 'Esto puede ser normal para ciertos tipos de recurso (auto-completado, recursos en bloques laterales).',
+                        confidence,
+                        actionItem:
+              'No requiere acción inmediata. Monitorear si estudiantes reportan problemas.',
+                        evidence: { inAdminUI, inAPI, inStudentAPI, inStudentUI },
+                    });
+                }
+            }
+        }
+        else {
+            // Student API not available — fallback: compare admin vs student UI only
+            // Auto-complete File resources are known to not render hrefs in student DOM,
+            // so we skip them when we can't verify via API.
+            const adminVsStudentUi = adminGraph.overlay(studentUiGraph);
+            for (const missing of adminVsStudentUi.missingNodes) {
+                if (missing.cmid === 0)
+                    continue;
+
+                const apiNode = apiGraph.nodes.get(missing.cmid);
+                const isAutoCompleteFile
+                    = apiNode?.isautomatic === true && apiNode?.visible === 1 && apiNode?.metadata?.hasContent;
+
+                if (isAutoCompleteFile) {
+                    if (options?.verbose) {
+                        console.log(
+                            `[TreeOverlay] "${apiNode?.name || missing.name}" (cmid ${missing.cmid}): isautomatic file, no student API data — SKIP (unreliable DOM)`,
+                        );
+                    }
+                    continue;
                 }
 
-                findings.push({
-                    severity: 'critical',
-                    sectionNumber: missing.sectionNumber,
-                    sectionTitle: sectionName,
-                    message: `"${modName}" existe en el curso pero estudiantes no pueden verlo`,
-                    detail:
-            `La actividad "${modName}" (cmid ${missing.cmid}) tiene visible=1 en DB y la API lo reporta, `
-            + 'pero no aparece para estudiantes en ninguna fuente (API ni UI). '
-            + 'Es un bug de interfaz o de permisos.',
-                    priority: 'high',
-                    actionItem: 'Verificar visibilidad y permisos del recurso en la configuración del curso.',
-                    confidence,
-                    evidence: { inAdminUI, inAPI, inStudentAPI, inStudentUI },
-                });
-            }
-            else if (!inStudentAPI && !inStudentUI) {
-                const modName = apiNode?.name || missing.name;
                 if (options?.verbose) {
                     console.log(
-                        `[TreeOverlay] "${modName}" (cmid ${missing.cmid}): not in student trees → WARNING`,
+                        `[TreeOverlay] "${missing.name}" (cmid ${missing.cmid}): not in student UI, no student API — WARNING`,
                     );
                 }
 
@@ -125,33 +198,20 @@ export class TreeOverlayAnalyzer {
                     severity: 'warning',
                     sectionNumber: missing.sectionNumber,
                     sectionTitle: missing.sectionName,
-                    message: `"${modName}" no se confirma como accesible para estudiantes`,
+                    message: `"${missing.name}" no se confirma como accesible para estudiantes`,
                     detail:
-            `El recurso "${modName}" (cmid ${missing.cmid}) no aparece en API ni UI del estudiante. `
-            + 'No se confirma que sea accesible.',
-                    confidence,
-                    actionItem: 'Verificar manualmente si el recurso es accesible.',
-                    evidence: { inAdminUI, inAPI, inStudentAPI, inStudentUI },
-                });
-            }
-            else if (!inStudentUI && inStudentAPI) {
-                if (options?.verbose) {
-                    console.log(
-                        `[TreeOverlay] "${missing.name}" (cmid ${missing.cmid}): API student confirms access but not in UI → INFO`,
-                    );
-                }
-                findings.push({
-                    severity: 'info',
-                    sectionNumber: missing.sectionNumber,
-                    sectionTitle: missing.sectionName,
-                    message: `"${missing.name}" es accesible vía API pero no se renderiza en UI de estudiante`,
-                    detail:
-            `El recurso "${missing.name}" (cmid ${missing.cmid}) aparece en la API del estudiante `
-            + '(confirmando que es accesible), pero el DOM del estudiante no renderiza un enlace. '
-            + 'Esto puede ser normal para ciertos tipos de recurso (auto-completado, recursos en bloques laterales).',
-                    confidence,
-                    actionItem: 'No requiere acción inmediata. Monitorear si estudiantes reportan problemas.',
-                    evidence: { inAdminUI, inAPI, inStudentAPI, inStudentUI },
+            `El recurso "${missing.name}" (cmid ${missing.cmid}) tiene visible=1 en DB pero no aparece en la vista del estudiante. `
+            + 'No hay datos de API del estudiante para confirmar. '
+            + 'Se recomienda verificación manual.',
+                    priority: 'medium',
+                    actionItem: 'Verificar manualmente si el recurso es accesible para estudiantes.',
+                    confidence: buildConfidence(2, 'Solo Admin UI y API confirman existencia'),
+                    evidence: {
+                        inAdminUI: true,
+                        inAPI: apiGraph.nodes.has(missing.cmid),
+                        inStudentAPI: false,
+                        inStudentUI: false,
+                    },
                 });
             }
         }
