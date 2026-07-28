@@ -213,93 +213,86 @@ export class MoodleCourse {
     const result = { hasShowMore: false, showMoreExpands: false, detail: '' }
 
     try {
-      // Stay on the course page — locked tab's tooltip/popover is on the tab bar
-      // Find the tab for this section (it may be an <a> or a <span> with nav-link class)
-      const tabLocators = [
-        this.page.locator(`a.nav-link[href*="section=${sectionNumber}"]`).first(),
-        this.page.locator(`li.disabled:has(a[href*="section=${sectionNumber}"]) a`).first(),
-        this.page.locator(`li.disabled:has(span.nav-link) span.nav-link`).first(),
-        this.page
-          .locator(`li.disabled:has(a.nav-link) a.nav-link, li.disabled span.nav-link`)
-          .first(),
+      // Ensure we're on the course page — get course ID from current URL
+      const currentUrl = this.page.url()
+      const courseIdMatch = currentUrl.match(/[?&]id=(\d+)/)
+      const courseId = courseIdMatch ? courseIdMatch[1] : ''
+      if (!courseId || !currentUrl.includes('/course/view.php')) {
+        result.detail = `Not on course page (URL: ${currentUrl.substring(0, 80)})`
+        return result
+      }
+
+      // Find the info/question-mark icon near the locked tab
+      // In onetopic format, this is a small icon at the tab's top-right corner
+      // It's typically inside the disabled <li> for the section
+      const infoIconSelectors = [
+        `li.disabled a[title="Information"], li.disabled a[title="Información"]`,
+        `li.disabled a[href*="section=${sectionNumber}"] img[title*="Information"], li.disabled a[href*="section=${sectionNumber}"] img[title*="Información"]`,
+        `a[href*="section=${sectionNumber}"] ~ a[title], a[href*="section=${sectionNumber}"] + a`,
+        `li:has(a[href*="section=${sectionNumber}"]) a.fi, li:has(a[href*="section=${sectionNumber}"]) a[aria-label]`,
+        `a[aria-label*="information"], a[aria-label*="información"]`,
       ]
 
-      let tabEl = tabLocators[0]
-      for (const loc of tabLocators) {
+      let infoIcon = this.page.locator(infoIconSelectors[0]).first()
+      for (const sel of infoIconSelectors) {
+        const loc = this.page.locator(sel).first()
         const count = await loc.count()
         if (count > 0) {
-          tabEl = loc
+          infoIcon = loc
           break
         }
       }
 
-      const tabExists = await tabEl.count()
-      if (!tabExists) {
-        result.detail = `Tab not found for section ${sectionNumber}`
-        return result
-      }
-
-      // Try clicking the tab to trigger the availability popover
-      // (locked tabs often show a popover with restriction details on click)
-      await tabEl.click({ timeout: 3000 }).catch(() => {})
+      // Try clicking the info icon to open the modal
+      await infoIcon.click({ timeout: 3000 }).catch(() => {})
       await this.page.waitForTimeout(600)
 
-      // Also try hovering to trigger tooltip
-      await tabEl.hover({ timeout: 3000 }).catch(() => {})
-      await this.page.waitForTimeout(400)
+      // If no specific info icon found, try clicking the locked tab itself
+      // (locked tabs may also trigger the popover on click)
+      const tabExists = await infoIcon.count()
+      if (!tabExists) {
+        const tab = this.page.locator(`a.nav-link[href*="section=${sectionNumber}"]`).first()
+        const tabCount = await tab.count()
+        if (!tabCount) {
+          result.detail = `No tab or info icon found for section ${sectionNumber}`
+          return result
+        }
+        await tab.click({ timeout: 3000 }).catch(() => {})
+        await this.page.waitForTimeout(600)
+      }
 
-      // The popover/tooltip may be a Bootstrap popover or a Moodle availabilityinfo
-      // It appears near the tab, often with class popover, tooltip, or availabilityinfo
-      const popoverSelectors = [
-        '.popover:not([style*="display: none"])',
-        '.popover.fade.in, .popover.show',
-        '[role="tooltip"]:not([style*="display: none"])',
-        '.availabilityinfo:not([style*="display: none"])',
+      // Check for a modal/popover that appeared
+      // The modal is typically a Bootstrap modal or a custom overlay
+      const modalSelectors = [
+        '.modal.show',
+        '.modal.in',
+        '.popover.show',
+        '.availabilityinfo-modal',
         '#format_onetopic_winfo_tab-' + sectionNumber,
       ]
 
-      let popoverEl: any = null
-      for (const sel of popoverSelectors) {
+      let modalFound = false
+      for (const sel of modalSelectors) {
         const loc = this.page.locator(sel).first()
         const count = await loc.count()
         if (count > 0) {
           const visible = await loc.isVisible().catch(() => false)
           if (visible) {
-            popoverEl = loc
+            modalFound = true
             break
           }
         }
       }
 
-      if (!popoverEl) {
-        // Fallback: search entire page for any visible availabilityinfo
-        const allInfo = await this.page.evaluate((secNum) => {
-          const infos = Array.from(
-            document.querySelectorAll(
-              '.availabilityinfo, .tab_restriction, [id^="format_onetopic_winfo_tab-"]',
-            ),
-          )
-          return infos
-            .filter((el) => {
-              const rect = el.getBoundingClientRect()
-              return rect.width > 0 && rect.height > 0
-            })
-            .map((el) => ({
-              text: (el.textContent || '').substring(0, 100),
-              id: el.id || el.className.substring(0, 40),
-            }))
-        }, sectionNumber)
-
-        if (allInfo.length === 0) {
-          result.detail = `No visible availability popover for section ${sectionNumber}`
-          return result
-        }
+      if (!modalFound) {
+        // Modal might not have appeared — search page for "Show More" anyway
+        result.detail = `No modal appeared after clicking tab ${sectionNumber}`
       }
 
-      // Search for "Show More" / "Mostrar más" inside the visible page
+      // Search for "Show More" / "Mostrar más" visible on the page
       const showMoreTexts = ['Show more', 'Show less', 'Mostrar más', 'Mostrar menos']
-      const showMoreFound = await this.page.evaluate((texts) => {
-        const all = Array.from(document.querySelectorAll('a, button, span, div'))
+      const showMoreEls = await this.page.evaluate((texts) => {
+        const all = Array.from(document.querySelectorAll('a, button, span'))
         return all
           .filter(
             (el) =>
@@ -310,26 +303,25 @@ export class MoodleCourse {
           .map((el) => ({
             text: (el.textContent || '').trim().substring(0, 60),
             tag: el.tagName,
-            visible: el.getBoundingClientRect().width > 0,
           }))
       }, showMoreTexts)
 
-      if (showMoreFound.length === 0) {
-        result.detail = `No "Show More" element found on page for section ${sectionNumber}`
+      if (showMoreEls.length === 0) {
+        result.detail = result.detail
+          ? result.detail + ' — no "Show More" found on page'
+          : `No "Show More" found on page for section ${sectionNumber}`
         return result
       }
 
       result.hasShowMore = true
 
-      // Try clicking the "Show More" link
-      const showMoreLink =
-        showMoreFound.find((e) => e.tag === 'A' || e.tag === 'BUTTON') || showMoreFound[0]
-
-      const clicked = await this.page.evaluate((targetText) => {
+      // Click the Show More link
+      const target = showMoreEls.find((e) => e.tag === 'A') || showMoreEls[0]
+      const clicked = await this.page.evaluate((text) => {
         const all = Array.from(document.querySelectorAll('a, button'))
         const match = all.find(
           (el) =>
-            (el.textContent || '').trim().toLowerCase().includes(targetText.toLowerCase()) &&
+            (el.textContent || '').trim().toLowerCase().includes(text.toLowerCase()) &&
             el.getBoundingClientRect().width > 0,
         )
         if (match) {
@@ -337,41 +329,37 @@ export class MoodleCourse {
           return true
         }
         return false
-      }, showMoreLink.text)
+      }, target.text)
 
       if (!clicked) {
-        result.detail = `Found "${showMoreLink.text}" but could not click it`
+        result.detail = `Found "${target.text}" but could not click`
         return result
       }
 
       await this.page.waitForTimeout(500)
 
-      // Check if content expanded: look for "Show less" or new visible links
-      const expansionDetected = await this.page.evaluate(() => {
-        // Check for "Show less" text
+      // Check expansion
+      const expanded = await this.page.evaluate(() => {
         const hasShowLess = Array.from(document.querySelectorAll('*')).some(
           (el) =>
             (el.textContent || '').trim().toLowerCase().includes('show less') ||
             (el.textContent || '').trim().toLowerCase().includes('mostrar menos'),
         )
         if (hasShowLess) return true
-
-        // Check if availability info now contains more links than before
-        const info = document.querySelector('.availabilityinfo')
+        const info = document.querySelector('.availabilityinfo, .modal-body, .modal-content')
         if (info) {
-          const linksAfter = info.querySelectorAll('a').length
-          return linksAfter > 1
+          const links = info.querySelectorAll('a')
+          return links.length > 2
         }
-
         return false
       })
 
-      if (expansionDetected) {
+      if (expanded) {
         result.showMoreExpands = true
-        result.detail = '"Show More" expands correctly — dropdown reveals pending activities'
+        result.detail = '"Show More" expands correctly'
       } else {
         result.showMoreExpands = false
-        result.detail = `"${showMoreLink.text}" clicked but no expansion detected — dropdown does not work for current user role`
+        result.detail = `"${target.text}" clicked but no expansion — dropdown does not work for current user role`
       }
     } catch (err) {
       result.detail = `Show More detection error: ${err instanceof Error ? err.message : String(err)}`
