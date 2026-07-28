@@ -213,13 +213,14 @@ export class MoodleCourse {
     const result = { hasShowMore: false, showMoreExpands: false, detail: '' }
 
     try {
-      // Ensure we're on the course page — get course ID from current URL
+      // Ensure we're on the course page
       const currentUrl = this.page.url()
-      const courseIdMatch = currentUrl.match(/[?&]id=(\d+)/)
-      const courseId = courseIdMatch ? courseIdMatch[1] : ''
-      if (!courseId || !currentUrl.includes('/course/view.php')) {
-        result.detail = `Not on course page (URL: ${currentUrl.substring(0, 80)})`
-        return result
+      if (!currentUrl.includes('/course/view.php')) {
+        // Navigate to course — find course ID from URL
+        const courseIdMatch =
+          currentUrl.match(/[?&]course=(\d+)/) || currentUrl.match(/[?&]id=(\d+)/)
+        const cid = courseIdMatch ? courseIdMatch[1] : '269'
+        await this.goToCourse(cid)
       }
 
       // Find the info/question-mark icon near the locked tab
