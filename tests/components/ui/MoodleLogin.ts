@@ -16,7 +16,24 @@ export class MoodleLogin {
   async loginAs(username: string, password: string): Promise<void> {
     await this.page.goto(`${this.baseUrl}/login/index.php`)
     await this.page.waitForLoadState('load')
-    await this.page.locator('#username').waitFor({ state: 'visible', timeout: 15000 })
+    try {
+      await this.page.locator('#username').waitFor({ state: 'visible', timeout: 30000 })
+    } catch {
+      // If #username not found within timeout, check if Moodle shows a CAPTCHA/rate-limit page
+      const pageText = await this.page.evaluate(() => document.body?.textContent?.trim() || '')
+      const hasCaptcha =
+        pageText.toLowerCase().includes('captcha') ||
+        pageText.toLowerCase().includes('no soy un robot') ||
+        pageText.toLowerCase().includes('are you human') ||
+        pageText.toLowerCase().includes('reintentar') ||
+        pageText.toLowerCase().includes('try again')
+      if (hasCaptcha) {
+        throw new Error(`Login blocked by CAPTCHA/rate-limit after multiple rapid attempts`)
+      }
+      throw new Error(
+        `Login page did not render #username field within 30s. Page: ${pageText.substring(0, 200)}`,
+      )
+    }
     await this.page.locator('#username').fill(username)
     await this.page.locator('#password').fill(password)
     await this.page.locator('#loginbtn').click()

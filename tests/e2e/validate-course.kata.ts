@@ -130,6 +130,8 @@ test.describe('Course Validation — Multi-Role Audit', () => {
     const completionReport =
       await test.step('9. Reporte de Activity Completion (admin)', async () => {
         console.log('\n=== ACTIVITY COMPLETION REPORT ===')
+        // Cool-down before re-login to avoid Moodle rate limiting
+        await new Promise((r) => setTimeout(r, 3000))
         await login.loginAsAdmin()
         const report = await course.getActivityCompletionReport(courseId)
         console.log(`Activity Completion: ${report.length} activities tracked`)
