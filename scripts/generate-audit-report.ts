@@ -489,7 +489,17 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
 
     // Side-by-side: all sections from all 3 roles
     let compareHTML = `<h2 class="section-title">Comparación visual: Admin · Teacher · Student</h2>
-  <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Cada sección del curso vista desde los tres roles. El admin es la fuente de verdad — lo que el estudiante NO ve está destacado.</p>`;
+  <div style="background:var(--surface);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px;box-shadow:var(--shadow);font-size:0.85em">
+    <p><strong>Cómo leer esta tabla:</strong> Cada módulo tiene tres columnas (Admin, Teacher, Student). La columna Student muestra <strong>solo lo que un estudiante puede ver y hacer clic</strong>.</p>
+    <ul style="margin:8px 0 0 18px;line-height:1.7">
+      <li>✅ = la actividad tiene un <strong>enlace visible y funcional</strong> (href presente, se puede hacer clic)</li>
+      <li>🔒 = el módulo está <strong>bloqueado</strong> (el estudiante no puede acceder)</li>
+      <li>📋 = la actividad tiene una <strong>restricción de acceso visible</strong> (ej: "Not available unless:...")</li>
+      <li>Los números entre paréntesis <strong>(-7)</strong> = cuántas actividades del Admin no aparecen en Student</li>
+    </ul>
+    <p style="margin-top:8px"><strong>¿Qué buscar?</strong> Expandí <strong>Módulo 2</strong> y compará las columnas. Admin/Teacher tienen 9 actividades; Student solo 2. Las 7 faltantes incluyen <strong>"Notebook Funcion-Lambda" (6918)</strong> y "Notebook Funcion-Lambda-CEF" (6917) — están en Admin pero no tienen enlace para Student. Luego expandí <strong>Módulo 3</strong> y <strong>Cierre</strong>: están 🔒 bloqueados porque requieren completar actividades del Módulo 2 que el estudiante no puede ver ni descargar.</p>
+    <p style="margin-top:8px">💡 Si al hacer el cambio de rol ves algo <strong>distinto</strong> a lo que muestra el reporte (ej: un enlace en 6918, o el Show More sí se expande), <strong>avisanos</strong> para ajustar la detección.</p>
+  </div>`;
     for (const section of adminView.sections) {
         const teacherSection = teacherView.sections.find(s => s.number === section.number);
         const studentSection = studentView.sections.find(s => s.number === section.number);
@@ -534,7 +544,6 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
 
     let devNote = '';
     if (findings.length > 0) {
-        const lockedSection = studentView.sections.find(s => s.isLocked);
         devNote = `
     <h2 class="section-title">🧪 Cómo reproducir este hallazgo manualmente</h2>
     <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Seguí estos pasos con tu propio usuario admin para ver el mismo mismatch que detectó el test automatizado.</p>
@@ -559,15 +568,15 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
       <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px">
         <div style="flex:1;min-width:200px">
           <div style="font-size:2em;font-weight:800;color:var(--accent);margin-bottom:4px">4</div>
-          <strong>Ahora fijate en las secciones</strong>
+          <strong>Inspeccioná el Módulo 2 como estudiante</strong>
           <p class="dim" style="font-size:0.85em;margin-top:4px">
-            ${lockedSection ? `La sección <strong>"${esc(lockedSection.title)}"</strong> que antes veías ahora está bloqueada o invisible. Coincide con el reporte de abajo.` : 'Las secciones marcadas en el reporte son las que cambiaron.'}
+            Buscá la actividad <strong>"Notebook Funcion-Lambda" (6918)</strong>. Notá que <strong>no tiene un enlace descargable</strong> — el nombre aparece pero sin href. Arriba de la pestaña debería haber un tooltip "Show More" / "Mostrar más" que al hacer clic expandiría los requisitos pendientes: <strong>no se expande</strong>. Eso es el bug que detecta el reporte.
           </p>
         </div>
         <div style="flex:1;min-width:200px">
           <div style="font-size:2em;font-weight:800;color:var(--accent);margin-bottom:4px">5</div>
           <strong>Comprobá con el reporte</strong>
-          <p class="dim" style="font-size:0.85em;margin-top:4px">En la sección <strong>"Vista lado a lado"</strong> de esta página, compará lo que ves como admin vs. lo que ves como estudiante. Los screenshots son evidencia.</p>
+          <p class="dim" style="font-size:0.85em;margin-top:4px">En la sección <strong>"Comparación visual: Admin · Teacher · Student"</strong> (más arriba), expandí cada módulo y compará las tres columnas. Admin y Teacher muestran 9 actividades en Módulo 2; Student muestra solo 2. Las 7 faltantes (incluida 6918) son las que no se renderizan para estudiantes.</p>
         </div>
         <div style="flex:1;min-width:200px">
           <div style="font-size:2em;font-weight:800;color:var(--accent);margin-bottom:4px">6</div>
