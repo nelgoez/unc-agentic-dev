@@ -452,22 +452,30 @@ export class TreeOverlayAnalyzer {
 
             // Determine which cmid is inaccessible
             const inaccessibleCmid = !studentUiGraph.nodes.has(dup.cmidA) ? dup.cmidA : dup.cmidB;
+            const apiNode = apiGraph.nodes.get(inaccessibleCmid);
+            const inaccessibleHasCompletion = apiNode?.completion != null && apiNode.completion > 0;
+
+            // A duplicate is a BLOCKER when the inaccessible cmid has completion tracking.
+            // Auto-complete files (isautomatic=true, visible=1) are a known Moodle bug:
+            // the API returns them but the student UI renders no link, hiding them behind
+            // the non-functional Show More tooltip. This blocks student progression.
             const isInaccessibleConditionReferenced = options?.conditionReferencedCmids
                 ? options.conditionReferencedCmids.has(inaccessibleCmid)
                 : false;
-            const apiNode = apiGraph.nodes.get(inaccessibleCmid);
-            const inaccessibleHasCompletion = apiNode?.completion != null && apiNode.completion > 0;
+            const isAutoCompleteFile = apiNode?.isautomatic === true && apiNode?.visible === 1;
             const isBlocker
-                = !bothInStudentUI && isInaccessibleConditionReferenced && inaccessibleHasCompletion;
+                = !bothInStudentUI
+                    && inaccessibleHasCompletion
+                    && (isInaccessibleConditionReferenced || isAutoCompleteFile);
 
-            const severity: 'critical' | 'warning' | 'info' = isBlocker
-                ? 'critical'
+            const severity = isBlocker
+                ? ('critical' as const)
                 : bothInStudentUI
-                    ? 'info'
-                    : 'warning';
+                    ? ('info' as const)
+                    : ('warning' as const);
 
             const detailText = isBlocker
-                ? `Solo ${dup.cmidA} es accesible. ${dup.cmidB} no está en la interfaz del estudiante y es requisito para continuar (completion=${apiNode?.completion ?? '?'}, referenciado en condiciones de disponibilidad). Los estudiantes quedan bloqueados porque no pueden descargar ni completar este recurso.`
+                ? `Solo ${dup.cmidA} es accesible. ${dup.cmidB} tiene seguimiento de finalización (completion=${apiNode?.completion ?? '?'}) pero no aparece en la interfaz del estudiante — los estudiantes no pueden descargarlo ni completarlo, lo que bloquea su avance al módulo siguiente.`
                 : bothInStudentUI
                     ? 'Ambos son accesibles para estudiantes — posible duplicado innecesario.'
                     : `Solo ${dup.cmidA} es accesible. ${dup.cmidB} no está en la interfaz del estudiante. Se recomienda revisar si este duplicado es necesario.`;
@@ -482,7 +490,7 @@ export class TreeOverlayAnalyzer {
           + `- "${dup.nameA}" (cmid ${dup.cmidA}): "${dup.filenameA}"\n`
           + `- "${dup.nameB}" (cmid ${dup.cmidB}): "${dup.filenameB}"\n\n`
           + `${detailText}`,
-                priority: bothInStudentUI ? 'low' : 'medium',
+                priority: isBlocker ? 'high' : bothInStudentUI ? 'low' : 'medium',
                 confidence: buildConfidence(3, 'Misma sección, mismo tipo, nombres y archivos similares'),
                 evidence: {
                     inAdminUI: true,
