@@ -12,8 +12,14 @@ export class MoodleLogin {
     this.baseUrl = baseUrl
   }
 
+  async logout(): Promise<void> {
+    await this.page.goto(`${this.baseUrl}/login/logout.php`)
+    await this.page.waitForLoadState('load')
+  }
+
   @atc('ML-1', { story: 'UNC-RE-1', feature: 'Moodle Login' })
   async loginAs(username: string, password: string): Promise<void> {
+    await this.logout()
     await this.page.goto(`${this.baseUrl}/login/index.php`)
     await this.page.waitForLoadState('load')
     await this.page.locator('#username').waitFor({ state: 'visible', timeout: 15000 })
