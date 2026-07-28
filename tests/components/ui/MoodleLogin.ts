@@ -19,19 +19,10 @@ export class MoodleLogin {
     try {
       await this.page.locator('#username').waitFor({ state: 'visible', timeout: 30000 })
     } catch {
-      // If #username not found within timeout, check if Moodle shows a CAPTCHA/rate-limit page
       const pageText = await this.page.evaluate(() => document.body?.textContent?.trim() || '')
-      const hasCaptcha =
-        pageText.toLowerCase().includes('captcha') ||
-        pageText.toLowerCase().includes('no soy un robot') ||
-        pageText.toLowerCase().includes('are you human') ||
-        pageText.toLowerCase().includes('reintentar') ||
-        pageText.toLowerCase().includes('try again')
-      if (hasCaptcha) {
-        throw new Error(`Login blocked by CAPTCHA/rate-limit after multiple rapid attempts`)
-      }
+      const pageUrl = this.page.url()
       throw new Error(
-        `Login page did not render #username field within 30s. Page: ${pageText.substring(0, 200)}`,
+        `Login page did not render #username within 30s. URL: ${pageUrl.substring(0, 100)} Page: ${pageText.substring(0, 300)}`,
       )
     }
     await this.page.locator('#username').fill(username)
