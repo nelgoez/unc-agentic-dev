@@ -179,12 +179,19 @@ function buildFindingsLayer1(findings: AuditFinding[], apiResults: ApiAuditResul
             for (const section of apiResults.breakdown.sections) {
                 for (const mod of section.modules ?? []) {
                     if (f.message.toLowerCase().includes(mod.name.toLowerCase())) {
-                        techHtml += `<div class="data-source"><strong>DB:</strong> module.id=${mod.id} · completion=${mod.completion}</div>`;
+                        techHtml += `<div class="data-source"><strong>DB:</strong> actividad.id=${mod.id} · completion=${mod.completion}</div>`;
                         if (mod.completiondata != null) {
                             techHtml += `<div class="data-source"><strong>API:</strong> core_course_get_contents → uservisible=${mod.completiondata.uservisible} · hascompletion=${mod.completiondata.hascompletion} · isautomatic=${mod.completiondata.isautomatic}</div>`;
                         }
+                        // Determine per-activity student visibility from finding detail text.
+                        // Duplicate findings encode which cmid is accessible in the detail:
+                        //   "Solo 6917 es accesible. 6918 ..." → 6917 is the accessible one.
+                        const accessibleCmidMatch = f.detail?.match(/Solo (\d+) es accesible/);
+                        const accessibleCmid = accessibleCmidMatch ? Number.parseInt(accessibleCmidMatch[1]) : null;
                         const studentVisible
-                            = f.severity !== 'critical' && mod.completiondata?.uservisible !== false;
+                            = accessibleCmid != null
+                                ? accessibleCmid === mod.id
+                                : mod.completiondata?.uservisible !== false;
                         techHtml += `<div class="data-source"><strong>UI:</strong> Admin: ✅ visible · Student role: ${studentVisible ? '✅ visible' : '❌ sin acceso'}</div>`;
                     }
                 }
