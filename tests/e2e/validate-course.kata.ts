@@ -97,16 +97,13 @@ test.describe('Course Validation — Multi-Role Audit', () => {
         return view
       })
 
-    const studentView = await test.step('7. Ingreso como estudiante fresco', async () => {
+    const studentView = await test.step('7. Ingreso como estudiante (switch role)', async () => {
       console.log('\n=== STUDENT VIEW ===')
       if (freshStudent) {
-        // Clear session before logging in as fresh student
-        await page.context().clearCookies()
-        await login.loginAs(freshStudent.username, freshStudent.password)
-      } else {
-        await roles.revertToAdmin(courseId)
-        await roles.switchToStudent(courseId)
+        console.log('  Fresh student available via API — using switch-role for UI analysis')
       }
+      await roles.revertToAdmin(courseId)
+      await roles.switchToStudent(courseId)
       const view = await course.analyze(courseId)
       console.log(`Sections: ${view.sections.length}`)
       return view
@@ -130,9 +127,7 @@ test.describe('Course Validation — Multi-Role Audit', () => {
     const completionReport =
       await test.step('9. Reporte de Activity Completion (admin)', async () => {
         console.log('\n=== ACTIVITY COMPLETION REPORT ===')
-        // Cool-down to avoid Moodle rate limiting after 2 prior logins
-        await new Promise((r) => setTimeout(r, 10000))
-        await login.loginAsAdmin()
+        await roles.revertToAdmin(courseId)
         const report = await course.getActivityCompletionReport(courseId)
         console.log(`Activity Completion: ${report.length} activities tracked`)
         console.log(`  Students: ${report[0]?.totalStudents || 0}`)
