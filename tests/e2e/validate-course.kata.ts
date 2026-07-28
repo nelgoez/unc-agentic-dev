@@ -336,6 +336,40 @@ test.describe('Course Validation — Multi-Role Audit', () => {
         })
       }
 
+      // 6. Show More tooltip detection for locked tabs
+      const lockedTabs = adminView.tabs.filter(
+        (t) => t.isDisabled && t.restrictionText && t.restrictionText.trim().length > 3,
+      )
+      for (const tab of lockedTabs) {
+        console.log(
+          `\n   Checking Show More for locked tab: "${tab.title}" (section ${tab.sectionNumber})`,
+        )
+        const smResult = await course.detectShowMoreBug(tab.sectionNumber)
+        if (smResult.hasShowMore && !smResult.showMoreExpands) {
+          phantoms.push({
+            severity: 'warning',
+            sectionNumber: tab.sectionNumber,
+            sectionTitle: tab.title,
+            message: `"Show More" en "${tab.title}" no expande contenido para estudiantes`,
+            detail:
+              `La pestaña "${tab.title}" está bloqueada y muestra un enlace "Show More" / "Mostrar más" ` +
+              `que debería expandir la lista de actividades pendientes. En la vista de estudiante, ` +
+              `el enlace aparece pero no es funcional — al hacer clic no se despliega ningún contenido. ` +
+              `Esto impide que los estudiantes vean qué actividades necesitan completar para desbloquear el módulo.` +
+              (smResult.detail ? `\n[Diagnóstico: ${smResult.detail}]` : ''),
+            priority: 'medium',
+            actionItem:
+              'Verificar la configuración del formato de curso (onetopic) o reportar bug al equipo de Moodle. ' +
+              'El "Show More" debería expandir la lista de requisitos pendientes pero no lo hace para estudiantes.',
+          })
+          console.log(`  → Show More BUG: "${tab.title}" — link visible but does not expand`)
+        } else if (smResult.hasShowMore && smResult.showMoreExpands) {
+          console.log(`  → Show More OK: "${tab.title}" — funciona correctamente`)
+        } else {
+          console.log(`  → No Show More en "${tab.title}": ${smResult.detail}`)
+        }
+      }
+
       console.log(`\n=== AUDIT COMPLETE ===`)
       console.log(
         `Admin: ${adminView.sections.length} | Teacher: ${teacherView.sections.length} | Student: ${(studentView ?? switchRoleStudentView).sections.length} | Findings: ${phantoms.length}`,
