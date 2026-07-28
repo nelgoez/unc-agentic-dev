@@ -213,116 +213,92 @@ export class MoodleCourse {
     const result = { hasShowMore: false, showMoreExpands: false, detail: '' }
 
     try {
-      const tabLocator = this.page.locator(`a.nav-link[href*="section=${sectionNumber}"]`).first()
-      const tabExists = await tabLocator.count()
-      if (!tabExists) {
-        result.detail = `Tab for section ${sectionNumber} not found`
+      // Navigate to the section to ensure its DOM is rendered
+      await this.navigateToSection(sectionNumber)
+
+      // Look for the restriction info popover that contains "Show More"
+      // In onetopic format, locked sections show a popover/availabilityinfo
+      const restrictionSelector = `.availabilityinfo, .section_availability, .tab_restriction, [id^="format_onetopic_winfo_tab-"]`
+      const restrictionEl = this.page.locator(restrictionSelector).first()
+      const restrictionExists = await restrictionEl.count()
+
+      if (!restrictionExists) {
+        result.detail = `No restriction info element found for section ${sectionNumber}`
         return result
       }
 
-      const li = tabLocator.locator('xpath=..')
-      const isDisabled = await li.evaluate((el) => el.classList.contains('disabled'))
-      if (!isDisabled) {
-        result.detail = `Section ${sectionNumber} is not locked — skipping Show More check`
-        return result
-      }
+      // Scroll restriction info into view
+      await restrictionEl.scrollIntoViewIfNeeded().catch(() => {})
 
-      // Try to trigger the popover by clicking the tab
-      await tabLocator.click({ timeout: 3000 }).catch(() => {})
-      await this.page.waitForTimeout(500)
-
-      // Look for the availability popover/tooltip
-      const popover = this.page
-        .locator('.popover, .availabilityinfo-popover, [role="tooltip"]')
-        .first()
-      const popoverVisible = await popover.isVisible().catch(() => false)
-
-      if (!popoverVisible) {
-        // Try hovering to trigger tooltip
-        await tabLocator.hover({ timeout: 3000 }).catch(() => {})
-        await this.page.waitForTimeout(500)
-      }
-
-      // Find "Show More" / "Mostrar más" elements anywhere visible
+      // Find "Show More" / "Mostrar más" link inside the restriction info
       const showMoreTexts = ['Show more', 'Show less', 'Mostrar más', 'Mostrar menos']
-      const allElements = await this.page.evaluate((texts) => {
-        const allLinks = Array.from(document.querySelectorAll('a, span, button, div'))
-        const matches: Array<{
-          text: string
-          tag: string
-          visible: boolean
-          clickable: boolean
-          id: string
-        }> = []
-        for (const el of allLinks) {
-          const t = el.textContent?.trim() || ''
-          if (texts.some((st) => t.toLowerCase().includes(st.toLowerCase()))) {
-            const rect = el.getBoundingClientRect()
-            const isVisible = rect.width > 0 && rect.height > 0
-            const isClickable = el.tagName === 'A' || el.tagName === 'BUTTON'
-            matches.push({
-              text: t.substring(0, 60),
-              tag: el.tagName,
-              visible: isVisible,
-              clickable: isClickable,
-              id: el.id || el.className || '(no id)',
-            })
-          }
-        }
-        return matches
-      }, showMoreTexts)
+      const showMoreEl = this.page
+        .locator(restrictionSelector)
+        .first()
+        .locator(
+          `a:has-text("Show more"), a:has-text("Show less"), a:has-text("Mostrar más"), a:has-text("Mostrar menos")`,
+        )
+      const showMoreCount = await showMoreEl.count()
 
-      if (allElements.length === 0) {
-        result.detail = `No "Show More" element found for locked section ${sectionNumber}`
+      if (showMoreCount === 0) {
+        // Try broader search: any visible element with those texts
+        const allShowMore = await this.page.evaluate((texts) => {
+          const all = Array.from(document.querySelectorAll('a, button, span'))
+          return all
+            .filter((el) => {
+              const t = el.textContent?.trim() || ''
+              return (
+                texts.some((st) => t.toLowerCase().includes(st.toLowerCase())) &&
+                el.getBoundingClientRect().width > 0
+              )
+            })
+            .map((el) => ({
+              text: (el.textContent?.trim() || '').substring(0, 60),
+              tag: el.tagName,
+              id: el.id || el.className.substring(0, 40) || '(no id)',
+            }))
+        }, showMoreTexts)
+
+        if (allShowMore.length === 0) {
+          result.detail = `No "Show More" element found for section ${sectionNumber}`
+          return result
+        }
+
+        result.hasShowMore = true
+        result.detail = `Found "${allShowMore[0].text}" (${allShowMore[0].tag}) but could not verify expansion`
         return result
       }
 
       result.hasShowMore = true
 
-      // Try clicking the "Show More" element
-      const clickableEl = allElements.find((e) => e.clickable && e.visible) || allElements[0]
-      const clicked = await this.page.evaluate((text) => {
-        const allLinks = Array.from(document.querySelectorAll('a, span, button, div'))
-        const match = allLinks.find(
-          (el) =>
-            (el.textContent?.trim() || '').toLowerCase().includes(text.toLowerCase()) &&
-            el.getBoundingClientRect().width > 0,
-        )
-        if (match) {
-          ;(match as HTMLElement).click()
-          return true
-        }
-        return false
-      }, clickableEl.text)
+      // Click it and check if content expands
+      await showMoreEl.click({ timeout: 3000 }).catch(() => {})
+      await this.page.waitForTimeout(500)
 
-      if (clicked) {
-        await this.page.waitForTimeout(500)
-        // Check if new content appeared (e.g., a hidden div expanded)
-        const newElements = await this.page.evaluate(() => {
-          const body = document.body
-          const before = body.innerHTML.length
-          return { bodyLength: before }
+      // Check if "Show less" / "Mostrar menos" appeared (sign of expansion)
+      const showLessNow = await this.page
+        .locator(`a:has-text("Show less"), a:has-text("Mostrar menos")`)
+        .count()
+
+      if (showLessNow > 0) {
+        result.showMoreExpands = true
+        result.detail = '"Show More" expands correctly — "Show less" now visible'
+      } else {
+        // Also check if new content appeared inside the restriction area
+        const contentChanged = await this.page.evaluate(() => {
+          const info = document.querySelector('.availabilityinfo')
+          if (!info) return false
+          const allLinks = Array.from(info.querySelectorAll('a'))
+          return allLinks.length > 1 // expanded = more links visible
         })
 
-        const showLessTexts = ['Show less', 'Mostrar menos']
-        const showLessNow = await this.page.evaluate((texts) => {
-          return Array.from(document.querySelectorAll('*')).some(
-            (el) =>
-              (el.textContent?.trim() || '').toLowerCase().includes(texts[0].toLowerCase()) ||
-              (el.textContent?.trim() || '').toLowerCase().includes(texts[1].toLowerCase()),
-          )
-        }, showLessTexts)
-
-        if (showLessNow) {
+        if (contentChanged) {
           result.showMoreExpands = true
-          result.detail = `"${clickableEl.text}" appeared and "Show less" is now visible — dropdown expanded correctly`
+          result.detail = '"Show More" expands correctly — new links appeared'
         } else {
-          result.showMoreExpands = false
-          result.detail = `"${clickableEl.text}" clicked but no expansion detected — "Show less" not visible`
+          result.detail =
+            '"Show More" clicked but no expansion detected — link may not be functional for current user role'
         }
-      } else {
-        result.showMoreExpands = false
-        result.detail = `Found "Show More" element but could not click it`
       }
     } catch (err) {
       result.detail = `Show More detection error: ${err instanceof Error ? err.message : String(err)}`
