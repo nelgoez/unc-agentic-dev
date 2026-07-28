@@ -59,6 +59,13 @@ interface ApiAuditResults {
             name: string;
             moduleCount: number;
             hasSectionRestriction: boolean;
+            sectionConditions: Array<{
+                type: string;
+                cm?: number;
+                id?: number;
+                min?: number;
+                max?: number;
+            }>;
             modulesWithRestrictions: Array<{
                 id: number;
                 name: string;

@@ -433,6 +433,13 @@ export class MoodleApiClient {
             name: string;
             moduleCount: number;
             hasSectionRestriction: boolean;
+            sectionConditions: Array<{
+                type: string;
+                cm?: number;
+                id?: number;
+                min?: number;
+                max?: number;
+            }>;
             modulesWithRestrictions: Array<{
                 id: number;
                 name: string;
@@ -452,6 +459,21 @@ export class MoodleApiClient {
 
         const breakdown = contents.map((section) => {
             const hasSectionRestriction = !!(section.availability && section.availability !== 'null');
+
+            const sectionConditions: Array<{
+                type: string;
+                cm?: number;
+                id?: number;
+                min?: number;
+                max?: number;
+            }> = [];
+            if (hasSectionRestriction) {
+                try {
+                    const tree = JSON.parse(section.availability!);
+                    this.traverseAvailabilityTree(tree, c => sectionConditions.push(c));
+                }
+                catch {}
+            }
 
             const modulesWithRestrictions = section.modules
                 .filter(mod => mod.availability && mod.availability !== 'null')
@@ -476,6 +498,7 @@ export class MoodleApiClient {
                 name: section.name,
                 moduleCount: section.modules.length,
                 hasSectionRestriction,
+                sectionConditions,
                 modulesWithRestrictions,
                 modules: section.modules.map(mod => ({
                     id: mod.id,

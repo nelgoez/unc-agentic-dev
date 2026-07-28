@@ -154,7 +154,8 @@ test.describe('Course Validation — Multi-Role Audit', () => {
               + `que debería expandir la lista de actividades pendientes. En la vista de estudiante, `
               + `el enlace aparece pero no es funcional — al hacer clic no se despliega ningún contenido. `
               + `Esto impide que los estudiantes vean qué actividades necesitan completar para desbloquear el módulo.${
-                  smResult.detail ? `\n[Diagnóstico: ${smResult.detail}]` : ''}`,
+                  smResult.detail ? `\n[Diagnóstico: ${smResult.detail}]` : ''
+              }`,
                         priority: 'medium',
                         actionItem:
               'Verificar la configuración del formato de curso (onetopic) o reportar bug al equipo de Moodle. '
@@ -215,11 +216,6 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                 console.warn('⚠️ Nelthor data fetch failed:', err);
             }
 
-            // Build referenced cmid set from module-level conditions only.
-            // Section-level conditions ("complete all activities in section 2")
-            // are intentionally excluded — they produce false positives in gated
-            // sections when fresh student data is unavailable. The 6917≈6918
-            // duplicate is caught by the overlay's duplicate detection instead.
             const breakdown = await api.getAvailabilityJsonBreakdown(courseId);
             const referencedCmidSet = new Set<number>();
             for (const section of breakdown.sections) {
@@ -228,6 +224,14 @@ test.describe('Course Validation — Multi-Role Audit', () => {
                         if (cond.type === 'completion' && cond.cm) {
                             referencedCmidSet.add(cond.cm);
                         }
+                    }
+                }
+            }
+            // Also include conditions from section-level availability
+            for (const section of breakdown.sections) {
+                for (const cond of section.sectionConditions ?? []) {
+                    if (cond.type === 'completion' && cond.cm) {
+                        referencedCmidSet.add(cond.cm);
                     }
                 }
             }
