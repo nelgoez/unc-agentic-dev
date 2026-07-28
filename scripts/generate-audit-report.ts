@@ -293,16 +293,27 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
         statusDetail = `${warningCount2} precaución(es)`;
     }
     else {
-        statusClass = 'ok';
-        statusIcon = '🟢';
-        statusLabel = 'OK';
-        statusDetail = 'Sin problemas detectados';
+        const hasUnresolvedInfo = filteredFindings.some(
+            f => f.severity === 'info' && f.message.toLowerCase().includes('duplicado'),
+        );
+        if (hasUnresolvedInfo) {
+            statusClass = 'warn';
+            statusIcon = '🟡';
+            statusLabel = 'REVISAR';
+            statusDetail = 'Hallazgos pendientes de revisión';
+        }
+        else {
+            statusClass = 'ok';
+            statusIcon = '🟢';
+            statusLabel = 'OK';
+            statusDetail = 'Sin problemas detectados';
+        }
     }
 
     // Investigation note (replaces old resolved banner)
     const investigationNote = `\
   <div style="background:#fff3cd;border:1px solid #ffc107;border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;font-size:0.9em">
-    <strong>⏳ En investigación:</strong> La actividad "Notebook Funcion-Lambda" existe en el curso pero es invisible para los estudiantes (visible=0). El recurso fue restaurado pero sigue sin ser accesible desde la vista de estudiante. Estamos trabajando con el equipo de Campus Virtual para determinar si esto requiere una acción adicional.
+    <strong>⏳ En investigación:</strong> La actividad "Notebook Funcion-Lambda" (6918) tiene visible=1 en la base de datos pero los estudiantes no pueden verla. Es un duplicado de 6917 "Notebook Funcion-Lambda-CEF" — solo 6917 tiene un enlace accesible en la interfaz. El tooltip "Show More" del módulo bloqueado no expande su contenido para estudiantes, lo que agrava el problema al no mostrar los requisitos pendientes.
   </div>`;
 
     // Layer 1 — findings with action items
@@ -336,17 +347,17 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
     <div style="padding:12px;background:#d1fae5;border-radius:var(--radius);">
       <div style="font-size:1.3em;font-weight:800;color:#065f46">${nelthorCompletedNames.length}</div>
-      <div style="font-size:0.85em;color:#065f46">Actividades que nelthor completó sin problemas</div>
+      <div style="font-size:0.85em;color:#065f46">Actividades que nelthor completó desde admin (switch-role)</div>
       ${nelthorCompletedNames.length > 0 ? `<div style="font-size:0.8em;color:#065f46;margin-top:4px">${nelthorCompletedNames.join(', ')}</div>` : ''}
     </div>
     <div style="padding:12px;background:#fee2e2;border-radius:var(--radius);">
       <div style="font-size:1.3em;font-weight:800;color:#991b1b">${nelthorBlockedNames.length}</div>
       <div style="font-size:0.85em;color:#991b1b">Actividades que nelthor NO pudo completar</div>
-      ${nelthorBlockedNames.length > 0 ? `<div style="font-size:0.8em;color:#991b1b;margin-top:4px">${nelthorBlockedNames.join(', ')}</div>` : '<div style="font-size:0.8em;color:#991b1b;margin-top:4px">(ninguna — nelthor completó todo sin ayuda)</div>'}
+      ${nelthorBlockedNames.length > 0 ? `<div style="font-size:0.8em;color:#991b1b;margin-top:4px">${nelthorBlockedNames.join(', ')}</div>` : '<div style="font-size:0.8em;color:#991b1b;margin-top:4px">(como estudiante real quedó bloqueado en Módulo 2)</div>'}
     </div>
   </div>
   <p style="font-size:0.85em;color:var(--text-2);margin-top:8px">
-    💡 Las actividades que nelthor completó no son bloqueos reales para estudiantes — el curso era funcional cuando nelthor lo cursó. Los hallazgos marcados como BLOQUEA arriba ya tienen en cuenta este dato y solo muestran lo que realmente impide el avance.
+    ⚠️ Nelthor fue promovido a administrador después de cursar. Su progreso histórico muestra que el curso era funcional cuando lo cursó como estudiante real, pero desde que es admin el cambio de rol a "Estudiante" no replica exactamente la experiencia de un estudiante real — algunas actividades que completó como admin (con switch-role) no son accesibles para un estudiante genuino. Los hallazgos marcados como BLOQUEA arriba ya tienen en cuenta esta diferencia.
   </p>
 </div>`;
     }
@@ -381,6 +392,22 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
             phantomHTML += '<li><em>No se detectaron recursos ocultos en los datos del API.</em></li>';
         }
         phantomHTML += '</ul>';
+    }
+
+    // Show More section
+    let showMoreHTML = '';
+    const showMoreFindings = filteredFindings.filter(
+        f =>
+            f.message.toLowerCase().includes('show more')
+            || f.message.toLowerCase().includes('mostrar más'),
+    );
+    if (showMoreFindings.length > 0) {
+        showMoreHTML = `<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;font-size:0.9em">
+    <strong>🔍 Show More / Mostrar más:</strong> Se detectaron ${showMoreFindings.length} hallazgos relacionados con el tooltip "Show More" de módulos bloqueados. Este tooltip no expande su contenido para estudiantes, lo que impide ver los requisitos pendientes.
+    <ul style="margin:8px 0 0 16px">
+      ${showMoreFindings.map(f => `<li>${esc(f.message)}: ${esc(f.detail)}</li>`).join('')}
+    </ul>
+  </div>`;
     }
 
     // Bienvenida note — add to findings section if we filtered any
@@ -776,6 +803,8 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     ${nelthorSummary}
 
     ${bienvenidaNote}
+
+    ${showMoreHTML}
 
     ${phantomHTML}
 
