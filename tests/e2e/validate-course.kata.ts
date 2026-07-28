@@ -130,7 +130,7 @@ test.describe('Course Validation — Multi-Role Audit', () => {
     const completionReport =
       await test.step('9. Reporte de Activity Completion (admin)', async () => {
         console.log('\n=== ACTIVITY COMPLETION REPORT ===')
-        await roles.revertToAdmin(courseId)
+        await login.loginAsAdmin()
         const report = await course.getActivityCompletionReport(courseId)
         console.log(`Activity Completion: ${report.length} activities tracked`)
         console.log(`  Students: ${report[0]?.totalStudents || 0}`)
