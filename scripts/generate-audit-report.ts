@@ -321,37 +321,13 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
 
     // Nelthor cross-reference summary
     let nelthorSummary = '';
-    let nelthorStudentCompletedCount = 0;
-    let nelthorStudentBlockedCount = 0;
-    if (results.nelthorData) {
-        for (const data of Object.values(results.nelthorData)) {
-            if (data.state === 1) {
-                nelthorStudentCompletedCount++;
-            }
-            else {
-                nelthorStudentBlockedCount++;
-            }
-        }
-    }
-    if (nelthorStudentCompletedCount > 0) {
-        const p = apiResults?.progression;
+    if (results.nelthorData && Object.keys(results.nelthorData).length > 0) {
         nelthorSummary = `
 <div class="nelthor-summary" style="background:var(--surface);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);margin-bottom:16px">
   <h3 style="margin-bottom:8px;font-size:1em">🧪 Verificación con nelthor (estudiante histórico)</h3>
-  <p style="font-size:0.9em;color:var(--text-2);margin-bottom:8px">Nelthor cursó el curso como estudiante regular (sin privilegios de administrador). Su progreso muestra que las actividades hasta Módulo 2 son funcionales — el bloqueo real está en 6918 "Notebook Funcion-Lambda".</p>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
-    <div style="padding:12px;background:#d1fae5;border-radius:var(--radius);">
-      <div style="font-size:1.3em;font-weight:800;color:#065f46">${nelthorStudentCompletedCount}</div>
-      <div style="font-size:0.85em;color:#065f46">Actividades completadas como estudiante regular (hasta Módulo 2)</div>
-    </div>
-    <div style="padding:12px;background:#fee2e2;border-radius:var(--radius);">
-      <div style="font-size:1.3em;font-weight:800;color:#991b1b">${nelthorStudentBlockedCount}</div>
-      <div style="font-size:0.85em;color:#991b1b">Actividades bloqueadas (incluye 6918 + Módulo 3 y Cierre)</div>
-      <div style="font-size:0.8em;color:#991b1b;margin-top:4px">6918 "Notebook Funcion-Lambda" fue el primer bloqueador — el resto son consecuencia en cascada</div>
-    </div>
-  </div>
-  <p style="font-size:0.85em;color:var(--text-2);margin-top:8px">
-    💡 Nelthor completó ${p ? `${p.alreadyComplete}/${p.trackedActivities}` : 'la mayoría de las'} actividades como estudiante regular y quedó bloqueado exactamente en el mismo punto que detecta esta auditoría: la actividad 6918 no tiene un enlace descargable para estudiantes (está oculta detrás del tooltip "Show More" que no expande). Esto confirma que el bloqueo es real y no un falso positivo.
+  <p style="font-size:0.9em;color:var(--text-2);margin-bottom:8px">Nelthor cursó el curso como estudiante regular (sin privilegios de administrador) y completó todas las actividades de Bienvenida, Módulo 1 y Módulo 2. Llegó hasta 6918 "Notebook Funcion-Lambda" y quedó bloqueado — no pudo descargar el archivo. Es el mismo problema que sigue vigente hoy.</p>
+  <p style="font-size:0.85em;color:var(--text-2)">
+    💡 Esto confirma que las actividades previas a 6918 son funcionales y el bloqueo es real, no un falso positivo. Nelthor fue promovido a administrador posteriormente y su progreso actual en la API puede incluir datos de ese período — por eso no presentamos números exactos de su avance como estudiante.
   </p>
 </div>`;
     }
@@ -449,18 +425,17 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     // Progression / nelthor comparison
     let progressionHTML = '';
     if (apiResults?.progression) {
-        const p = apiResults.progression;
         progressionHTML = `
-    <h2 class="section-title">🎓 Progreso histórico: nelthor (estudiante real)</h2>
-    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Nelthor cursó el curso como estudiante regular. Su progreso (${p.alreadyComplete}/${p.trackedActivities}) muestra que las actividades de Bienvenida, Módulo 1 y Módulo 2 son funcionales. El bloqueo está en 6918, que tampoco pudo completar porque no tenía un enlace descargable.</p>
+    <h2 class="section-title">🎓 Progreso histórico: nelthor (antes de ser admin)</h2>
+    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Nelthor cursó el curso como estudiante regular y completó todas las actividades de Bienvenida, Módulo 1 y Módulo 2. Llegó hasta 6918 y quedó bloqueado — el mismo problema que esta auditoría detecta hoy.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
       <div class="finding info" style="border-left-color:var(--good)">
         <div class="finding-header">
           <span class="icon">👤</span>
-          <span class="msg"><strong>nelthor como estudiante regular</strong><br><span class="dim" style="font-size:0.85em">Progreso: ${p.alreadyComplete}/${p.trackedActivities}</span></span>
+          <span class="msg"><strong>nelthor como estudiante regular</strong><br><span class="dim" style="font-size:0.85em">Completó Bienvenida, Módulo 1 y Módulo 2 — sin contar datos posteriores a su promoción a admin</span></span>
         </div>
         <div class="finding-detail" style="display:block;padding:8px 16px 12px">
-          <p>Nelthor completó Bienvenida, Módulo 1 y Módulo 2 sin problemas. Llegó hasta 6918 "Notebook Funcion-Lambda" y quedó bloqueado — no pudo descargar el archivo porque no tenía un enlace accesible desde la interfaz de estudiante. Es el mismo problema que detecta esta auditoría.</p>
+          <p>Nelthor completó Bienvenida, Módulo 1 y Módulo 2 sin problemas. Llegó hasta 6918 "Notebook Funcion-Lambda" y quedó bloqueado — no pudo descargar el archivo. Es el mismo problema que detecta esta auditoría. Las actividades posteriores a su promoción como administrador no se consideran representativas de un estudiante real.</p>
         </div>
       </div>
       <div class="finding info" style="border-left-color:var(--bad)">
