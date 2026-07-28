@@ -450,12 +450,30 @@ export class TreeOverlayAnalyzer {
             const bothInStudentUI
                 = studentUiGraph.nodes.has(dup.cmidA) && studentUiGraph.nodes.has(dup.cmidB);
 
-            const detailText = bothInStudentUI
-                ? 'Ambos son accesibles para estudiantes — posible duplicado innecesario.'
-                : `Solo ${dup.cmidA} es accesible. ${dup.cmidB} no está en la interfaz del estudiante. Se recomienda revisar si este duplicado es necesario.`;
+            // Determine which cmid is inaccessible
+            const inaccessibleCmid = !studentUiGraph.nodes.has(dup.cmidA) ? dup.cmidA : dup.cmidB;
+            const isInaccessibleConditionReferenced = options?.conditionReferencedCmids
+                ? options.conditionReferencedCmids.has(inaccessibleCmid)
+                : false;
+            const apiNode = apiGraph.nodes.get(inaccessibleCmid);
+            const inaccessibleHasCompletion = apiNode?.completion != null && apiNode.completion > 0;
+            const isBlocker
+                = !bothInStudentUI && isInaccessibleConditionReferenced && inaccessibleHasCompletion;
+
+            const severity: 'critical' | 'warning' | 'info' = isBlocker
+                ? 'critical'
+                : bothInStudentUI
+                    ? 'info'
+                    : 'warning';
+
+            const detailText = isBlocker
+                ? `Solo ${dup.cmidA} es accesible. ${dup.cmidB} no está en la interfaz del estudiante y es requisito para continuar (completion=${apiNode?.completion ?? '?'}, referenciado en condiciones de disponibilidad). Los estudiantes quedan bloqueados porque no pueden descargar ni completar este recurso.`
+                : bothInStudentUI
+                    ? 'Ambos son accesibles para estudiantes — posible duplicado innecesario.'
+                    : `Solo ${dup.cmidA} es accesible. ${dup.cmidB} no está en la interfaz del estudiante. Se recomienda revisar si este duplicado es necesario.`;
 
             findings.push({
-                severity: bothInStudentUI ? 'info' : 'warning',
+                severity,
                 sectionNumber: dup.sectionNumber,
                 sectionTitle: dup.sectionName,
                 message: `Posible duplicado: "${dup.nameA}" ≈ "${dup.nameB}"`,

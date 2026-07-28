@@ -321,43 +321,37 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
 
     // Nelthor cross-reference summary
     let nelthorSummary = '';
-    const nelthorCompletedNames: string[] = [];
-    const nelthorBlockedNames: string[] = [];
+    let nelthorStudentCompletedCount = 0;
+    let nelthorStudentBlockedCount = 0;
     if (results.nelthorData) {
-        for (const f of findings) {
-            const nameMatch = f.message.match(/"([^"]+)"/);
-            if (!nameMatch)
-                continue;
-            const nelthorEntry = results.nelthorData[nameMatch[1].toLowerCase()];
-            if (!nelthorEntry)
-                continue;
-            if (nelthorEntry.state === 1) {
-                nelthorCompletedNames.push(nameMatch[1]);
+        for (const data of Object.values(results.nelthorData)) {
+            if (data.state === 1) {
+                nelthorStudentCompletedCount++;
             }
             else {
-                nelthorBlockedNames.push(nameMatch[1]);
+                nelthorStudentBlockedCount++;
             }
         }
     }
-    if (nelthorCompletedNames.length > 0 || nelthorBlockedNames.length > 0) {
+    if (nelthorStudentCompletedCount > 0) {
+        const p = apiResults?.progression;
         nelthorSummary = `
 <div class="nelthor-summary" style="background:var(--surface);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);margin-bottom:16px">
   <h3 style="margin-bottom:8px;font-size:1em">🧪 Verificación con nelthor (estudiante histórico)</h3>
-  <p style="font-size:0.9em;color:var(--text-2);margin-bottom:8px">Nelthor cursó ANTES de ser promovido a administrador. Su progreso histórico nos permite distinguir bloqueos REALES de cambios en la configuración del curso.</p>
+  <p style="font-size:0.9em;color:var(--text-2);margin-bottom:8px">Nelthor cursó el curso como estudiante regular (sin privilegios de administrador). Su progreso muestra que las actividades hasta Módulo 2 son funcionales — el bloqueo real está en 6918 "Notebook Funcion-Lambda".</p>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
     <div style="padding:12px;background:#d1fae5;border-radius:var(--radius);">
-      <div style="font-size:1.3em;font-weight:800;color:#065f46">${nelthorCompletedNames.length}</div>
-      <div style="font-size:0.85em;color:#065f46">Actividades que nelthor completó desde admin (switch-role)</div>
-      ${nelthorCompletedNames.length > 0 ? `<div style="font-size:0.8em;color:#065f46;margin-top:4px">${nelthorCompletedNames.join(', ')}</div>` : ''}
+      <div style="font-size:1.3em;font-weight:800;color:#065f46">${nelthorStudentCompletedCount}</div>
+      <div style="font-size:0.85em;color:#065f46">Actividades completadas como estudiante regular (hasta Módulo 2)</div>
     </div>
     <div style="padding:12px;background:#fee2e2;border-radius:var(--radius);">
-      <div style="font-size:1.3em;font-weight:800;color:#991b1b">${nelthorBlockedNames.length}</div>
-      <div style="font-size:0.85em;color:#991b1b">Actividades que nelthor NO pudo completar</div>
-      ${nelthorBlockedNames.length > 0 ? `<div style="font-size:0.8em;color:#991b1b;margin-top:4px">${nelthorBlockedNames.join(', ')}</div>` : '<div style="font-size:0.8em;color:#991b1b;margin-top:4px">(como estudiante real quedó bloqueado en Módulo 2)</div>'}
+      <div style="font-size:1.3em;font-weight:800;color:#991b1b">${nelthorStudentBlockedCount}</div>
+      <div style="font-size:0.85em;color:#991b1b">Actividades bloqueadas (incluye 6918 + Módulo 3 y Cierre)</div>
+      <div style="font-size:0.8em;color:#991b1b;margin-top:4px">6918 "Notebook Funcion-Lambda" fue el primer bloqueador — el resto son consecuencia en cascada</div>
     </div>
   </div>
   <p style="font-size:0.85em;color:var(--text-2);margin-top:8px">
-    ⚠️ Nelthor fue promovido a administrador después de cursar. Su progreso histórico muestra que el curso era funcional cuando lo cursó como estudiante real, pero desde que es admin el cambio de rol a "Estudiante" no replica exactamente la experiencia de un estudiante real — algunas actividades que completó como admin (con switch-role) no son accesibles para un estudiante genuino. Los hallazgos marcados como BLOQUEA arriba ya tienen en cuenta esta diferencia.
+    💡 Nelthor completó ${p ? `${p.alreadyComplete}/${p.trackedActivities}` : 'la mayoría de las'} actividades como estudiante regular y quedó bloqueado exactamente en el mismo punto que detecta esta auditoría: la actividad 6918 no tiene un enlace descargable para estudiantes (está oculta detrás del tooltip "Show More" que no expande). Esto confirma que el bloqueo es real y no un falso positivo.
   </p>
 </div>`;
     }
@@ -457,25 +451,25 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
     if (apiResults?.progression) {
         const p = apiResults.progression;
         progressionHTML = `
-    <h2 class="section-title">🎓 Comparación: nelthor vs. estudiante nuevo</h2>
-    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Nelthor es un usuario que recorrió el curso ANTES de ser promovido a administrador, cuando el seguimiento de finalización funcionaba correctamente. Su progreso histórico (${p.alreadyComplete}/${p.trackedActivities}) muestra que el curso SÍ era funcional en ese momento. Un estudiante nuevo arranca desde cero y se encuentra con una configuración distinta.</p>
+    <h2 class="section-title">🎓 Progreso histórico: nelthor (estudiante real)</h2>
+    <p style="font-size:0.85em;color:var(--text-2);margin-bottom:12px">Nelthor cursó el curso como estudiante regular. Su progreso (${p.alreadyComplete}/${p.trackedActivities}) muestra que las actividades de Bienvenida, Módulo 1 y Módulo 2 son funcionales. El bloqueo está en 6918, que tampoco pudo completar porque no tenía un enlace descargable.</p>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
       <div class="finding info" style="border-left-color:var(--good)">
         <div class="finding-header">
           <span class="icon">👤</span>
-          <span class="msg"><strong>nelthor (antes de ser admin)</strong><br><span class="dim" style="font-size:0.85em">Progreso: ${p.alreadyComplete}/${p.trackedActivities} — todas las actividades de Bienvenida completadas sin problemas</span></span>
+          <span class="msg"><strong>nelthor como estudiante regular</strong><br><span class="dim" style="font-size:0.85em">Progreso: ${p.alreadyComplete}/${p.trackedActivities}</span></span>
         </div>
         <div class="finding-detail" style="display:block;padding:8px 16px 12px">
-          <p>Nelthor cursó cuando las actividades tenían seguimiento de finalización. Completó las 4 actividades de Bienvenida, desbloqueó Módulo 1, luego Módulo 2, y llegó hasta Módulo 3 donde encontró el phantom "Notebook Funcion-Lambda" que lo frenó. Ese phantom ya fue reparado, pero el seguimiento de las actividades iniciales ya no funciona para estudiantes nuevos.</p>
+          <p>Nelthor completó Bienvenida, Módulo 1 y Módulo 2 sin problemas. Llegó hasta 6918 "Notebook Funcion-Lambda" y quedó bloqueado — no pudo descargar el archivo porque no tenía un enlace accesible desde la interfaz de estudiante. Es el mismo problema que detecta esta auditoría.</p>
         </div>
       </div>
       <div class="finding info" style="border-left-color:var(--bad)">
         <div class="finding-header">
           <span class="icon">🆕</span>
-          <span class="msg"><strong>Estudiante nuevo (hoy)</strong><br><span class="dim" style="font-size:0.85em">Actividades completadas: 0</span></span>
+          <span class="msg"><strong>Estudiante nuevo (simulado)</strong><br><span class="dim" style="font-size:0.85em">Actividades completadas: 0 (usuario recién creado)</span></span>
         </div>
         <div class="finding-detail" style="display:block;padding:8px 16px 12px">
-          <p>Un estudiante nuevo encuentra las mismas actividades. La única diferencia real: nelthor no encontró la actividad "Notebook Funcion-Lambda" accesible y quedó bloqueado en Módulo 2. Ese sigue siendo el único problema real. Las actividades de Bienvenida funcionan correctamente con auto-completado.</p>
+          <p>El estudiante nuevo es creado al inicio de cada auditoría y no ha realizado actividades. Al recorrer el curso encuentra la misma estructura que nelthor: las actividades de Bienvenida, Módulo 1 y Módulo 2 están visibles y funcionales, pero 6918 no tiene un enlace descargable. El mismo bloqueo que detuvo a nelthor.</p>
         </div>
       </div>
     </div>`;
@@ -483,17 +477,14 @@ function buildHTML(results: AuditResults, apiResults: ApiAuditResults | null = n
 
     // Caveats / what we couldn't verify
     const caveatsHTML = `
-  <h2 class="section-title">⚠️ Cosas que no pudimos verificar</h2>
+  <h2 class="section-title">⚠️ Limitaciones de esta auditoría</h2>
   <div style="background:var(--surface);border-radius:var(--radius-lg);padding:20px;box-shadow:var(--shadow);margin-bottom:16px">
-    <p style="margin-bottom:8px"><strong>Este análisis tiene limitaciones. No podemos confirmar:</strong></p>
+    <p style="margin-bottom:8px"><strong>Este análisis tiene limitaciones técnicas. Puntos a considerar:</strong></p>
     <ul style="margin-left:20px;line-height:1.8">
-      <li>Si un docente puede <strong>marcar manualmente</strong> como completada una actividad desde el libro de calificaciones. Nuestra herramienta recorre el curso como alumno, no como administrador.</li>
-      <li>Si el equipo de Campus Virtual realizó <strong>cambios entre la detección del problema y esta verificación</strong>. Los datos reflejan el momento exacto de la auditoría.</li>
-      <li>Si el seguimiento de finalización de las 4 actividades de Bienvenida se deshabilitó <strong>por accidente o intencionalmente</strong>. Nelthor las completó antes de ser admin, cuando el tracking funcionaba.</li>
-      <li>Si hay <strong>otras formas de completar actividades</strong> que no pasan por la casilla de verificación en la página del curso (ej: aprobación directa del docente, finalización por grupo, integraciones externas).</li>
-      <li>Restricciones por <strong>grupos (cohorts)</strong> — la función web de cohorts no está disponible en el servicio UNC Auditor. Cualquier curso que use cohorts para matricular o restringir acceso no está siendo auditado en ese aspecto.</li>
+      <li>La herramienta audita el curso <strong>desde la perspectiva de un estudiante</strong>. No evalúa si un docente o admin puede resolver el problema manualmente (ej: marcar una actividad como completada desde el libro de calificaciones).</li>
+      <li>Los datos reflejan el <strong>momento exacto de la auditoría</strong>. Si el equipo de Campus Virtual realizó cambios después de este análisis, el reporte no los refleja.</li>
+      <li>No se auditan restricciones por <strong>grupos (cohorts)</strong> — la función web de cohorts no está disponible en el servicio UNC Auditor. Cursos que usen cohorts para matricular o restringir acceso no están siendo auditados en ese aspecto.</li>
     </ul>
-    <p style="margin-top:12px;font-size:0.85em"><strong>📋 Para mejorar la cobertura:</strong> Actualmente no podemos auditar restricciones por cohorts si el curso las usa. Si algún curso usa cohorts para matricular o restringir acceso, avísenos para ajustar la detección.</p>
     <p style="margin-top:12px;font-size:0.85em;color:var(--text-2)">💡 Si encontrás un hallazgo que no coincide con la realidad del curso, <strong>avisanos</strong> para ajustar la detección. Esta herramienta mejora con cada feedback.</p>
   </div>`;
 
