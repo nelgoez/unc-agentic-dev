@@ -1,21 +1,24 @@
-import PptxGenJS from 'pptxgenjs'
+// ── Write ──
+import path from 'node:path';
 
-const pptx = new PptxGenJS()
-pptx.layout = 'LAYOUT_WIDE'
-pptx.author = 'Campus Virtual UNC'
-pptx.title = 'Propuesta de Servicios — Campus Virtual UNC'
-pptx.subject = 'Propuesta de servicios de desarrollo para reenganche, dashboard y estandarización'
+import PptxGenJS from 'pptxgenjs';
+
+const pptx = new PptxGenJS();
+pptx.layout = 'LAYOUT_WIDE';
+pptx.author = 'Campus Virtual UNC';
+pptx.title = 'Propuesta de Servicios — Campus Virtual UNC';
+pptx.subject = 'Propuesta de servicios de desarrollo para reenganche, dashboard y estandarización';
 
 // ── Colors ──
-const NAVY = '1A3A8A'
-const BLUE = '3466D0'
-const LIGHT_BLUE = '5B8DEF'
-const WHITE = 'FFFFFF'
-const DARK = '0A1628'
-const GRAY = '44556D'
-const LIGHT_GRAY = 'F0F3F8'
-const BORDER = 'DDE2ED'
-const CHECK_GREEN = '0D8040'
+const NAVY = '1A3A8A';
+const BLUE = '3466D0';
+const LIGHT_BLUE = '5B8DEF';
+const WHITE = 'FFFFFF';
+const DARK = '0A1628';
+const GRAY = '44556D';
+const LIGHT_GRAY = 'F0F3F8';
+const BORDER = 'DDE2ED';
+const CHECK_GREEN = '0D8040';
 
 // ── Helpers ──
 function addFooter(slide: PptxGenJS.Slide, pageNum: number) {
@@ -26,7 +29,7 @@ function addFooter(slide: PptxGenJS.Slide, pageNum: number) {
     h: 0.3,
     fontSize: 8,
     color: '888888',
-  })
+  });
   slide.addText(String(pageNum), {
     x: 12,
     y: 6.9,
@@ -35,11 +38,11 @@ function addFooter(slide: PptxGenJS.Slide, pageNum: number) {
     fontSize: 8,
     color: '888888',
     align: 'right',
-  })
+  });
 }
 
 function addTopBar(slide: PptxGenJS.Slide, label: string) {
-  slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 0.06, fill: { color: NAVY } })
+  slide.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: '100%', h: 0.06, fill: { color: NAVY } });
   slide.addText(label, {
     x: 0.5,
     y: 0.2,
@@ -49,15 +52,15 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     color: NAVY,
     bold: true,
     fontFace: 'Calibri',
-  })
+  });
 }
 
 // ═══════════════════════════════════════════
 // SLIDE 1 — Portada
 // ═══════════════════════════════════════════
 {
-  const s = pptx.addSlide()
-  s.background = { fill: NAVY }
+  const s = pptx.addSlide();
+  s.background = { fill: NAVY };
   s.addShape(pptx.ShapeType.ellipse, {
     x: 7,
     y: -1.5,
@@ -65,7 +68,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     h: 6,
     fill: { color: BLUE },
     rotate: -15,
-  })
+  });
   s.addText('CAMPUS VIRTUAL UNC', {
     x: 0.8,
     y: 1.2,
@@ -76,7 +79,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     fontFace: 'Calibri',
     bold: true,
     charSpacing: 6,
-  })
+  });
   s.addText('Propuesta de\nServicios Profesionales', {
     x: 0.8,
     y: 1.8,
@@ -87,7 +90,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     fontFace: 'Calibri Light',
     bold: true,
     lineSpacingMultiple: 0.95,
-  })
+  });
   s.addText(
     'Reenganche automatizado · Dashboard de actividades · Inducción estudiantil · Estandarización de cursos',
     {
@@ -99,7 +102,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       color: 'AABBCC',
       fontFace: 'Calibri',
     },
-  )
+  );
   s.addText(
     'Preparado para Patricia Altamirano, Dirección de Campus Virtual\nJunio 2026 · Confidencial',
     {
@@ -111,17 +114,17 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       color: '8899BB',
       fontFace: 'Calibri',
     },
-  )
-  addFooter(s, 1)
+  );
+  addFooter(s, 1);
 }
 
 // ═══════════════════════════════════════════
 // SLIDE 2 — Contexto
 // ═══════════════════════════════════════════
 {
-  const s = pptx.addSlide()
-  s.background = { fill: WHITE }
-  addTopBar(s, 'CONTEXTO')
+  const s = pptx.addSlide();
+  s.background = { fill: WHITE };
+  addTopBar(s, 'CONTEXTO');
 
   s.addText('Tres desafíos que escalan\ncon cada cohorte.', {
     x: 0.5,
@@ -132,7 +135,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     color: NAVY,
     fontFace: 'Calibri Light',
     bold: true,
-  })
+  });
 
   const challenges = [
     {
@@ -147,10 +150,10 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       title: 'Fricción de punta a punta',
       desc: 'Sin inducción estandarizada ni progresión encadenada, cada curso reinventa la rueda.',
     },
-  ]
+  ];
 
   challenges.forEach((c, i) => {
-    const yPos = 2.2 + i * 1.5
+    const yPos = 2.2 + i * 1.5;
     s.addShape(pptx.ShapeType.roundRect, {
       x: 0.5,
       y: yPos,
@@ -158,7 +161,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       h: 1.2,
       fill: { color: i === 0 ? LIGHT_GRAY : 'F8F9FC' },
       rectRadius: 0.1,
-    })
+    });
     s.addText(c.title, {
       x: 0.8,
       y: yPos + 0.1,
@@ -168,7 +171,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       color: NAVY,
       fontFace: 'Calibri',
       bold: true,
-    })
+    });
     s.addText(c.desc, {
       x: 0.8,
       y: yPos + 0.55,
@@ -177,8 +180,8 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       fontSize: 12,
       color: GRAY,
       fontFace: 'Calibri',
-    })
-  })
+    });
+  });
 
   s.addText(
     'Esta propuesta ofrece tres niveles de intervención incremental. Cada nivel suma capacidades sobre el anterior.',
@@ -192,17 +195,17 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       fontFace: 'Calibri',
       italic: true,
     },
-  )
-  addFooter(s, 2)
+  );
+  addFooter(s, 2);
 }
 
 // ═══════════════════════════════════════════
 // SLIDE 3 — MVP 1 Rescate
 // ═══════════════════════════════════════════
 {
-  const s = pptx.addSlide()
-  s.background = { fill: WHITE }
-  addTopBar(s, 'MVP 1 — RESCATE INMEDIATO')
+  const s = pptx.addSlide();
+  s.background = { fill: WHITE };
+  addTopBar(s, 'MVP 1 — RESCATE INMEDIATO');
 
   s.addText('MVP 1 — Rescate Inmediato', {
     x: 0.5,
@@ -213,7 +216,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     color: NAVY,
     fontFace: 'Calibri Light',
     bold: true,
-  })
+  });
   s.addText('6–8 semanas desde firma de contrato', {
     x: 0.5,
     y: 1.3,
@@ -222,7 +225,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     fontSize: 12,
     color: BLUE,
     fontFace: 'Calibri',
-  })
+  });
 
   const items = [
     '6 piezas de email HTML — 2 por curso (rescate M1 + mantenimiento M2)',
@@ -231,7 +234,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     'Pruebas de disparo en DEV con usuarios testing',
     'Activación controlada del cron (sin envíos prematuros)',
     'Setup de analítica: KPIs de Reactivación, Tiempo de Respuesta, Clics vs Finalización',
-  ]
+  ];
 
   items.forEach((item, i) => {
     s.addText(`→  ${item}`, {
@@ -242,8 +245,8 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       fontSize: 12,
       color: DARK,
       fontFace: 'Calibri',
-    })
-  })
+    });
+  });
 
   // Price box
   s.addShape(pptx.ShapeType.roundRect, {
@@ -253,7 +256,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     h: 2.0,
     fill: { color: NAVY },
     rectRadius: 0.15,
-  })
+  });
   s.addText('110–155 módulos', {
     x: 7.4,
     y: 4.75,
@@ -263,7 +266,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     color: WHITE,
     fontFace: 'Calibri',
     bold: true,
-  })
+  });
   s.addText('$5.700.000 – $8.000.000 ARS\n≈ USD 4.700 – 6.600', {
     x: 7.4,
     y: 5.3,
@@ -272,7 +275,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     fontSize: 11,
     color: '99AACC',
     fontFace: 'Calibri',
-  })
+  });
 
   s.addText('Entregables', {
     x: 0.5,
@@ -284,17 +287,17 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     fontFace: 'Calibri',
     bold: true,
     charSpacing: 4,
-  })
-  addFooter(s, 3)
+  });
+  addFooter(s, 3);
 }
 
 // ═══════════════════════════════════════════
 // SLIDE 4 — MVP 2 Visibilidad
 // ═══════════════════════════════════════════
 {
-  const s = pptx.addSlide()
-  s.background = { fill: WHITE }
-  addTopBar(s, 'MVP 2 — VISIBILIDAD')
+  const s = pptx.addSlide();
+  s.background = { fill: WHITE };
+  addTopBar(s, 'MVP 2 — VISIBILIDAD');
 
   s.addText('MVP 2 — Visibilidad', {
     x: 0.5,
@@ -305,7 +308,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     color: NAVY,
     fontFace: 'Calibri Light',
     bold: true,
-  })
+  });
   s.addText('Todo MVP 1, más dashboard · 10–14 semanas', {
     x: 0.5,
     y: 1.3,
@@ -314,7 +317,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     fontSize: 12,
     color: BLUE,
     fontFace: 'Calibri',
-  })
+  });
 
   const items = [
     'Dashboard de Análisis de Actividades sobre Moodle Configurable Reports',
@@ -322,7 +325,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     'Alertas automáticas: 0% (bloqueo) y 100% (anomalía)',
     'Reportes exportables para responsables académicos',
     'Cruce de datos: emails de reenganche vs progreso de actividades',
-  ]
+  ];
 
   items.forEach((item, i) => {
     s.addText(`→  ${item}`, {
@@ -333,8 +336,8 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       fontSize: 12,
       color: DARK,
       fontFace: 'Calibri',
-    })
-  })
+    });
+  });
 
   s.addShape(pptx.ShapeType.roundRect, {
     x: 7.2,
@@ -343,7 +346,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     h: 2.0,
     fill: { color: BLUE },
     rectRadius: 0.15,
-  })
+  });
   s.addText('190–270 módulos', {
     x: 7.4,
     y: 4.75,
@@ -353,7 +356,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     color: WHITE,
     fontFace: 'Calibri',
     bold: true,
-  })
+  });
   s.addText('$9.800.000 – $14.000.000 ARS\n≈ USD 8.100 – 11.600', {
     x: 7.4,
     y: 5.3,
@@ -362,7 +365,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     fontSize: 11,
     color: '99AACC',
     fontFace: 'Calibri',
-  })
+  });
 
   s.addText('Entregables adicionales', {
     x: 0.5,
@@ -374,17 +377,17 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     fontFace: 'Calibri',
     bold: true,
     charSpacing: 4,
-  })
-  addFooter(s, 4)
+  });
+  addFooter(s, 4);
 }
 
 // ═══════════════════════════════════════════
 // SLIDE 5 — MVP 3 Ciclo Completo
 // ═══════════════════════════════════════════
 {
-  const s = pptx.addSlide()
-  s.background = { fill: WHITE }
-  addTopBar(s, 'MVP 3 — CICLO COMPLETO')
+  const s = pptx.addSlide();
+  s.background = { fill: WHITE };
+  addTopBar(s, 'MVP 3 — CICLO COMPLETO');
 
   s.addText('MVP 3 — Ciclo Completo', {
     x: 0.5,
@@ -395,7 +398,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     color: NAVY,
     fontFace: 'Calibri Light',
     bold: true,
-  })
+  });
   s.addText('Todo MVP 2, más inducción + estandarización · 16–22 semanas', {
     x: 0.5,
     y: 1.3,
@@ -404,7 +407,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     fontSize: 12,
     color: BLUE,
     fontFace: 'Calibri',
-  })
+  });
 
   // Two columns
   s.addShape(pptx.ShapeType.roundRect, {
@@ -414,7 +417,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     h: 2.6,
     fill: { color: LIGHT_GRAY },
     rectRadius: 0.1,
-  })
+  });
   s.addText('Inducción Estudiantil', {
     x: 0.8,
     y: 2.0,
@@ -424,14 +427,14 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     color: NAVY,
     fontFace: 'Calibri',
     bold: true,
-  })
+  });
   const indItems = [
     'Tour de Automatriculación',
     'Tour de Autoregistro',
     'Video de bienvenida institucional',
     'Mails de confirmación (2 variantes)',
     'Módulo 0 en todos los cursos activos',
-  ]
+  ];
   indItems.forEach((item, i) => {
     s.addText(`→  ${item}`, {
       x: 0.8,
@@ -441,8 +444,8 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       fontSize: 11,
       color: DARK,
       fontFace: 'Calibri',
-    })
-  })
+    });
+  });
 
   s.addShape(pptx.ShapeType.roundRect, {
     x: 6.7,
@@ -451,7 +454,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     h: 2.6,
     fill: { color: LIGHT_GRAY },
     rectRadius: 0.1,
-  })
+  });
   s.addText('Estandarización de Cursos', {
     x: 7.0,
     y: 2.0,
@@ -461,13 +464,13 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     color: NAVY,
     fontFace: 'Calibri',
     bold: true,
-  })
+  });
   const estItems = [
     'Exámenes auto-calificados',
     'Progresión encadenada por módulo',
     'Material obligatorio configurado',
     'Emisión de certificados automatizada',
-  ]
+  ];
   estItems.forEach((item, i) => {
     s.addText(`→  ${item}`, {
       x: 7.0,
@@ -477,8 +480,8 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       fontSize: 11,
       color: DARK,
       fontFace: 'Calibri',
-    })
-  })
+    });
+  });
 
   s.addShape(pptx.ShapeType.roundRect, {
     x: 0.5,
@@ -487,7 +490,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     h: 1.8,
     fill: { color: NAVY },
     rectRadius: 0.15,
-  })
+  });
   s.addText('320–460 módulos  |  $16.500.000 – $23.800.000 ARS  |  ≈ USD 13.600 – 19.600', {
     x: 0.8,
     y: 4.95,
@@ -497,7 +500,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     color: WHITE,
     fontFace: 'Calibri',
     bold: true,
-  })
+  });
   s.addText(
     'Todo MVP 1 + MVP 2, más inducción y estandarización. El paquete completo para el ciclo de vida del estudiante.',
     {
@@ -509,17 +512,17 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       color: '99AACC',
       fontFace: 'Calibri',
     },
-  )
-  addFooter(s, 5)
+  );
+  addFooter(s, 5);
 }
 
 // ═══════════════════════════════════════════
 // SLIDE 6 — Tabla Comparativa
 // ═══════════════════════════════════════════
 {
-  const s = pptx.addSlide()
-  s.background = { fill: WHITE }
-  addTopBar(s, 'TABLA COMPARATIVA')
+  const s = pptx.addSlide();
+  s.background = { fill: WHITE };
+  addTopBar(s, 'TABLA COMPARATIVA');
 
   s.addText('Tabla Comparativa', {
     x: 0.5,
@@ -530,7 +533,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     color: NAVY,
     fontFace: 'Calibri Light',
     bold: true,
-  })
+  });
 
   const rows: { text: string; options: Record<string, unknown> }[][] = [
     [
@@ -614,7 +617,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       { text: '—', options: { color: 'BBBBBB', align: 'center', fontSize: 11 } },
       { text: '✓', options: { color: CHECK_GREEN, bold: true, align: 'center', fontSize: 11 } },
     ],
-  ]
+  ];
 
   const pricingRows: { text: string; options: Record<string, unknown> }[][] = [
     [
@@ -719,7 +722,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
         },
       },
     ],
-  ]
+  ];
 
   s.addTable(rows, {
     x: 0.5,
@@ -732,7 +735,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     fontFace: 'Calibri',
     color: DARK,
     margin: [4, 6, 4, 6],
-  })
+  });
 
   s.addTable(pricingRows, {
     x: 0.5,
@@ -742,17 +745,17 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     rowH: 0.42,
     border: { type: 'solid', color: BORDER },
     margin: [4, 6, 4, 6],
-  })
+  });
 
-  addFooter(s, 6)
+  addFooter(s, 6);
 }
 
 // ═══════════════════════════════════════════
 // SLIDE 7 — Términos y Próximos Pasos
 // ═══════════════════════════════════════════
 {
-  const s = pptx.addSlide()
-  s.background = { fill: NAVY }
+  const s = pptx.addSlide();
+  s.background = { fill: NAVY };
 
   s.addText('Próximos Pasos', {
     x: 0.8,
@@ -763,14 +766,14 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     color: WHITE,
     fontFace: 'Calibri Light',
     bold: true,
-  })
+  });
 
   const steps = [
     'Revisión y ajuste de alcance por parte de Campus Virtual',
     'Definición del nivel seleccionado (MVP 1, 2 o 3)',
     'Presentación formal a Prosecretaría de Informática (Ing. Alfredo M. Montes)',
     'Firma de contrato e inicio de actividades',
-  ]
+  ];
 
   steps.forEach((step, i) => {
     s.addShape(pptx.ShapeType.ellipse, {
@@ -779,7 +782,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       w: 0.38,
       h: 0.38,
       fill: { color: WHITE },
-    })
+    });
     s.addText(String(i + 1), {
       x: 0.8,
       y: 2.0 + i * 0.95,
@@ -791,7 +794,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       bold: true,
       align: 'center',
       valign: 'middle',
-    })
+    });
     s.addText(step, {
       x: 1.4,
       y: 1.95 + i * 0.95,
@@ -800,8 +803,8 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       fontSize: 15,
       color: WHITE,
       fontFace: 'Calibri',
-    })
-  })
+    });
+  });
 
   // Terms box
   s.addShape(pptx.ShapeType.roundRect, {
@@ -811,7 +814,7 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
     h: 1.2,
     fill: { color: '0D1F4A' },
     rectRadius: 0.1,
-  })
+  });
   s.addText(
     'Modalidad: Contratación bajo normativa UNC · Unidad: Módulo UNC ($51.700 ARS)\nAjuste por inflación si pago demorado >60 días · Mantenimiento: 15% anual (opcional)\nPropuesta válida por 60 días. ARS y USD a tipo de cambio oficial estimado.',
     {
@@ -823,20 +826,17 @@ function addTopBar(slide: PptxGenJS.Slide, label: string) {
       color: '99AACC',
       fontFace: 'Calibri',
     },
-  )
+  );
 
-  addFooter(s, 7)
+  addFooter(s, 7);
 }
-
-// ── Write ──
-import path from 'node:path'
 
 const outPath = path.resolve(
   process.cwd(),
   '.context',
   'unc-quote-preparation',
   'Propuesta-Campus-Virtual-UNC.pptx',
-)
+);
 
-await pptx.writeFile({ fileName: outPath })
-console.log(`PPTX saved to: ${outPath}`)
+await pptx.writeFile({ fileName: outPath });
+console.log(`PPTX saved to: ${outPath}`);

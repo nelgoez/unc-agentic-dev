@@ -1,16 +1,17 @@
-import type { ReporterDescription } from '@playwright/test'
-import { defineConfig, devices } from '@playwright/test'
+import type { ReporterDescription } from '@playwright/test';
+import path from 'node:path';
 
+import { fileURLToPath } from 'node:url';
+import { defineConfig, devices } from '@playwright/test';
 /**
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-import dotenv from 'dotenv'
-import { fileURLToPath } from 'node:url'
-import path from 'node:path'
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-dotenv.config({ path: path.resolve(__dirname, '.env') })
+import dotenv from 'dotenv';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -87,4 +88,4 @@ export default defineConfig({
   //   url: 'http://localhost:3000',
   //   reuseExistingServer: !process.env.CI,
   // },
-})
+});

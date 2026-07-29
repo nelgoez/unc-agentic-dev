@@ -1,25 +1,25 @@
-import { randomUUID } from 'node:crypto'
+import { randomUUID } from 'node:crypto';
 
 export interface AtcMetadata {
-  testId: string
-  label: string
-  story?: string
-  feature?: string
+  testId: string;
+  label: string;
+  story?: string;
+  feature?: string;
 }
 
 export interface AtcOptions {
-  story?: string
-  feature?: string
+  story?: string;
+  feature?: string;
 }
 
-const ATC_MAP = new Map<string, AtcMetadata>()
+const ATC_MAP = new Map<string, AtcMetadata>();
 
 export function getAtcMap(): Map<string, AtcMetadata> {
-  return ATC_MAP
+  return ATC_MAP;
 }
 
 export function getAllAtcs(): AtcMetadata[] {
-  return Array.from(ATC_MAP.values())
+  return Array.from(ATC_MAP.values());
 }
 
 export function atc(testId: string, opts?: AtcOptions) {
@@ -27,20 +27,20 @@ export function atc(testId: string, opts?: AtcOptions) {
     target: (this: This, ...args: Args) => Return,
     context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>,
   ) {
-    const key = `${String(context.name)}-${randomUUID().slice(0, 8)}`
+    const key = `${String(context.name)}-${randomUUID().slice(0, 8)}`;
     ATC_MAP.set(key, {
       testId,
       label: String(context.name),
       story: opts?.story,
       feature: opts?.feature,
-    })
+    });
 
     function replacement(this: This, ...args: Args): Return {
-      return target.call(this, ...args)
+      return target.call(this, ...args);
     }
 
-    return replacement
-  }
+    return replacement;
+  };
 }
 
 export function step() {
@@ -49,9 +49,9 @@ export function step() {
     _context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Return>,
   ) {
     function replacement(this: This, ...args: Args): Return {
-      return target.call(this, ...args)
+      return target.call(this, ...args);
     }
 
-    return replacement
-  }
+    return replacement;
+  };
 }

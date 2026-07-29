@@ -17,13 +17,12 @@
 (function () {
   'use strict';
 
-  const ANIMS = ['fade-up','fade-down','fade-left','fade-right','rise-in','drop-in',
-    'zoom-pop','blur-in','glitch-in','typewriter','neon-glow','shimmer-sweep',
-    'gradient-flow','stagger-list','counter-up','path-draw','parallax-tilt',
-    'card-flip-3d','cube-rotate-3d','page-turn-3d','perspective-zoom',
-    'marquee-scroll','kenburns','confetti-burst','spotlight','morph-shape','ripple-reveal'];
+  const ANIMS = ['fade-up', 'fade-down', 'fade-left', 'fade-right', 'rise-in', 'drop-in', 'zoom-pop', 'blur-in', 'glitch-in', 'typewriter', 'neon-glow', 'shimmer-sweep', 'gradient-flow', 'stagger-list', 'counter-up', 'path-draw', 'parallax-tilt', 'card-flip-3d', 'cube-rotate-3d', 'page-turn-3d', 'perspective-zoom', 'marquee-scroll', 'kenburns', 'confetti-burst', 'spotlight', 'morph-shape', 'ripple-reveal'];
 
-  function ready(fn){ if(document.readyState!='loading')fn(); else document.addEventListener('DOMContentLoaded',fn);}
+  function ready(fn) {
+    if (document.readyState != 'loading')
+      fn(); else document.addEventListener('DOMContentLoaded', fn);
+  }
 
   /* ========== Parse URL for preview-only mode ==========
    * When loaded as iframe.src = "index.html?preview=3", runtime enters a
@@ -34,14 +33,16 @@
    */
   function getPreviewIdx() {
     const m = /[?&]preview=(\d+)/.exec(location.search || '');
-    return m ? parseInt(m[1], 10) - 1 : -1;
+    return m ? Number.parseInt(m[1], 10) - 1 : -1;
   }
 
-  ready(function () {
+  ready(() => {
     const deck = document.querySelector('.deck');
-    if (!deck) return;
+    if (!deck)
+      return;
     const slides = Array.from(deck.querySelectorAll('.slide'));
-    if (!slides.length) return;
+    if (!slides.length)
+      return;
 
     const previewOnlyIdx = getPreviewIdx();
     const isPreviewMode = previewOnlyIdx >= 0 && previewOnlyIdx < slides.length;
@@ -63,18 +64,20 @@
       showSlide(previewOnlyIdx);
       /* Hide chrome that the presenter shouldn't see in preview */
       const hideSel = '.progress-bar, .notes-overlay, .overview, .notes, aside.notes, .speaker-notes';
-      document.querySelectorAll(hideSel).forEach(el => { el.style.display = 'none'; });
+      document.querySelectorAll(hideSel).forEach((el) => { el.style.display = 'none'; });
       document.documentElement.setAttribute('data-preview', '1');
       document.body.setAttribute('data-preview', '1');
       /* Auto-detect theme base path for theme switching in preview mode */
       function getPreviewThemeBase() {
         const base = document.documentElement.getAttribute('data-theme-base');
-        if (base) return base;
+        if (base)
+          return base;
         const tl = document.getElementById('theme-link');
         if (tl) {
           const raw = tl.getAttribute('href') || '';
           const ls = raw.lastIndexOf('/');
-          if (ls >= 0) return raw.substring(0, ls + 1);
+          if (ls >= 0)
+            return raw.substring(0, ls + 1);
         }
         return 'assets/themes/';
       }
@@ -83,12 +86,15 @@
       /* Listen for postMessage from parent presenter window:
        *  - preview-goto: switch visible slide WITHOUT reloading
        *  - preview-theme: switch theme CSS link to match audience window */
-      window.addEventListener('message', function(e) {
-        if (!e.data) return;
+      window.addEventListener('message', (e) => {
+        if (!e.data)
+          return;
         if (e.data.type === 'preview-goto') {
-          const n = parseInt(e.data.idx, 10);
-          if (n >= 0 && n < slides.length) showSlide(n);
-        } else if (e.data.type === 'preview-theme' && e.data.name) {
+          const n = Number.parseInt(e.data.idx, 10);
+          if (n >= 0 && n < slides.length)
+            showSlide(n);
+        }
+        else if (e.data.type === 'preview-theme' && e.data.name) {
           let link = document.getElementById('theme-link');
           if (!link) {
             link = document.createElement('link');
@@ -96,12 +102,13 @@
             link.id = 'theme-link';
             document.head.appendChild(link);
           }
-          link.href = previewThemeBase + e.data.name + '.css';
+          link.href = `${previewThemeBase + e.data.name}.css`;
           document.documentElement.setAttribute('data-theme', e.data.name);
         }
       });
       /* Signal to parent that preview iframe is ready */
-      try { window.parent && window.parent.postMessage({ type: 'preview-ready' }, '*'); } catch(e) {}
+      try { window.parent && window.parent.postMessage({ type: 'preview-ready' }, '*'); }
+      catch (e) {}
       return;
     }
 
@@ -109,9 +116,10 @@
     const total = slides.length;
 
     /* ===== BroadcastChannel for presenter sync ===== */
-    const CHANNEL_NAME = 'html-ppt-presenter-' + location.pathname;
+    const CHANNEL_NAME = `html-ppt-presenter-${location.pathname}`;
     let bc;
-    try { bc = new BroadcastChannel(CHANNEL_NAME); } catch(e) { bc = null; }
+    try { bc = new BroadcastChannel(CHANNEL_NAME); }
+    catch (e) { bc = null; }
 
     // Are we running inside the presenter popup? (legacy flag, now unused)
     const isPresenterWindow = false;
@@ -148,9 +156,9 @@
         t.style.position = 'relative';
         t.style.overflow = 'hidden';
 
-        const title = s.getAttribute('data-title') ||
-          (s.querySelector('h1,h2,h3')||{}).textContent || ('Slide '+(i+1));
-        
+        const title = s.getAttribute('data-title')
+          || (s.querySelector('h1,h2,h3') || {}).textContent || (`Slide ${i + 1}`);
+
         // Create a container for the mini-slide
         const mini = document.createElement('div');
         mini.className = 'mini-slide';
@@ -162,7 +170,7 @@
         mini.style.transformOrigin = 'top left';
         mini.style.pointerEvents = 'none';
         mini.style.background = 'var(--bg)';
-        
+
         // Clone the slide content
         const clone = s.cloneNode(true);
         clone.className = 'slide is-active'; // force active styles
@@ -171,7 +179,7 @@
         clone.style.transform = 'none';
         clone.style.opacity = '1';
         clone.style.padding = '72px 96px'; // ensure padding is kept
-        
+
         mini.appendChild(clone);
         t.appendChild(mini);
 
@@ -183,7 +191,7 @@
         overlay.style.color = '#fff';
         overlay.style.zIndex = '10';
         overlay.style.pointerEvents = 'none';
-        
+
         const n = document.createElement('div');
         n.className = 'n';
         n.textContent = i + 1;
@@ -194,10 +202,10 @@
         n.style.fontSize = '16px';
         n.style.color = '#fff';
         n.style.textShadow = '0 1px 4px rgba(0,0,0,0.8)';
-        
+
         const text = document.createElement('div');
         text.className = 't';
-        text.textContent = title.trim().slice(0,80);
+        text.textContent = title.trim().slice(0, 80);
         text.style.position = 'absolute';
         text.style.bottom = '12px';
         text.style.left = '16px';
@@ -206,7 +214,7 @@
         text.style.fontSize = '14px';
         text.style.color = '#fff';
         text.style.textShadow = '0 1px 4px rgba(0,0,0,0.8)';
-        
+
         overlay.appendChild(n);
         overlay.appendChild(text);
         t.appendChild(overlay);
@@ -218,46 +226,47 @@
     }
 
     /* ===== navigation ===== */
-    function go(n, fromRemote){
-      n = Math.max(0, Math.min(total-1, n));
-      slides.forEach((s,i) => {
-        s.classList.toggle('is-active', i===n);
-        s.classList.toggle('is-prev', i<n);
+    function go(n, fromRemote) {
+      n = Math.max(0, Math.min(total - 1, n));
+      slides.forEach((s, i) => {
+        s.classList.toggle('is-active', i === n);
+        s.classList.toggle('is-prev', i < n);
       });
       idx = n;
-      barFill.style.width = ((n+1)/total*100)+'%';
+      barFill.style.width = `${(n + 1) / total * 100}%`;
       const numEl = document.querySelector('.slide-number');
-      if (numEl) { numEl.setAttribute('data-current', n+1); numEl.setAttribute('data-total', total); }
+      if (numEl) { numEl.setAttribute('data-current', n + 1); numEl.setAttribute('data-total', total); }
 
       // notes (bottom overlay)
       const note = slides[n].querySelector('.notes, aside.notes, .speaker-notes');
       notes.innerHTML = note ? note.innerHTML : '';
 
       // hash
-      const hashTarget = '#/'+(n+1);
+      const hashTarget = `#/${n + 1}`;
       if (location.hash !== hashTarget && !isPresenterWindow) {
-        history.replaceState(null,'', hashTarget);
+        history.replaceState(null, '', hashTarget);
       }
 
       // re-trigger entry animations
-      slides[n].querySelectorAll('[data-anim]').forEach(el => {
+      slides[n].querySelectorAll('[data-anim]').forEach((el) => {
         const a = el.getAttribute('data-anim');
-        el.classList.remove('anim-'+a);
+        el.classList.remove(`anim-${a}`);
         void el.offsetWidth;
-        el.classList.add('anim-'+a);
+        el.classList.add(`anim-${a}`);
       });
 
       // counter-up
-      slides[n].querySelectorAll('.counter').forEach(el => {
-        const target = parseFloat(el.getAttribute('data-to')||el.textContent);
-        const dur = parseInt(el.getAttribute('data-dur')||'1200',10);
+      slides[n].querySelectorAll('.counter').forEach((el) => {
+        const target = Number.parseFloat(el.getAttribute('data-to') || el.textContent);
+        const dur = Number.parseInt(el.getAttribute('data-dur') || '1200', 10);
         const start = performance.now();
         const from = 0;
-        function tick(now){
-          const t = Math.min(1,(now-start)/dur);
-          const v = from + (target-from)*(1-Math.pow(1-t,3));
+        function tick(now) {
+          const t = Math.min(1, (now - start) / dur);
+          const v = from + (target - from) * (1 - (1 - t) ** 3);
           el.textContent = (target % 1 === 0) ? Math.round(v) : v.toFixed(1);
-          if (t<1) requestAnimationFrame(tick);
+          if (t < 1)
+            requestAnimationFrame(tick);
         }
         requestAnimationFrame(tick);
       });
@@ -270,30 +279,33 @@
 
     /* ===== listen for remote navigation / theme changes ===== */
     if (bc) {
-      bc.onmessage = function(e) {
-        if (!e.data) return;
+      bc.onmessage = function (e) {
+        if (!e.data)
+          return;
         if (e.data.type === 'go' && typeof e.data.idx === 'number') {
           go(e.data.idx, true);
-        } else if (e.data.type === 'theme' && e.data.name) {
+        }
+        else if (e.data.type === 'theme' && e.data.name) {
           /* Sync theme across windows */
           const i = themes.indexOf(e.data.name);
-          if (i >= 0) themeIdx = i;
+          if (i >= 0)
+            themeIdx = i;
           applyTheme(e.data.name);
         }
       };
     }
 
-    function toggleNotes(force){ notes.classList.toggle('open', force!==undefined?force:!notes.classList.contains('open')); }
-    function toggleOverview(force){
-      const isOpen = force!==undefined ? force : !overview.classList.contains('open');
+    function toggleNotes(force) { notes.classList.toggle('open', force !== undefined ? force : !notes.classList.contains('open')); }
+    function toggleOverview(force) {
+      const isOpen = force !== undefined ? force : !overview.classList.contains('open');
       overview.classList.toggle('open', isOpen);
       if (isOpen) {
         requestAnimationFrame(() => {
           const thumbs = overview.querySelectorAll('.thumb');
           if (thumbs.length) {
             const scale = thumbs[0].clientWidth / 1920;
-            overview.querySelectorAll('.mini-slide').forEach(m => {
-              m.style.transform = 'scale(' + scale + ')';
+            overview.querySelectorAll('.mini-slide').forEach((m) => {
+              m.style.transform = `scale(${scale})`;
             });
           }
         });
@@ -318,15 +330,15 @@
       }
 
       // Build absolute URL of THIS deck file (without hash/query)
-      const deckUrl = location.protocol + '//' + location.host + location.pathname;
+      const deckUrl = `${location.protocol}//${location.host}${location.pathname}`;
 
       // Collect slide titles + notes (HTML strings)
       const slideMeta = slides.map((s, i) => {
         const note = s.querySelector('.notes, aside.notes, .speaker-notes');
         return {
-          title: s.getAttribute('data-title') ||
-            (s.querySelector('h1,h2,h3')||{}).textContent || ('Slide '+(i+1)),
-          notes: note ? note.innerHTML : ''
+          title: s.getAttribute('data-title')
+            || (s.querySelector('h1,h2,h3') || {}).textContent || (`Slide ${i + 1}`),
+          notes: note ? note.innerHTML : '',
         };
       });
 
@@ -349,7 +361,7 @@
       const deckUrlJSON = JSON.stringify(deckUrl);
       const channelJSON = JSON.stringify(channelName);
       const themeJSON = JSON.stringify(currentTheme || '');
-      const storageKey = 'html-ppt-presenter:' + location.pathname;
+      const storageKey = `html-ppt-presenter:${location.pathname}`;
 
       // Build the document as a single template string for clarity
       return `<!DOCTYPE html>
@@ -866,19 +878,21 @@
   nxtMeta.textContent = (idx + 2) + '/' + total;
   timerCount.textContent = (idx + 1) + ' / ' + total;
 })();
-</` + `script>
+  </` + `script>
 </body></html>`;
     }
 
-    function fullscreen(){ const el=document.documentElement;
-      if (!document.fullscreenElement) el.requestFullscreen&&el.requestFullscreen();
-      else document.exitFullscreen&&document.exitFullscreen();
+    function fullscreen() {
+      const el = document.documentElement;
+      if (!document.fullscreenElement)
+        el.requestFullscreen && el.requestFullscreen();
+      else document.exitFullscreen && document.exitFullscreen();
     }
 
     // theme cycling
     const root = document.documentElement;
     const themesAttr = root.getAttribute('data-themes') || document.body.getAttribute('data-themes');
-    const themes = themesAttr ? themesAttr.split(',').map(s=>s.trim()).filter(Boolean) : [];
+    const themes = themesAttr ? themesAttr.split(',').map(s => s.trim()).filter(Boolean) : [];
     let themeIdx = 0;
 
     // Auto-detect theme base path from existing <link id="theme-link">
@@ -890,7 +904,8 @@
         const rawHref = existingLink.getAttribute('href') || '';
         const lastSlash = rawHref.lastIndexOf('/');
         themeBase = lastSlash >= 0 ? rawHref.substring(0, lastSlash + 1) : 'assets/themes/';
-      } else {
+      }
+      else {
         themeBase = 'assets/themes/';
       }
     }
@@ -903,41 +918,46 @@
         link.id = 'theme-link';
         document.head.appendChild(link);
       }
-      link.href = themeBase + name + '.css';
+      link.href = `${themeBase + name}.css`;
       root.setAttribute('data-theme', name);
       const ind = document.querySelector('.theme-indicator');
-      if (ind) ind.textContent = name;
+      if (ind)
+        ind.textContent = name;
     }
-    function cycleTheme(fromRemote){
-      if (!themes.length) return;
-      themeIdx = (themeIdx+1) % themes.length;
+    function cycleTheme(fromRemote) {
+      if (!themes.length)
+        return;
+      themeIdx = (themeIdx + 1) % themes.length;
       const name = themes[themeIdx];
       applyTheme(name);
       /* Broadcast to other window (audience ↔ presenter) */
-      if (!fromRemote && bc) bc.postMessage({ type: 'theme', name: name });
+      if (!fromRemote && bc)
+        bc.postMessage({ type: 'theme', name });
     }
 
     // animation cycling on current slide
     let animIdx = 0;
-    function cycleAnim(){
-      animIdx = (animIdx+1) % ANIMS.length;
+    function cycleAnim() {
+      animIdx = (animIdx + 1) % ANIMS.length;
       const a = ANIMS[animIdx];
       const target = slides[idx].querySelector('[data-anim-target]') || slides[idx];
-      ANIMS.forEach(x => target.classList.remove('anim-'+x));
+      ANIMS.forEach(x => target.classList.remove(`anim-${x}`));
       void target.offsetWidth;
-      target.classList.add('anim-'+a);
+      target.classList.add(`anim-${a}`);
       target.setAttribute('data-anim', a);
       const ind = document.querySelector('.anim-indicator');
-      if (ind) ind.textContent = a;
+      if (ind)
+        ind.textContent = a;
     }
 
-    document.addEventListener('keydown', function (e) {
-      if (e.metaKey||e.ctrlKey||e.altKey) return;
+    document.addEventListener('keydown', (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey)
+        return;
       switch (e.key) {
-        case 'ArrowRight': case ' ': case 'PageDown': case 'Enter': go(idx+1); e.preventDefault(); break;
-        case 'ArrowLeft': case 'PageUp': case 'Backspace': go(idx-1); e.preventDefault(); break;
+        case 'ArrowRight': case ' ': case 'PageDown': case 'Enter': go(idx + 1); e.preventDefault(); break;
+        case 'ArrowLeft': case 'PageUp': case 'Backspace': go(idx - 1); e.preventDefault(); break;
         case 'Home': go(0); break;
-        case 'End': go(total-1); break;
+        case 'End': go(total - 1); break;
         case 'f': case 'F': fullscreen(); break;
         case 's': case 'S': openPresenterWindow(); break;
         case 'n': case 'N': toggleNotes(); break;
@@ -949,9 +969,10 @@
     });
 
     // hash deep-link
-    function fromHash(){
-      const m = /^#\/(\d+)/.exec(location.hash||'');
-      if (m) go(Math.max(0, parseInt(m[1],10)-1));
+    function fromHash() {
+      const m = /^#\/(\d+)/.exec(location.hash || '');
+      if (m)
+        go(Math.max(0, Number.parseInt(m[1], 10) - 1));
     }
     window.addEventListener('hashchange', fromHash);
     fromHash();

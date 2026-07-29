@@ -1,17 +1,18 @@
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
-const outDir = resolve('reports/informe')
-mkdirSync(outDir, { recursive: true })
+const outDir = resolve('reports/informe');
+mkdirSync(outDir, { recursive: true });
 
 function imgToBase64(path: string): string {
   try {
-    const buf = readFileSync(resolve(path))
-    const ext = path.split('.').pop()?.toLowerCase() || 'png'
-    const mime = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : 'image/png'
-    return `data:${mime};base64,${buf.toString('base64')}`
-  } catch {
-    return ''
+    const buf = readFileSync(resolve(path));
+    const ext = path.split('.').pop()?.toLowerCase() || 'png';
+    const mime = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : 'image/png';
+    return `data:${mime};base64,${buf.toString('base64')}`;
+  }
+  catch {
+    return '';
   }
 }
 
@@ -35,7 +36,7 @@ const cursos = [
     fix2: 'Opción B: Quitar la restricción de Módulo 3 si no es necesaria',
     fixAdminUrl: 'https://campus.aulavirtual.unc.edu.ar/course/modedit.php?update=',
   },
-]
+];
 
 const html = `<!DOCTYPE html>
 <html lang="es">
@@ -117,7 +118,7 @@ const html = `<!DOCTYPE html>
         <tr><th>Curso</th><th>Módulos</th><th>Estado</th><th>Críticos</th><th>Info</th><th>Resumen</th></tr>
         ${cursos
           .map(
-            (c) => `<tr>
+            c => `<tr>
           <td><strong>${c.nombre}</strong></td>
           <td>${c.modulos}</td>
           <td><span class="badge badge-${c.estado === 'CRÍTICO' ? 'critical' : 'ok'}">${c.estado}</span></td>
@@ -132,7 +133,7 @@ const html = `<!DOCTYPE html>
 
     ${cursos
       .map(
-        (c) => `
+        c => `
     <div class="card">
       <h2><span class="badge-curso">Curso ${c.id}</span> ${c.nombre}</h2>
 
@@ -218,9 +219,9 @@ const html = `<!DOCTYPE html>
     </div>
   </div>
 </body>
-</html>`
+</html>`;
 
-const outPath = resolve(outDir, 'index.html')
-writeFileSync(outPath, html)
-console.warn(`Informe generado: ${outPath}`)
-console.warn(`Tamaño: ~${(Buffer.byteLength(html) / 1024 / 1024).toFixed(1)} MB`)
+const outPath = resolve(outDir, 'index.html');
+writeFileSync(outPath, html);
+console.warn(`Informe generado: ${outPath}`);
+console.warn(`Tamaño: ~${(Buffer.byteLength(html) / 1024 / 1024).toFixed(1)} MB`);

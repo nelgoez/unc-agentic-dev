@@ -1,79 +1,79 @@
-import { mkdirSync, writeFileSync } from 'node:fs'
-import { join } from 'node:path'
-import { stringify } from 'yaml'
-import type { CursoConfig, Activity } from './schema/curso'
+import type { Activity, CursoConfig } from './schema/curso';
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { stringify } from 'yaml';
 
 export function generateCursoKit(config: CursoConfig, outputDir: string): void {
   // Create output directory
-  const dir = join(outputDir, config.slug)
-  mkdirSync(dir, { recursive: true })
-  mkdirSync(join(dir, 'context', 'fases'), { recursive: true })
-  mkdirSync(join(dir, 'qa'), { recursive: true })
-  mkdirSync(join(dir, '.gemini'), { recursive: true })
+  const dir = join(outputDir, config.slug);
+  mkdirSync(dir, { recursive: true });
+  mkdirSync(join(dir, 'context', 'fases'), { recursive: true });
+  mkdirSync(join(dir, 'qa'), { recursive: true });
+  mkdirSync(join(dir, '.gemini'), { recursive: true });
 
   // 1. curso.yaml
-  writeFileSync(join(dir, 'curso.yaml'), stringify(config), 'utf-8')
+  writeFileSync(join(dir, 'curso.yaml'), stringify(config), 'utf-8');
 
   // 2. .gemini/settings.json
-  writeFileSync(join(dir, '.gemini', 'settings.json'), renderGeminiSettings(config), 'utf-8')
+  writeFileSync(join(dir, '.gemini', 'settings.json'), renderGeminiSettings(config), 'utf-8');
 
   // 3. opencode.jsonc (optional upgrade path)
-  writeFileSync(join(dir, 'opencode.jsonc'), renderOpenCodeConfig(config), 'utf-8')
+  writeFileSync(join(dir, 'opencode.jsonc'), renderOpenCodeConfig(config), 'utf-8');
 
   // 4. context/curso-overview.md
-  writeFileSync(join(dir, 'context', 'curso-overview.md'), renderCursoOverview(config), 'utf-8')
+  writeFileSync(join(dir, 'context', 'curso-overview.md'), renderCursoOverview(config), 'utf-8');
 
   // 5. context/fases/01-fundacion.md
   writeFileSync(
     join(dir, 'context', 'fases', '01-fundacion.md'),
     renderFaseFundacion(config),
     'utf-8',
-  )
+  );
 
   // 6. context/fases/02-scaffold.md
   writeFileSync(
     join(dir, 'context', 'fases', '02-scaffold.md'),
     renderFaseScaffold(config),
     'utf-8',
-  )
+  );
 
   // 7. context/fases/03-contenido.md
   writeFileSync(
     join(dir, 'context', 'fases', '03-contenido.md'),
     renderFaseContenido(config),
     'utf-8',
-  )
+  );
 
   // 8. context/fases/04-revision.md
   writeFileSync(
     join(dir, 'context', 'fases', '04-revision.md'),
     renderFaseRevision(config),
     'utf-8',
-  )
+  );
 
   // 9. context/fases/05-publicacion.md
   writeFileSync(
     join(dir, 'context', 'fases', '05-publicacion.md'),
     renderFasePublicacion(config),
     'utf-8',
-  )
+  );
 
   // 10. context/fases/06-mantenimiento.md
   writeFileSync(
     join(dir, 'context', 'fases', '06-mantenimiento.md'),
     renderFaseMantenimiento(config),
     'utf-8',
-  )
+  );
 
   // 11. qa/checklist-left-right.md
-  writeFileSync(join(dir, 'qa', 'checklist-left-right.md'), renderQAChecklist(config), 'utf-8')
+  writeFileSync(join(dir, 'qa', 'checklist-left-right.md'), renderQAChecklist(config), 'utf-8');
 
-  console.log(`\n✅ Curso kit generado en: ${dir}`)
-  console.log(`   📁 context/         → Plan del curso + fases`)
-  console.log(`   📁 qa/              → Checklist de testing left-right`)
-  console.log(`   📄 curso.yaml       → Blueprint machine-readable`)
-  console.log(`   📄 .gemini/settings.json → Config para Gemini CLI`)
-  console.log(`\n   Para empezar: cd ${config.slug} && gemini`)
+  console.log(`\n✅ Curso kit generado en: ${dir}`);
+  console.log(`   📁 context/         → Plan del curso + fases`);
+  console.log(`   📁 qa/              → Checklist de testing left-right`);
+  console.log(`   📄 curso.yaml       → Blueprint machine-readable`);
+  console.log(`   📄 .gemini/settings.json → Config para Gemini CLI`);
+  console.log(`\n   Para empezar: cd ${config.slug} && gemini`);
 }
 
 function renderGeminiSettings(config: CursoConfig): string {
@@ -94,7 +94,7 @@ function renderGeminiSettings(config: CursoConfig): string {
     },
     null,
     2,
-  )
+  );
 }
 
 function renderOpenCodeConfig(config: CursoConfig): string {
@@ -116,15 +116,15 @@ function renderOpenCodeConfig(config: CursoConfig): string {
     "bash": { "*": "allow" }
   }
 }
-`
+`;
 }
 
 function renderCursoOverview(config: CursoConfig): string {
-  const mandatoryActs = config.modules.flatMap((m) => m.activities.filter((a) => a.mandatory))
+  const mandatoryActs = config.modules.flatMap(m => m.activities.filter(a => a.mandatory));
   const totalHours = config.modules.reduce(
     (sum, m) => sum + m.activities.reduce((s, a) => s + a.estimatedTimeMinutes, 0),
     0,
-  )
+  );
 
   // Keep overview compact — per-module detail loaded only when needed via @ref
   const overview = `# ${config.name}
@@ -142,10 +142,10 @@ ${config.description}
 
 ${config.modules
   .map(
-    (m) => `### ${m.name}
+    m => `### ${m.name}
 ${m.activities
   .map(
-    (a) =>
+    a =>
       `- [${a.mandatory ? 'x' : ' '}] **${a.name}** (${a.type})${a.gatesToNextModule ? ' → gate' : ''}${a.rescueTrigger ? ' rescue' : ''}${a.maintenanceTrigger ? ' maint' : ''}`,
   )
   .join('\n')}`,
@@ -160,28 +160,28 @@ ${m.activities
 ---
 
 *Generado por unc-course-kit*
-`
+`;
 
-  contextBudget('curso-overview', overview)
-  return overview
+  contextBudget('curso-overview', overview);
+  return overview;
 }
 
 function formatActivities(config: CursoConfig): string {
   return config.modules
     .map(
-      (m) =>
+      m =>
         `### ${m.name}
 
 | # | Actividad | Tipo | Obligatoria | Requisito | Criteria | Rescue | Tiempo |
 |---|-----------|------|-------------|-----------|----------|--------|--------|
 ${m.activities
   .map(
-    (a) =>
+    a =>
       `| ${a.order} | ${a.name} | ${a.type} | ${a.mandatory ? 'Sí' : 'No'} | ${a.gatesToNextModule ? 'Sí' : 'No'} | ${renderCriteria(a)} | ${a.rescueTrigger ? 'Sí' : 'No'} | ${a.estimatedTimeMinutes}min |`,
   )
   .join('\n')}`,
     )
-    .join('\n\n')
+    .join('\n\n');
 }
 
 /**
@@ -189,32 +189,34 @@ ${m.activities
  * ~4 chars per token for Spanish text (conservative).
  */
 function estimateTokens(text: string): number {
-  return Math.ceil(text.length / 4)
+  return Math.ceil(text.length / 4);
 }
 
 /**
  * Context budget threshold — warn if estimated tokens exceed this.
  * Based on MECW research (Paulsen 2025): degradation starts ~1000 tokens.
  */
-const CONTEXT_BUDGET_WARN = 800
-const CONTEXT_BUDGET_CRITICAL = 1500
+const CONTEXT_BUDGET_WARN = 800;
+const CONTEXT_BUDGET_CRITICAL = 1500;
 
 /**
  * Check prompt size against budget. Logs warning if exceeded.
  * Non-dev first: no config needed, runs automatically.
  */
 function contextBudget(label: string, prompt: string): void {
-  const tokens = estimateTokens(prompt)
+  const tokens = estimateTokens(prompt);
   if (tokens >= CONTEXT_BUDGET_CRITICAL) {
     console.warn(
       `  ⚠️  [${label}] ~${tokens} tokens — CRÍTICO (MECW research: degradación probable). Partí este prompt en módulos.`,
-    )
-  } else if (tokens >= CONTEXT_BUDGET_WARN) {
+    );
+  }
+  else if (tokens >= CONTEXT_BUDGET_WARN) {
     console.warn(
       `  ⚠️  [${label}] ~${tokens} tokens — cerca del límite. Considerá partir por módulo.`,
-    )
-  } else {
-    console.log(`  ✓  [${label}] ~${tokens} tokens — dentro del budget.`)
+    );
+  }
+  else {
+    console.log(`  ✓  [${label}] ~${tokens} tokens — dentro del budget.`);
   }
 }
 
@@ -229,22 +231,22 @@ function formatModuleActivities(module: CursoConfig['modules'][0]): string {
 |---|-----------|------|-------------|-----------|----------|--------|--------|
 ${module.activities
   .map(
-    (a) =>
+    a =>
       `| ${a.order} | ${a.name} | ${a.type} | ${a.mandatory ? 'Sí' : 'No'} | ${a.gatesToNextModule ? 'Sí' : 'No'} | ${renderCriteria(a)} | ${a.rescueTrigger ? 'Sí' : 'No'} | ${a.estimatedTimeMinutes}min |`,
   )
-  .join('\n')}`
+  .join('\n')}`;
 }
 
 function renderCriteria(a: Activity): string {
   switch (a.completionCriteria.kind) {
     case 'view':
-      return 'Visualizar'
+      return 'Visualizar';
     case 'grade_threshold':
-      return `Nota ≥ ${a.completionCriteria.minGrade}`
+      return `Nota ≥ ${a.completionCriteria.minGrade}`;
     case 'submission':
-      return 'Envío'
+      return 'Envío';
     case 'manual':
-      return 'Manual'
+      return 'Manual';
   }
 }
 
@@ -286,17 +288,17 @@ Ayudame a definir:
 - [ ] Prerequisitos documentados
 - [ ] Narrativa del curso trazada
 - [ ] Tipo de contenido decidido por actividad
-`
+`;
 
-  contextBudget('01-fundacion', prompt)
-  return prompt
+  contextBudget('01-fundacion', prompt);
+  return prompt;
 }
 
 function renderFaseScaffold(config: CursoConfig): string {
-  const gates = config.modules.flatMap((m) => m.activities.filter((a) => a.gatesToNextModule))
-  const specialActs = config.modules.flatMap((m) =>
-    m.activities.filter((a) => a.gatesToNextModule || a.rescueTrigger || a.maintenanceTrigger),
-  )
+  const gates = config.modules.flatMap(m => m.activities.filter(a => a.gatesToNextModule));
+  const specialActs = config.modules.flatMap(m =>
+    m.activities.filter(a => a.gatesToNextModule || a.rescueTrigger || a.maintenanceTrigger),
+  );
 
   // Build per-module instructions separately to keep each prompt small
   const moduleInstructions = config.modules
@@ -306,15 +308,15 @@ ${formatModuleActivities(m)}
 
 Completá este módulo antes de pasar al siguiente.
 ${
-  m.activities.some((a) => a.gatesToNextModule)
+  m.activities.some(a => a.gatesToNextModule)
     ? `⚠️  Este módulo tiene actividades gate: ${m.activities
-        .filter((a) => a.gatesToNextModule)
-        .map((a) => `"${a.name}"`)
-        .join(', ')}`
+      .filter(a => a.gatesToNextModule)
+      .map(a => `"${a.name}"`)
+      .join(', ')}`
     : ''
 }`,
     )
-    .join('\n\n')
+    .join('\n\n');
 
   const prompt = `# Fase 2: Scaffold — Armar la estructura en Moodle
 
@@ -335,7 +337,7 @@ ${
   specialActs.length > 0
     ? specialActs
         .map(
-          (a) =>
+          a =>
             `- **${a.name}**: ${a.gatesToNextModule ? '[GATE] ' : ''}${a.rescueTrigger ? '[RESCUE] ' : ''}${a.maintenanceTrigger ? '[MAINTENANCE]' : ''}`,
         )
         .join('\n')
@@ -374,16 +376,16 @@ ${
 - [ ] Condiciones de acceso configuradas
 - [ ] Triggers de reengagement configurados
 - [ ] Roles y permisos verificados
-`
+`;
 
-  contextBudget('02-scaffold', prompt)
-  return prompt
+  contextBudget('02-scaffold', prompt);
+  return prompt;
 }
 
 function renderFaseContenido(config: CursoConfig): string {
-  const htmlActivities = config.modules.flatMap((m) =>
-    m.activities.filter((a) => a.type === 'html' || a.type === 'video' || a.type === 'url'),
-  )
+  const htmlActivities = config.modules.flatMap(m =>
+    m.activities.filter(a => a.type === 'html' || a.type === 'video' || a.type === 'url'),
+  );
 
   const prompt = `# Fase 3: Contenido — Generar materiales con Gemini
 
@@ -397,7 +399,7 @@ Para cada módulo y actividad, generar el contenido según el tipo:
 
 ${config.modules
   .map(
-    (m) => `### ${m.name}
+    m => `### ${m.name}
 ${m.activities
   .map((a) => {
     const prompts: Record<string, string> = {
@@ -409,8 +411,8 @@ ${m.activities
       h5p: 'Especificación para actividad H5P interactiva',
       feedback: 'Preguntas para encuesta de retroalimentación',
       url: 'Enlace a recurso externo con breve descripción',
-    }
-    return `  - **${a.name}** (${a.type}): ${prompts[a.type] ?? 'Contenido genérico'}`
+    };
+    return `  - **${a.name}** (${a.type}): ${prompts[a.type] ?? 'Contenido genérico'}`;
   })
   .join('\n')}`,
   )
@@ -453,15 +455,15 @@ Incluí:
 - [ ] Foros con preguntas disparadoras
 - [ ] Videos seleccionados/embebidos
 - [ ] Links verificados
-`
+`;
 
-  contextBudget('03-contenido', prompt)
-  return prompt
+  contextBudget('03-contenido', prompt);
+  return prompt;
 }
 
 function renderFaseRevision(config: CursoConfig): string {
-  const totalActs = config.modules.reduce((sum, m) => sum + m.activities.length, 0)
-  const gates = config.modules.flatMap((m) => m.activities.filter((a) => a.gatesToNextModule))
+  const totalActs = config.modules.reduce((sum, m) => sum + m.activities.length, 0);
+  const gates = config.modules.flatMap(m => m.activities.filter(a => a.gatesToNextModule));
 
   const moduleChecklists = config.modules
     .map(
@@ -472,7 +474,7 @@ function renderFaseRevision(config: CursoConfig): string {
 - [ ] Criterios de finalización correctos
 `,
     )
-    .join('\n')
+    .join('\n');
 
   const prompt = `# Fase 4: Revisión — Control de calidad del contenido
 
@@ -484,7 +486,7 @@ Verificar que todo el contenido sea correcto, accesible, consistente y esté lis
 
 - **Módulos:** ${config.modules.length} (${totalActs} actividades totales)
 - **Actividades gate:** ${gates.length}
-- **Módulos:** ${config.modules.map((m) => `"${m.name}"`).join(', ')}
+- **Módulos:** ${config.modules.map(m => `"${m.name}"`).join(', ')}
 
 ## Qué revisar (por módulo)
 
@@ -533,10 +535,10 @@ ${
 - [ ] Links verificados
 - [ ] Accesibilidad revisada
 - [ ] Configuración técnica validada
-`
+`;
 
-  contextBudget('04-revision', prompt)
-  return prompt
+  contextBudget('04-revision', prompt);
+  return prompt;
 }
 
 function renderFasePublicacion(config: CursoConfig): string {
@@ -557,14 +559,16 @@ Publicar todo el contenido en Moodle, activar las actividades y verificar que el
 ## Actividades para reengagement
 
 ${config.modules
-  .flatMap((m) =>
+  .flatMap(m =>
     m.activities
-      .filter((a) => a.rescueTrigger || a.maintenanceTrigger)
+      .filter(a => a.rescueTrigger || a.maintenanceTrigger)
       .map((a) => {
-        const triggers = []
-        if (a.rescueTrigger) triggers.push('RESCUE')
-        if (a.maintenanceTrigger) triggers.push('MAINT')
-        return `- **${m.name} > ${a.name}**: ${triggers.join(' + ')}`
+        const triggers = [];
+        if (a.rescueTrigger)
+          triggers.push('RESCUE');
+        if (a.maintenanceTrigger)
+          triggers.push('MAINT');
+        return `- **${m.name} > ${a.name}**: ${triggers.join(' + ')}`;
       }),
   )
   .join('\n')}
@@ -582,10 +586,10 @@ Dame una guía paso a paso para:
 
 El curso tiene ${config.modules.length} módulos y las siguientes actividades con config especial:
 ${config.modules
-  .flatMap((m) =>
+  .flatMap(m =>
     m.activities
-      .filter((a) => a.gatesToNextModule || a.rescueTrigger || a.maintenanceTrigger)
-      .map((a) =>
+      .filter(a => a.gatesToNextModule || a.rescueTrigger || a.maintenanceTrigger)
+      .map(a =>
         `- "${a.name}" en ${m.name}: ${a.gatesToNextModule ? 'gate' : ''} ${a.rescueTrigger ? 'rescue' : ''} ${a.maintenanceTrigger ? 'maintenance' : ''}`.trim(),
       ),
   )
@@ -600,10 +604,10 @@ ${config.modules
 - [ ] Reengagement configurado y activo
 - [ ] Curso visible para estudiantes
 - [ ] Vista previa como estudiante verificada
-`
+`;
 
-  contextBudget('05-publicacion', prompt)
-  return prompt
+  contextBudget('05-publicacion', prompt);
+  return prompt;
 }
 
 function renderFaseMantenimiento(config: CursoConfig): string {
@@ -624,11 +628,11 @@ Monitorear el progreso de los estudiantes, ajustar triggers de reengagement y op
 ### Puntos de rescate activos
 
 ${config.modules
-  .flatMap((m) =>
+  .flatMap(m =>
     m.activities
-      .filter((a) => a.rescueTrigger)
+      .filter(a => a.rescueTrigger)
       .map(
-        (a) =>
+        a =>
           `- **${m.name} > ${a.name}**: rescue a las ${config.reengagement.rescueDelayHours}h de inactividad`,
       ),
   )
@@ -637,11 +641,11 @@ ${config.modules
 ### Puntos de mantenimiento activos
 
 ${config.modules
-  .flatMap((m) =>
+  .flatMap(m =>
     m.activities
-      .filter((a) => a.maintenanceTrigger)
+      .filter(a => a.maintenanceTrigger)
       .map(
-        (a) =>
+        a =>
           `- **${m.name} > ${a.name}**: maintenance a las ${config.reengagement.maintenanceDelayHours}h de inactividad`,
       ),
   )
@@ -676,16 +680,16 @@ Basado en estos datos, recomendame:
 - [ ] Actualizar contenido basado en feedback de estudiantes
 - [ ] Revisar consultas en foros y responder pendientes
 - [ ] Reportar avances al equipo
-`
+`;
 
-  contextBudget('06-mantenimiento', prompt)
-  return prompt
+  contextBudget('06-mantenimiento', prompt);
+  return prompt;
 }
 
 function renderQAChecklist(config: CursoConfig): string {
-  const gateActivities = config.modules.flatMap((m) =>
-    m.activities.filter((a) => a.gatesToNextModule),
-  )
+  const gateActivities = config.modules.flatMap(m =>
+    m.activities.filter(a => a.gatesToNextModule),
+  );
 
   const prompt = `# QA: Left-Right Testing — ${config.name}
 
@@ -693,10 +697,10 @@ function renderQAChecklist(config: CursoConfig): string {
 
 ${config.modules
   .map((m) => {
-    const mandatory = m.activities.filter((a) => a.mandatory)
+    const mandatory = m.activities.filter(a => a.mandatory);
     return mandatory.length > 0
-      ? `### ${m.name}\n${mandatory.map((a) => `- [ ] ${a.order}. ${a.name}`).join('\n')}`
-      : `### ${m.name}\n- _Sin actividades obligatorias_`
+      ? `### ${m.name}\n${mandatory.map(a => `- [ ] ${a.order}. ${a.name}`).join('\n')}`
+      : `### ${m.name}\n- _Sin actividades obligatorias_`;
   })
   .join('\n\n')}
 
@@ -709,27 +713,27 @@ ${config.modules.length > 3 ? `- [ ] Completar Módulo ${config.modules.length -
 - [ ] Completar todos los módulos → verificar que se marca curso completo
 
 ### Puertas (gates)
-${gateActivities.length > 0 ? gateActivities.map((a) => `- [ ] No completar "${a.name}" → verificar que el siguiente módulo está bloqueado`).join('\n') : '- _No hay actividades con gate_'}
-${gateActivities.length > 0 ? gateActivities.map((a) => `- [ ] Completar "${a.name}" → verificar que el siguiente módulo se desbloquea inmediatamente`).join('\n') : ''}
+${gateActivities.length > 0 ? gateActivities.map(a => `- [ ] No completar "${a.name}" → verificar que el siguiente módulo está bloqueado`).join('\n') : '- _No hay actividades con gate_'}
+${gateActivities.length > 0 ? gateActivities.map(a => `- [ ] Completar "${a.name}" → verificar que el siguiente módulo se desbloquea inmediatamente`).join('\n') : ''}
 
 ### Rescate (reengagement)
 ${
-  config.modules.flatMap((m) => m.activities.filter((a) => a.rescueTrigger)).length > 0
+  config.modules.flatMap(m => m.activities.filter(a => a.rescueTrigger)).length > 0
     ? config.modules
-        .flatMap((m) => m.activities.filter((a) => a.rescueTrigger))
+        .flatMap(m => m.activities.filter(a => a.rescueTrigger))
         .map(
-          (a) =>
+          a =>
             `- [ ] Simular inactividad en "${a.name}" → verificar que se dispara email de rescue a las ${config.reengagement.rescueDelayHours}h`,
         )
         .join('\n')
     : '- _No hay actividades con rescue trigger_'
 }
 ${
-  config.modules.flatMap((m) => m.activities.filter((a) => a.maintenanceTrigger)).length > 0
+  config.modules.flatMap(m => m.activities.filter(a => a.maintenanceTrigger)).length > 0
     ? config.modules
-        .flatMap((m) => m.activities.filter((a) => a.maintenanceTrigger))
+        .flatMap(m => m.activities.filter(a => a.maintenanceTrigger))
         .map(
-          (a) =>
+          a =>
             `- [ ] Simular inactividad prolongada en "${a.name}" → verificar email de maintenance a las ${config.reengagement.maintenanceDelayHours}h`,
         )
         .join('\n')
@@ -754,14 +758,14 @@ ${
 | Rescue delay | ${config.reengagement.rescueDelayHours}h |
 | Maintenance delay | ${config.reengagement.maintenanceDelayHours}h |
 | Actividades gate | ${gateActivities.length} |
-| Actividades rescue | ${config.modules.flatMap((m) => m.activities.filter((a) => a.rescueTrigger)).length} |
-| Actividades maintenance | ${config.modules.flatMap((m) => m.activities.filter((a) => a.maintenanceTrigger)).length} |
+| Actividades rescue | ${config.modules.flatMap(m => m.activities.filter(a => a.rescueTrigger)).length} |
+| Actividades maintenance | ${config.modules.flatMap(m => m.activities.filter(a => a.maintenanceTrigger)).length} |
 | Tiempo total estimado | ${Math.round(config.modules.reduce((sum, m) => sum + m.activities.reduce((s, a) => s + a.estimatedTimeMinutes, 0), 0) / 60)}h |
 
 ---
 *QA generado por unc-course-kit*
-`
+`;
 
-  contextBudget('qa-checklist', prompt)
-  return prompt
+  contextBudget('qa-checklist', prompt);
+  return prompt;
 }

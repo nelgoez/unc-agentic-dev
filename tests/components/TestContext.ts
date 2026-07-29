@@ -1,17 +1,17 @@
-import { randomInt } from 'node:crypto'
+import { randomInt } from 'node:crypto';
 
 export interface TestEnv {
-  baseUrl: string
-  studentUser: string
-  studentPass: string
-  adminUser: string
-  adminPass: string
-  wsToken: string
-  isCI: boolean
+  baseUrl: string;
+  studentUser: string;
+  studentPass: string;
+  adminUser: string;
+  adminPass: string;
+  wsToken: string;
+  isCI: boolean;
 }
 
 export class TestContext {
-  env: TestEnv
+  env: TestEnv;
 
   constructor(overrides?: Partial<TestEnv>) {
     this.env = {
@@ -23,18 +23,18 @@ export class TestContext {
       wsToken: (process.env.MOODLE_WS_TOKEN ?? '').trim(),
       isCI: Boolean(process.env.CI),
       ...overrides,
-    }
+    };
   }
 
   get hasAdminCreds(): boolean {
-    return this.env.adminUser !== '' && this.env.adminPass !== ''
+    return this.env.adminUser !== '' && this.env.adminPass !== '';
   }
 
   get hasWsToken(): boolean {
-    return this.env.wsToken !== ''
+    return this.env.wsToken !== '';
   }
 
   uniqueEmail(prefix = 'test'): string {
-    return `${prefix}+${randomInt(1_000_000)}@test.unc.edu.ar`
+    return `${prefix}+${randomInt(1_000_000)}@test.unc.edu.ar`;
   }
 }

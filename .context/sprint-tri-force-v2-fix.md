@@ -81,15 +81,16 @@ Lógica nueva al final de `findPhantoms()`, después de generar todos los findin
 // Nelthor cross-reference: downgrade findings that nelthor completed
 if (nelthorData) {
   for (const finding of findings) {
-    const nameMatch = finding.message.match(/"([^"]+?)"/)
-    if (!nameMatch) continue
-    const nelthorState = nelthorData.get(nameMatch[1].toLowerCase())?.state
+    const nameMatch = finding.message.match(/"([^"]+)"/);
+    if (!nameMatch)
+      continue;
+    const nelthorState = nelthorData.get(nameMatch[1].toLowerCase())?.state;
     if (nelthorState === 1 && finding.severity === 'critical') {
       // Nelthor completed this — downgrade to info with explanation
-      finding.severity = 'info'
-      finding.priority = 'low'
-      finding.detail +=
-        ' [Nota: Nelthor (estudiante real) completó esta actividad sin problemas antes de ser administrador. El problema puede estar en la configuración posterior del curso o ser un falso positivo.]'
+      finding.severity = 'info';
+      finding.priority = 'low';
+      finding.detail
+        += ' [Nota: Nelthor (estudiante real) completó esta actividad sin problemas antes de ser administrador. El problema puede estar en la configuración posterior del curso o ser un falso positivo.]';
     }
   }
 }
@@ -105,25 +106,27 @@ Después de construir `apiModuleData`, buscar a nelthor y obtener su completion 
 
 ```typescript
 // Construir nelthorData para cross-reference
-const nelthorData = new Map<string, { state: number }>()
+const nelthorData = new Map<string, { state: number }>();
 try {
-  const nelthorUsers = await api.getUsersByField('username', ['nelthor'])
+  const nelthorUsers = await api.getUsersByField('username', ['nelthor']);
   if (nelthorUsers[0]) {
-    const nelthorStatus = await api.getActivitiesCompletionStatus(courseId, nelthorUsers[0].id)
+    const nelthorStatus = await api.getActivitiesCompletionStatus(courseId, nelthorUsers[0].id);
     for (const st of nelthorStatus) {
       const modName = contents
         .flatMap((s: { modules: Array<{ id: number; name: string }> }) => s.modules)
-        .find((m: { id: number }) => m.id === st.cmid)?.name
+        .find((m: { id: number }) => m.id === st.cmid)
+        ?.name;
       if (modName) {
-        nelthorData.set(modName.toLowerCase(), { state: st.state })
+        nelthorData.set(modName.toLowerCase(), { state: st.state });
       }
     }
   }
-} catch (err) {
-  console.warn('⚠️ Nelthor data fetch failed:', err)
+}
+catch (err) {
+  console.warn('⚠️ Nelthor data fetch failed:', err);
 }
 
-const phantoms = course.findPhantoms(adminView, switchRoleStudentView, apiModuleData, nelthorData)
+const phantoms = course.findPhantoms(adminView, switchRoleStudentView, apiModuleData, nelthorData);
 ```
 
 ### Fix 4: Mejorar el reporte con nelthor cross-reference

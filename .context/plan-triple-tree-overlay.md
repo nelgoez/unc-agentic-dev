@@ -218,36 +218,36 @@ Cada hallazgo tiene un score basado en cuántas capas coinciden. Solo findings c
 
 ```typescript
 interface GraphNode {
-  cmid: number
-  name: string
-  sectionNumber: number
-  sectionName: string
-  type: string
-  completion: number // 0|1|2
-  isautomatic: boolean
-  visible: number // 0|1
-  uservisible: boolean
-  groupmode: number
+  cmid: number;
+  name: string;
+  sectionNumber: number;
+  sectionName: string;
+  type: string;
+  completion: number; // 0|1|2
+  isautomatic: boolean;
+  visible: number; // 0|1
+  uservisible: boolean;
+  groupmode: number;
 }
 
 interface GraphEdge {
-  fromCmid: number // el módulo BLOQUEADO
-  toCmid: number // el módulo REQUERIDO
-  type: 'completion' | 'grade' | 'group' | 'cohort' | 'date'
-  requiredValue: number // state=1 para completion, min nota para grade
-  rawCondition: Record<string, unknown>
+  fromCmid: number; // el módulo BLOQUEADO
+  toCmid: number; // el módulo REQUERIDO
+  type: 'completion' | 'grade' | 'group' | 'cohort' | 'date';
+  requiredValue: number; // state=1 para completion, min nota para grade
+  rawCondition: Record<string, unknown>;
 }
 
 class CourseDependencyGraph {
-  nodes: Map<number, GraphNode> // key = cmid when available, else section+name hash
-  edges: GraphEdge[]
+  nodes: Map<number, GraphNode>; // key = cmid when available, else section+name hash
+  edges: GraphEdge[];
 
-  static fromAdminUI(view: CourseStructure): CourseDependencyGraph
-  static fromStudentUI(view: CourseStructure): CourseDependencyGraph
-  static fromApi(breakdown: ApiBreakdown): CourseDependencyGraph
-  static fromDesignPattern(pattern: DesignPattern): CourseDependencyGraph // future
+  static fromAdminUI(view: CourseStructure): CourseDependencyGraph;
+  static fromStudentUI(view: CourseStructure): CourseDependencyGraph;
+  static fromApi(breakdown: ApiBreakdown): CourseDependencyGraph;
+  static fromDesignPattern(pattern: DesignPattern): CourseDependencyGraph; // future
 
-  overlay(other: CourseDependencyGraph): LayerDelta
+  overlay(other: CourseDependencyGraph): LayerDelta;
 }
 ```
 
@@ -262,25 +262,25 @@ class TreeOverlayAnalyzer {
     apiGraph: CourseDependencyGraph,
     studentApiGraph: CourseDependencyGraph,
     studentUiGraph: CourseDependencyGraph,
-  ): OverlayResult
+  ): OverlayResult;
 }
 
 interface OverlayResult {
   comparisons: {
-    adminUiVsApi: LayerDelta
-    apiVsStudentApi: LayerDelta
-    studentApiVsStudentUi: LayerDelta
-    adminUiVsStudentUi: LayerDelta
-  }
+    adminUiVsApi: LayerDelta;
+    apiVsStudentApi: LayerDelta;
+    studentApiVsStudentUi: LayerDelta;
+    adminUiVsStudentUi: LayerDelta;
+  };
   combinedFindings: Array<{
-    nodeName: string
-    sectionName: string
-    confidence: 'muy_alta' | 'alta' | 'media' | 'baja'
-    agreementCount: number // 0-4
-    discrepancies: string[] // qué capas difieren
-    severity: 'critical' | 'warning' | 'info'
-    actionItem: string
-  }>
+    nodeName: string;
+    sectionName: string;
+    confidence: 'muy_alta' | 'alta' | 'media' | 'baja';
+    agreementCount: number; // 0-4
+    discrepancies: string[]; // qué capas difieren
+    severity: 'critical' | 'warning' | 'info';
+    actionItem: string;
+  }>;
 }
 ```
 

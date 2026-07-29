@@ -1,31 +1,31 @@
-import { resolve } from 'node:path'
-import { writeFileSync, mkdirSync } from 'node:fs'
-import { MoodleApiClient } from '../tests/components/api/MoodleApiClient'
+import { mkdirSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { MoodleApiClient } from '../tests/components/api/MoodleApiClient';
 
-const baseUrl = process.env.MOODLE_BASE_URL ?? 'https://campus.aulavirtual.unc.edu.ar'
-const wsToken = (process.env.MOODLE_WS_TOKEN ?? '').trim()
-const courseIds = ['267', '265', '269', '276']
-const outDir = resolve('reports/mvp-demo')
+const baseUrl = process.env.MOODLE_BASE_URL ?? 'https://campus.aulavirtual.unc.edu.ar';
+const wsToken = (process.env.MOODLE_WS_TOKEN ?? '').trim();
+const courseIds = ['267', '265', '269', '276'];
+const outDir = resolve('reports/mvp-demo');
 
 interface CourseReport {
-  courseId: string
-  courseName: string
-  sections: Array<{ number: number; name: string; activityCount: number; restricted: boolean }>
+  courseId: string;
+  courseName: string;
+  sections: Array<{ number: number; name: string; activityCount: number; restricted: boolean }>;
   restrictions: Array<{
-    section: string
-    activityName: string
-    conditions: Array<{ type: string; detail: string }>
-  }>
-  completionStatus: string
-  freshStudentStatus: string
-  nelthorStatus: string
-  findings: Array<{ severity: string; section: string; message: string; recommendation: string }>
+    section: string;
+    activityName: string;
+    conditions: Array<{ type: string; detail: string }>;
+  }>;
+  completionStatus: string;
+  freshStudentStatus: string;
+  nelthorStatus: string;
+  findings: Array<{ severity: string; section: string; message: string; recommendation: string }>;
 }
 
 async function auditCourse(api: MoodleApiClient, courseId: string): Promise<CourseReport> {
-  const contents = await api.getCourseContents(courseId)
-  const breakdown = await api.getAvailabilityJsonBreakdown(courseId)
-  const orphans = await api.findOrphanedCmIds(contents)
+  const contents = await api.getCourseContents(courseId);
+  const breakdown = await api.getAvailabilityJsonBreakdown(courseId);
+  const orphans = await api.findOrphanedCmIds(contents);
 
   const testUser = await api.createUser(
     `report-${courseId}-${Date.now().toString(36)}`,
@@ -33,30 +33,32 @@ async function auditCourse(api: MoodleApiClient, courseId: string): Promise<Cour
     'Report',
     'Student',
     `report.${courseId}.${Date.now().toString(36)}@test.unc.edu.ar`,
-  )
-  const freshUserId = testUser.id
+  );
+  const freshUserId = testUser.id;
 
-  let freshStatus = 'No completada ninguna actividad (usuario nuevo)'
+  let freshStatus = 'No completada ninguna actividad (usuario nuevo)';
   try {
-    const freshCompletion = await api.getActivitiesCompletionStatus(courseId, freshUserId)
-    const tracked = freshCompletion.filter((c: any) => c.tracking > 0)
-    freshStatus = `${tracked.length} actividades con tracking, ${tracked.filter((c: any) => c.state === 1).length} completadas`
-  } catch {}
+    const freshCompletion = await api.getActivitiesCompletionStatus(courseId, freshUserId);
+    const tracked = freshCompletion.filter((c: any) => c.tracking > 0);
+    freshStatus = `${tracked.length} actividades con tracking, ${tracked.filter((c: any) => c.state === 1).length} completadas`;
+  }
+  catch {}
 
-  let nelthorStatus = 'No se pudo obtener'
+  let nelthorStatus = 'No se pudo obtener';
   try {
-    const nelthorUsers = await api.getUsersByField('username', ['nelthor'])
+    const nelthorUsers = await api.getUsersByField('username', ['nelthor']);
     if (nelthorUsers[0]) {
       const nelthorCompletion = await api.getActivitiesCompletionStatus(
         courseId,
         nelthorUsers[0].id,
-      )
-      const tracked = nelthorCompletion.filter((c: any) => c.tracking > 0)
-      nelthorStatus = `${tracked.length} actividades con tracking, ${tracked.filter((c: any) => c.state === 1).length} completadas`
+      );
+      const tracked = nelthorCompletion.filter((c: any) => c.tracking > 0);
+      nelthorStatus = `${tracked.length} actividades con tracking, ${tracked.filter((c: any) => c.state === 1).length} completadas`;
     }
-  } catch {}
+  }
+  catch {}
 
-  await api.deleteUsers([freshUserId])
+  await api.deleteUsers([freshUserId]);
 
   const report: CourseReport = {
     courseId,
@@ -87,7 +89,7 @@ async function auditCourse(api: MoodleApiClient, courseId: string): Promise<Cour
     freshStudentStatus: freshStatus,
     nelthorStatus,
     findings: [],
-  }
+  };
 
   if (orphans.length > 0) {
     for (const o of orphans) {
@@ -96,7 +98,7 @@ async function auditCourse(api: MoodleApiClient, courseId: string): Promise<Cour
         section: o.sectionName,
         message: `cmid ${o.cmid} referenciado en disponibilidad JSON no existe`,
         recommendation: 'Eliminar la condición de disponibilidad que referencia este cmid.',
-      })
+      });
     }
   }
 
@@ -110,7 +112,7 @@ async function auditCourse(api: MoodleApiClient, courseId: string): Promise<Cour
             message: `"${mod.name}" requiere nota mínima ${cond.min} (grade item ${cond.id})`,
             recommendation:
               'Verificar que el grade item exista y tenga datos. Sin calificaciones, el certificado nunca se desbloqueará.',
-          })
+          });
         }
         if (cond.type === 'completion' && cond.cm) {
           report.findings.push({
@@ -119,41 +121,42 @@ async function auditCourse(api: MoodleApiClient, courseId: string): Promise<Cour
             message: `"${mod.name}" requiere completion de cmid ${cond.cm}`,
             recommendation:
               'Verificar que la actividad referenciada tenga completion tracking habilitado y sea accesible por estudiantes.',
-          })
+          });
         }
       }
     }
   }
 
-  return report
+  return report;
 }
 
 async function main() {
-  mkdirSync(outDir, { recursive: true })
-  const api = new MoodleApiClient(baseUrl, wsToken)
-  const reports: CourseReport[] = []
+  mkdirSync(outDir, { recursive: true });
+  const api = new MoodleApiClient(baseUrl, wsToken);
+  const reports: CourseReport[] = [];
 
   for (const courseId of courseIds) {
-    console.log(`Auditando curso ${courseId}...`)
+    console.log(`Auditando curso ${courseId}...`);
     try {
-      const report = await auditCourse(api, courseId)
-      reports.push(report)
-      const reportPath = resolve(outDir, `REPORTE-CURSO-${courseId}.md`)
-      writeFileSync(reportPath, generateSingleReport(report), 'utf-8')
-      console.log(`  -> Reporte generado: ${reportPath}`)
-    } catch (err) {
-      console.error(`  -> Error auditando curso ${courseId}:`, err)
+      const report = await auditCourse(api, courseId);
+      reports.push(report);
+      const reportPath = resolve(outDir, `REPORTE-CURSO-${courseId}.md`);
+      writeFileSync(reportPath, generateSingleReport(report), 'utf-8');
+      console.log(`  -> Reporte generado: ${reportPath}`);
+    }
+    catch (err) {
+      console.error(`  -> Error auditando curso ${courseId}:`, err);
     }
   }
 
-  const summaryPath = resolve(outDir, 'REPORTE-MVP-UNC.md')
-  writeFileSync(summaryPath, generateSummaryReport(reports), 'utf-8')
-  console.log(`Reporte multi-curso generado: ${summaryPath}`)
-  console.log(`Total cursos auditados: ${reports.length}`)
+  const summaryPath = resolve(outDir, 'REPORTE-MVP-UNC.md');
+  writeFileSync(summaryPath, generateSummaryReport(reports), 'utf-8');
+  console.log(`Reporte multi-curso generado: ${summaryPath}`);
+  console.log(`Total cursos auditados: ${reports.length}`);
 }
 
 function generateSingleReport(data: CourseReport): string {
-  const tienePhantoms = data.findings.some((f) => f.severity === 'critico')
+  const tienePhantoms = data.findings.some(f => f.severity === 'critico');
 
   return `# Reporte de Auditoría — UNC Campus Virtual
 
@@ -172,14 +175,14 @@ function generateSingleReport(data: CourseReport): string {
 | Actividades totales | ${data.sections.reduce((s, sec) => s + sec.activityCount, 0)} |
 | Secciones | ${data.sections.length} |
 | Actividades con restricciones | ${data.restrictions.reduce((s, r) => s + r.conditions.length, 0)} |
-| Phantoms (cmids huérfanos) | ${data.findings.filter((f) => f.severity === 'critico').length} |
+| Phantoms (cmids huérfanos) | ${data.findings.filter(f => f.severity === 'critico').length} |
 | Completación de estudiante nuevo | ${data.freshStudentStatus} |
 
 **Conclusión principal:** ${
-    tienePhantoms
-      ? 'Se detectaron referencias a actividades que no existen en el curso. Esto puede causar bloqueos permanentes para estudiantes.'
-      : 'No se detectaron actividades fantasma a nivel de datos JSON. Las restricciones existentes referencian actividades y grade items válidos.'
-  }
+  tienePhantoms
+    ? 'Se detectaron referencias a actividades que no existen en el curso. Esto puede causar bloqueos permanentes para estudiantes.'
+    : 'No se detectaron actividades fantasma a nivel de datos JSON. Las restricciones existentes referencian actividades y grade items válidos.'
+}
 
 ---
 
@@ -190,7 +193,7 @@ function generateSingleReport(data: CourseReport): string {
 ${data.findings.length === 0 ? 'No se encontraron hallazgos significativos.' : ''}
 ${data.findings
   .map(
-    (f) => `#### ${f.severity.toUpperCase()}: ${f.message}
+    f => `#### ${f.severity.toUpperCase()}: ${f.message}
 - **Sección:** ${f.section}
 - **Recomendación:** ${f.recommendation}
 `,
@@ -202,8 +205,8 @@ ${data.findings
 ${data.restrictions.length === 0 ? 'No se detectaron restricciones de disponibilidad en el curso.' : ''}
 ${data.restrictions
   .map(
-    (r) => `#### "${r.activityName}" (${r.section})
-${r.conditions.map((c) => `- Tipo: **${c.type}** — ${c.detail}`).join('\n')}
+    r => `#### "${r.activityName}" (${r.section})
+${r.conditions.map(c => `- Tipo: **${c.type}** — ${c.detail}`).join('\n')}
 `,
   )
   .join('\n')}
@@ -211,22 +214,22 @@ ${r.conditions.map((c) => `- Tipo: **${c.type}** — ${c.detail}`).join('\n')}
 ---
 
 *Reporte generado automáticamente por la suite de auditoría UNC Agentic Dev — ${new Date().toISOString()}*
-`
+`;
 }
 
 function generateSummaryReport(reports: CourseReport[]): string {
   const totalActivities = reports.reduce(
     (s, r) => s + r.sections.reduce((s2, sec) => s2 + sec.activityCount, 0),
     0,
-  )
+  );
   const totalRestrictions = reports.reduce(
     (s, r) => s + r.restrictions.reduce((s2, res) => s2 + res.conditions.length, 0),
     0,
-  )
+  );
   const totalPhantoms = reports.reduce(
-    (s, r) => s + r.findings.filter((f) => f.severity === 'critico').length,
+    (s, r) => s + r.findings.filter(f => f.severity === 'critico').length,
     0,
-  )
+  );
 
   const header = `# Reporte de Auditoría Multi-Curso — UNC Campus Virtual
 
@@ -240,7 +243,7 @@ function generateSummaryReport(reports: CourseReport[]): string {
 
 | Curso ID | Nombre | Secciones | Actividades | Phantoms | Restricciones |
 |----------|--------|-----------|-------------|----------|---------------|
-${reports.map((r) => `| ${r.courseId} | ${r.courseName} | ${r.sections.length} | ${r.sections.reduce((s, sec) => s + sec.activityCount, 0)} | ${r.findings.filter((f) => f.severity === 'critico').length} | ${r.restrictions.reduce((s, res) => s + res.conditions.length, 0)} |`).join('\n')}
+${reports.map(r => `| ${r.courseId} | ${r.courseName} | ${r.sections.length} | ${r.sections.reduce((s, sec) => s + sec.activityCount, 0)} | ${r.findings.filter(f => f.severity === 'critico').length} | ${r.restrictions.reduce((s, res) => s + res.conditions.length, 0)} |`).join('\n')}
 
 **Totales:** ${reports.length} cursos, ${totalPhantoms} phantoms, ${totalRestrictions} restricciones, ${totalActivities} actividades.
 
@@ -250,13 +253,13 @@ ${reports.map((r) => `| ${r.courseId} | ${r.courseName} | ${r.sections.length} |
 
 ${reports
   .map(
-    (r) => `### Curso ${r.courseId} — ${r.courseName}
+    r => `### Curso ${r.courseId} — ${r.courseName}
 
 - **${r.sections.length} secciones**, ${r.sections.reduce((s, sec) => s + sec.activityCount, 0)} actividades
-- **${r.findings.filter((f) => f.severity === 'critico').length} phantoms** detectados
+- **${r.findings.filter(f => f.severity === 'critico').length} phantoms** detectados
 - **${r.restrictions.reduce((s, res) => s + res.conditions.length, 0)} restricciones**
 - **Estudiante nuevo:** ${r.freshStudentStatus}
-${r.restrictions.map((res) => `- "${res.activityName}" (${res.section}): ${res.conditions.map((c) => `${c.type} — ${c.detail}`).join('; ')}`).join('\n')}
+${r.restrictions.map(res => `- "${res.activityName}" (${res.section}): ${res.conditions.map(c => `${c.type} — ${c.detail}`).join('; ')}`).join('\n')}
 `,
   )
   .join('\n')}
@@ -275,9 +278,9 @@ ${r.restrictions.map((res) => `- "${res.activityName}" (${res.section}): ${res.c
 ---
 
 *Reporte generado automáticamente por la suite de auditoría UNC Agentic Dev — ${new Date().toISOString()}*
-`
+`;
 
-  return header
+  return header;
 }
 
-main().catch(console.error)
+main().catch(console.error);

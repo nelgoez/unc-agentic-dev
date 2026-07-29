@@ -27,23 +27,23 @@ El bug real no es de visibilidad — es de **permisos de recurso**: el link de d
 En `tests/components/ui/MoodleCourse.ts`, antes del primer `for (const required of activityNames)` (línea 290), agregar:
 
 ```typescript
-console.log('\n=== PHANTOM DIAGNOSTIC ===')
-console.log(`Restriction text: "${firstRestricted.restrictionText}"`)
+console.log('\n=== PHANTOM DIAGNOSTIC ===');
+console.log(`Restriction text: "${firstRestricted.restrictionText}"`);
 console.log(
   `Activity names parsed: ${Array.from(activityNames)
-    .map((n) => '"' + n + '"')
+    .map(n => `"${n}"`)
     .join(', ')}`,
-)
+);
 console.log(
-  `Admin activities: ${admin.sections.flatMap((s) => s.activities.map((a) => `"${a.name}"(visible=${a.isVisible}, completion=${a.hasCompletionTracking})`)).join(', ')}`,
-)
+  `Admin activities: ${admin.sections.flatMap(s => s.activities.map(a => `"${a.name}"(visible=${a.isVisible}, completion=${a.hasCompletionTracking})`)).join(', ')}`,
+);
 ```
 
 Luego, adentro del loop (después de línea 297 donde se encuentra matchingActivity):
 
 ```typescript
-console.log(`Required: "${required}" → matched: "${matchingActivity?.name ?? '(none)'}"`)
-console.log(`  hasCompletionTracking: ${matchingActivity?.hasCompletionTracking}`)
+console.log(`Required: "${required}" → matched: "${matchingActivity?.name ?? '(none)'}"`);
+console.log(`  hasCompletionTracking: ${matchingActivity?.hasCompletionTracking}`);
 ```
 
 Y en el check de apiModuleData (después de línea 314):
@@ -51,8 +51,9 @@ Y en el check de apiModuleData (después de línea 314):
 ```typescript
 console.log(
   `  apiModuleData for "${matchingActivity.name.toLowerCase()}": ${JSON.stringify(modData ?? '(none)')}`,
-)
-if (modData?.isautomatic === true) console.log(`  → SKIPPED (isautomatic=true)`)
+);
+if (modData?.isautomatic === true)
+  console.log(`  → SKIPPED (isautomatic=true)`);
 ```
 
 Y en el visibility phantom loop (después de línea 384):
@@ -60,9 +61,9 @@ Y en el visibility phantom loop (después de línea 384):
 ```typescript
 console.log(
   `Visibility check: "${required}" → existsInAdmin=${existsInAdmin}, existsInStudent=${existsInStudent}`,
-)
+);
 if (!existsInStudent) {
-  console.log(`  → VISIBILITY PHANTOM FIRED`)
+  console.log(`  → VISIBILITY PHANTOM FIRED`);
 }
 ```
 
@@ -101,11 +102,11 @@ if (modData?.isautomatic === true) {
   // Pero: ¿el estudiante PUEDE visualizarla?
   if (student) {
     const visibleInStudent = student.sections
-      .flatMap((s) => s.activities)
+      .flatMap(s => s.activities)
       .some(
-        (a) =>
+        a =>
           a.name.toLowerCase().includes(normalized) || normalized.includes(a.name.toLowerCase()),
-      )
+      );
     if (!visibleInStudent) {
       // Existe en admin, es auto-complete, pero el estudiante no puede verla → BLOQUEO
       findings.push({
@@ -117,10 +118,10 @@ if (modData?.isautomatic === true) {
         priority: 'high',
         actionItem:
           'Revisar visibilidad y permisos del recurso. Si debe estar disponible, cambiar visible=1 en los ajustes del módulo y verificar que el tipo de recurso permita acceso a estudiantes.',
-      })
+      });
     }
   }
-  continue
+  continue;
 }
 ```
 
@@ -157,12 +158,12 @@ Además de "visibility phantom" (existe pero no se ve), agregar "recurso inacces
 
 ```typescript
 interface AccessCheck {
-  name: string
-  cmid: number
-  isVisibleInDOM: boolean // aparece en el DOM
-  hasClickableLink: boolean // el link es clickeable
-  isDownloadable: boolean // archivo descargable
-  forRole: 'admin' | 'student' | 'switchrole'
+  name: string;
+  cmid: number;
+  isVisibleInDOM: boolean; // aparece en el DOM
+  hasClickableLink: boolean; // el link es clickeable
+  isDownloadable: boolean; // archivo descargable
+  forRole: 'admin' | 'student' | 'switchrole';
 }
 ```
 
