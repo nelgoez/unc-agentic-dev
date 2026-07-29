@@ -1,696 +1,715 @@
-import type { Page } from '@playwright/test'
-import { atc } from '../../utils/decorators'
+import type { Page } from '@playwright/test';
+import { atc } from '../../utils/decorators';
 
 export interface ActivityData {
-  name: string
-  type: string
-  href: string
-  isVisible: boolean
-  hasCompletionTracking: boolean
-  isComplete: boolean
-  availabilityInfo: string
+    name: string;
+    type: string;
+    href: string;
+    isVisible: boolean;
+    hasCompletionTracking: boolean;
+    isComplete: boolean;
+    availabilityInfo: string;
 }
 
 export interface SectionData {
-  number: number
-  title: string
-  isLocked: boolean
-  restrictionText: string
-  activities: ActivityData[]
-  allVisibleComplete: boolean
+    number: number;
+    title: string;
+    isLocked: boolean;
+    restrictionText: string;
+    activities: ActivityData[];
+    allVisibleComplete: boolean;
 }
 
 export interface TabLink {
-  title: string
-  sectionNumber: number
-  isDisabled: boolean
-  restrictionText: string
+    title: string;
+    sectionNumber: number;
+    isDisabled: boolean;
+    restrictionText: string;
 }
 
 export interface CourseStructure {
-  courseName: string
-  courseUrl: string
-  tabs: TabLink[]
-  sections: SectionData[]
+    courseName: string;
+    courseUrl: string;
+    tabs: TabLink[];
+    sections: SectionData[];
 }
 
 export interface AuditFinding {
-  severity: 'critical' | 'warning' | 'info'
-  sectionNumber: number
-  sectionTitle: string
-  message: string
-  detail: string
-  actionItem?: string
-  priority?: 'high' | 'medium' | 'low'
+    severity: 'critical' | 'warning' | 'info';
+    sectionNumber: number;
+    sectionTitle: string;
+    message: string;
+    detail: string;
+    actionItem?: string;
+    priority?: 'high' | 'medium' | 'low';
 }
 
 export interface ActivityCompletionSummary {
-  activityName: string
-  sectionName: string
-  totalStudents: number
-  completedCount: number
-  completionRate: number
+    activityName: string;
+    sectionName: string;
+    totalStudents: number;
+    completedCount: number;
+    completionRate: number;
 }
 
 export class MoodleCourse {
-  private page: Page
-  private baseUrl: string
+    private page: Page;
+    private baseUrl: string;
 
-  constructor(page: Page, baseUrl: string) {
-    this.page = page
-    this.baseUrl = baseUrl
-  }
-
-  @atc('MC-1', { story: 'UNC-RE-1', feature: 'Course Scan' })
-  async goToCourse(courseId: string): Promise<void> {
-    await this.page.goto(`${this.baseUrl}/course/view.php?id=${courseId}`)
-    await this.page.waitForLoadState('load')
-    await this.page
-      .locator('.course-content, .nav-tabs, a.nav-link[href*="section="]')
-      .first()
-      .waitFor({ state: 'visible', timeout: 15000 })
-      .catch(() => {})
-  }
-
-  @atc('MC-2', { story: 'UNC-RE-1', feature: 'Course Scan' })
-  async getTabs(): Promise<TabLink[]> {
-    return this.page.evaluate(() => {
-      const tabLinks = document.querySelectorAll<HTMLAnchorElement>('a.nav-link[href*="section="]')
-      const seen = new Map<
-        number,
-        { title: string; isDisabled: boolean; restrictionText: string }
-      >()
-
-      Array.from(tabLinks).forEach((a) => {
-        const href = a.getAttribute('href') || ''
-        const sectionMatch = href.match(/section=(\d+)/)
-        const sectionNumber = sectionMatch ? Number.parseInt(sectionMatch[1], 10) : -1
-        if (sectionNumber < 0) return
-
-        const parentLi = a.closest('li')
-        const isDisabled =
-          parentLi?.classList.contains('disabled') || a.classList.contains('disabled')
-        const rawTitle = a.textContent?.trim() || ''
-        const cleanTitle =
-          rawTitle
-            .split('\n')
-            .map((s) => s.trim())
-            .filter(Boolean)[0] || rawTitle
-        const restrictionEl = parentLi?.querySelector(
-          '.availabilityinfo, .dimmed_text, .text-muted',
-        )
-        let restrictionText = restrictionEl?.textContent?.trim() || ''
-        if (!restrictionText) {
-          const infoEl = parentLi?.querySelector('[id^="format_onetopic_winfo_tab-"]')
-          if (infoEl) restrictionText = infoEl.textContent?.trim() || ''
-        }
-        restrictionText = restrictionText
-          .replace(/Show\s+more\s*Show\s+less/gi, '')
-          .replace(/\s+/g, ' ')
-          .trim()
-
-        if (
-          !seen.has(sectionNumber) ||
-          (cleanTitle && cleanTitle.length > 2 && !seen.get(sectionNumber)!.title)
-        ) {
-          seen.set(sectionNumber, { title: cleanTitle, isDisabled, restrictionText })
-        }
-      })
-
-      return Array.from(seen.entries())
-        .sort(([a], [b]) => a - b)
-        .map(([sectionNumber, data]) => ({
-          title: data.title || `Sección ${sectionNumber}`,
-          sectionNumber,
-          isDisabled: data.isDisabled,
-          restrictionText: data.restrictionText,
-        }))
-    })
-  }
-
-  @atc('MC-3', { story: 'UNC-RE-1', feature: 'Course Scan' })
-  async navigateToSection(sectionNumber: number): Promise<void> {
-    const url = this.page.url()
-    const match = url.match(/id=(\d+)/)
-    const courseId = match ? match[1] : ''
-    await this.page.goto(`${this.baseUrl}/course/view.php?id=${courseId}&section=${sectionNumber}`)
-    await this.page.waitForLoadState('load')
-    await this.page
-      .locator(`#section-${sectionNumber}`)
-      .waitFor({ state: 'attached', timeout: 10000 })
-      .catch(() => {})
-  }
-
-  @atc('MC-4', { story: 'UNC-RE-1', feature: 'Course Scan' })
-  async getSectionActivities(sectionNumber: number): Promise<ActivityData[]> {
-    return this.page.evaluate((secNum) => {
-      const section = document.querySelector(`#section-${secNum}, li#section-${secNum}`)
-      if (!section) return []
-
-      const activities = section.querySelectorAll('.activity')
-      return Array.from(activities).map((act) => {
-        const nameEl = act.querySelector('[data-activityname]')
-        const linkEl = act.querySelector('a')
-        const completionEl = act.querySelector('.activity-completion')
-        const isDimmed = act.classList.contains('dimmed')
-        const modType =
-          Array.from(act.classList)
-            .find((c) => c.startsWith('modtype_'))
-            ?.replace('modtype_', '') || 'unknown'
-        const hasCheckbox = !!completionEl?.querySelector('input[type="checkbox"]')
-        const checkboxChecked =
-          hasCheckbox && !!completionEl?.querySelector('input[type="checkbox"]:checked')
-        const autoComplete = completionEl?.classList.contains('completion-automatic')
-        const name =
-          nameEl?.getAttribute('data-activityname') ||
-          linkEl?.textContent?.trim() ||
-          act.textContent?.trim().substring(0, 60) ||
-          'UNNAMED'
-
-        // Admin-only: availability info below restricted activities
-        const availEl = act.querySelector('.availabilityinfo')
-        const availabilityInfo = availEl
-          ? (availEl.textContent || '')
-              .replace(/Show\s+more\s*Show\s+less/gi, '')
-              .replace(/\s+/g, ' ')
-              .trim()
-          : ''
-
-        return {
-          name,
-          type: modType,
-          href: linkEl?.getAttribute('href') || '',
-          isVisible: !isDimmed,
-          hasCompletionTracking: hasCheckbox || !!autoComplete,
-          isComplete: checkboxChecked || false,
-          availabilityInfo,
-        }
-      })
-    }, sectionNumber)
-  }
-
-  @atc('MC-5', { story: 'UNC-RE-1', feature: 'Course Scan' })
-  async getCourseName(): Promise<string> {
-    return this.page.title()
-  }
-
-  @atc('MC-6', { story: 'UNC-RE-1', feature: 'Course Scan' })
-  async takeScreenshot(filename: string): Promise<void> {
-    await this.page
-      .locator('.course-content, #region-main')
-      .first()
-      .scrollIntoViewIfNeeded()
-      .catch(() => {})
-    await this.page.screenshot({ path: filename, fullPage: false })
-  }
-
-  @atc('MC-10', { story: 'UNC-RE-1', feature: 'Show More Detection' })
-  async detectShowMoreBug(sectionNumber: number): Promise<{
-    hasShowMore: boolean
-    showMoreExpands: boolean
-    detail: string
-  }> {
-    const result = { hasShowMore: false, showMoreExpands: false, detail: '' }
-
-    try {
-      // Ensure we're on the course page
-      const currentUrl = this.page.url()
-      if (!currentUrl.includes('/course/view.php')) {
-        // Navigate to course — find course ID from URL
-        const courseIdMatch =
-          currentUrl.match(/[?&]course=(\d+)/) || currentUrl.match(/[?&]id=(\d+)/)
-        const cid = courseIdMatch ? courseIdMatch[1] : '269'
-        await this.goToCourse(cid)
-      }
-
-      // Find the info/question-mark icon near the locked tab
-      // In onetopic format, this is a small icon at the tab's top-right corner
-      // It's typically inside the disabled <li> for the section
-      const infoIconSelectors = [
-        `li.disabled a[title="Information"], li.disabled a[title="Información"]`,
-        `li.disabled a[href*="section=${sectionNumber}"] img[title*="Information"], li.disabled a[href*="section=${sectionNumber}"] img[title*="Información"]`,
-        `a[href*="section=${sectionNumber}"] ~ a[title], a[href*="section=${sectionNumber}"] + a`,
-        `li:has(a[href*="section=${sectionNumber}"]) a.fi, li:has(a[href*="section=${sectionNumber}"]) a[aria-label]`,
-        `a[aria-label*="information"], a[aria-label*="información"]`,
-      ]
-
-      let infoIcon = this.page.locator(infoIconSelectors[0]).first()
-      for (const sel of infoIconSelectors) {
-        const loc = this.page.locator(sel).first()
-        const count = await loc.count()
-        if (count > 0) {
-          infoIcon = loc
-          break
-        }
-      }
-
-      // Try clicking the info icon to open the modal
-      await infoIcon.click({ timeout: 3000 }).catch(() => {})
-      await this.page.waitForTimeout(600)
-
-      // If no specific info icon found, try clicking the locked tab itself
-      // (locked tabs may also trigger the popover on click)
-      const tabExists = await infoIcon.count()
-      if (!tabExists) {
-        const tab = this.page.locator(`a.nav-link[href*="section=${sectionNumber}"]`).first()
-        const tabCount = await tab.count()
-        if (!tabCount) {
-          result.detail = `No tab or info icon found for section ${sectionNumber}`
-          return result
-        }
-        await tab.click({ timeout: 3000 }).catch(() => {})
-        await this.page.waitForTimeout(600)
-      }
-
-      // Check for a modal/popover that appeared
-      // The modal is typically a Bootstrap modal or a custom overlay
-      const modalSelectors = [
-        '.modal.show',
-        '.modal.in',
-        '.popover.show',
-        '.availabilityinfo-modal',
-        '#format_onetopic_winfo_tab-' + sectionNumber,
-      ]
-
-      let modalFound = false
-      for (const sel of modalSelectors) {
-        const loc = this.page.locator(sel).first()
-        const count = await loc.count()
-        if (count > 0) {
-          const visible = await loc.isVisible().catch(() => false)
-          if (visible) {
-            modalFound = true
-            break
-          }
-        }
-      }
-
-      if (!modalFound) {
-        // Modal might not have appeared — search page for "Show More" anyway
-        result.detail = `No modal appeared after clicking tab ${sectionNumber}`
-      }
-
-      // Search for "Show More" / "Mostrar más" visible on the page
-      const showMoreTexts = ['Show more', 'Show less', 'Mostrar más', 'Mostrar menos']
-      const showMoreEls = await this.page.evaluate((texts) => {
-        const all = Array.from(document.querySelectorAll('a, button, span'))
-        return all
-          .filter(
-            (el) =>
-              texts.some((t) =>
-                (el.textContent || '').trim().toLowerCase().includes(t.toLowerCase()),
-              ) && el.getBoundingClientRect().width > 0,
-          )
-          .map((el) => ({
-            text: (el.textContent || '').trim().substring(0, 60),
-            tag: el.tagName,
-          }))
-      }, showMoreTexts)
-
-      if (showMoreEls.length === 0) {
-        result.detail = result.detail
-          ? result.detail + ' — no "Show More" found on page'
-          : `No "Show More" found on page for section ${sectionNumber}`
-        return result
-      }
-
-      result.hasShowMore = true
-
-      // Click the Show More link
-      const target = showMoreEls.find((e) => e.tag === 'A') || showMoreEls[0]
-      const clicked = await this.page.evaluate((text) => {
-        const all = Array.from(document.querySelectorAll('a, button'))
-        const match = all.find(
-          (el) =>
-            (el.textContent || '').trim().toLowerCase().includes(text.toLowerCase()) &&
-            el.getBoundingClientRect().width > 0,
-        )
-        if (match) {
-          ;(match as HTMLElement).click()
-          return true
-        }
-        return false
-      }, target.text)
-
-      if (!clicked) {
-        result.detail = `Found "${target.text}" but could not click`
-        return result
-      }
-
-      await this.page.waitForTimeout(500)
-
-      // Check expansion
-      const expanded = await this.page.evaluate(() => {
-        const hasShowLess = Array.from(document.querySelectorAll('*')).some(
-          (el) =>
-            (el.textContent || '').trim().toLowerCase().includes('show less') ||
-            (el.textContent || '').trim().toLowerCase().includes('mostrar menos'),
-        )
-        if (hasShowLess) return true
-        const info = document.querySelector('.availabilityinfo, .modal-body, .modal-content')
-        if (info) {
-          const links = info.querySelectorAll('a')
-          return links.length > 2
-        }
-        return false
-      })
-
-      if (expanded) {
-        result.showMoreExpands = true
-        result.detail = '"Show More" expands correctly'
-      } else {
-        result.showMoreExpands = false
-        result.detail = `"${target.text}" clicked but no expansion — dropdown does not work for current user role`
-      }
-    } catch (err) {
-      result.detail = `Show More detection error: ${err instanceof Error ? err.message : String(err)}`
+    constructor(page: Page, baseUrl: string) {
+        this.page = page;
+        this.baseUrl = baseUrl;
     }
 
-    return result
-  }
-
-  @atc('MC-7', { story: 'UNC-RE-1', feature: 'Course Scan' })
-  async analyze(courseId: string): Promise<CourseStructure> {
-    await this.goToCourse(courseId)
-    const courseName = await this.page.title()
-    const courseUrl = this.page.url()
-    const tabs = await this.getTabs()
-
-    const sections: SectionData[] = []
-    for (const tab of tabs) {
-      await this.navigateToSection(tab.sectionNumber)
-      const title = await this.page.evaluate(
-        () => document.querySelector('.sectionname')?.textContent?.trim() || '',
-      )
-      const activities = await this.getSectionActivities(tab.sectionNumber)
-      const restrictionText =
-        tab.restrictionText ||
-        (await this.page.evaluate((secNum) => {
-          const section = document.querySelector(`#section-${secNum}, li#section-${secNum}`)
-          if (!section) return ''
-          const avail = section.querySelector(
-            '.section_availability .availabilityinfo, .availabilityinfo',
-          )
-          return avail?.textContent?.trim() || ''
-        }, tab.sectionNumber))
-
-      const visibleWithTracking = activities.filter((a) => a.isVisible && a.hasCompletionTracking)
-      const allVisibleComplete =
-        visibleWithTracking.length > 0 && visibleWithTracking.every((a) => a.isComplete)
-
-      sections.push({
-        number: tab.sectionNumber,
-        title: title || tab.title,
-        isLocked: tab.isDisabled,
-        restrictionText,
-        activities,
-        allVisibleComplete,
-      })
+    @atc('MC-1', { story: 'UNC-RE-1', feature: 'Course Scan' })
+    async goToCourse(courseId: string): Promise<void> {
+        await this.page.goto(`${this.baseUrl}/course/view.php?id=${courseId}`);
+        await this.page.waitForLoadState('load');
+        await this.page
+            .locator('.course-content, .nav-tabs, a.nav-link[href*="section="]')
+            .first()
+            .waitFor({ state: 'visible', timeout: 15000 })
+            .catch(() => {});
     }
 
-    return { courseName, courseUrl, tabs, sections }
-  }
+    @atc('MC-2', { story: 'UNC-RE-1', feature: 'Course Scan' })
+    async getTabs(): Promise<TabLink[]> {
+        return this.page.evaluate(() => {
+            const tabLinks = document.querySelectorAll<HTMLAnchorElement>('a.nav-link[href*="section="]');
+            const seen = new Map<
+                number,
+                { title: string; isDisabled: boolean; restrictionText: string }
+            >();
 
-  findPhantoms(
-    admin: CourseStructure,
-    student?: CourseStructure,
-    apiModuleData?: Map<string, { completion: number; isautomatic: boolean }>,
-    nelthorData?: Map<string, { state: number; timecompleted?: number }>,
-  ): AuditFinding[] {
-    const findings: AuditFinding[] = []
+            Array.from(tabLinks).forEach((a) => {
+                const href = a.getAttribute('href') || '';
+                const sectionMatch = href.match(/section=(\d+)/);
+                const sectionNumber = sectionMatch ? Number.parseInt(sectionMatch[1], 10) : -1;
+                if (sectionNumber < 0)
+                    return;
 
-    const sectionsWithRestrictions = admin.sections.filter(
-      (s) => s.restrictionText && s.restrictionText.trim().length > 3,
-    )
+                const parentLi = a.closest('li');
+                const isDisabled
+                    = parentLi?.classList.contains('disabled') || a.classList.contains('disabled');
+                const rawTitle = a.textContent?.trim() || '';
+                const cleanTitle
+                    = rawTitle
+                        .split('\n')
+                        .map(s => s.trim())
+                        .filter(Boolean)[0] || rawTitle;
+                const restrictionEl = parentLi?.querySelector(
+                    '.availabilityinfo, .dimmed_text, .text-muted',
+                );
+                let restrictionText = restrictionEl?.textContent?.trim() || '';
+                if (!restrictionText) {
+                    const infoEl = parentLi?.querySelector('[id^="format_onetopic_winfo_tab-"]');
+                    if (infoEl)
+                        restrictionText = infoEl.textContent?.trim() || '';
+                }
+                restrictionText = restrictionText
+                    .replace(/Show\s+more\s*Show\s+less/gi, '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
 
-    if (sectionsWithRestrictions.length === 0) return findings
+                if (
+                    !seen.has(sectionNumber)
+                    || (cleanTitle && cleanTitle.length > 2 && !seen.get(sectionNumber)!.title)
+                ) {
+                    seen.set(sectionNumber, { title: cleanTitle, isDisabled, restrictionText });
+                }
+            });
 
-    const firstRestricted = sectionsWithRestrictions[0]
-    const cleanText = firstRestricted.restrictionText
-      .replace(/Show\s+more\s*Show\s+less/gi, '')
-      .replace(/\s+/g, ' ')
-      .trim()
-
-    const activityNames = new Set<string>()
-
-    const conditionSegments = cleanText.split(/\.\.\.\s*/)
-    for (const segment of conditionSegments) {
-      const enPattern = /The activity\s+([^,."]+?)\s+is marked complete/gi
-      for (const m of segment.matchAll(enPattern)) {
-        activityNames.add(m[1].trim())
-      }
-      const passedPattern = /The activity\s+([^,."]+?)\s+is complete and passed/gi
-      for (const m of segment.matchAll(passedPattern)) {
-        activityNames.add(m[1].trim())
-      }
-      const esPattern =
-        /La actividad\s+([^,."]+?)\s+(?:est[ée] marcada como completada|debe marcarse como completada|este[ée] completada)/gi
-      for (const m of segment.matchAll(esPattern)) {
-        activityNames.add(m[1].trim())
-      }
+            return Array.from(seen.entries())
+                .sort(([a], [b]) => a - b)
+                .map(([sectionNumber, data]) => ({
+                    title: data.title || `Sección ${sectionNumber}`,
+                    sectionNumber,
+                    isDisabled: data.isDisabled,
+                    restrictionText: data.restrictionText,
+                }));
+        });
     }
 
-    const quotePattern = /"([^"]+)"/g
-    for (const m of cleanText.matchAll(quotePattern)) {
-      const name = m[1].trim()
-      if (name.length > 2 && name.length < 120) activityNames.add(name)
+    @atc('MC-3', { story: 'UNC-RE-1', feature: 'Course Scan' })
+    async navigateToSection(sectionNumber: number): Promise<void> {
+        const url = this.page.url();
+        const match = url.match(/id=(\d+)/);
+        const courseId = match ? match[1] : '';
+        await this.page.goto(`${this.baseUrl}/course/view.php?id=${courseId}&section=${sectionNumber}`);
+        await this.page.waitForLoadState('load');
+        await this.page
+            .locator(`#section-${sectionNumber}`)
+            .waitFor({ state: 'attached', timeout: 10000 })
+            .catch(() => {});
     }
 
-    const cascadeCount = sectionsWithRestrictions.length - 1
+    @atc('MC-4', { story: 'UNC-RE-1', feature: 'Course Scan' })
+    async getSectionActivities(sectionNumber: number): Promise<ActivityData[]> {
+        return this.page.evaluate((secNum) => {
+            const section = document.querySelector(`#section-${secNum}, li#section-${secNum}`);
+            if (!section)
+                return [];
 
-    console.log('\n=== PHANTOM DIAGNOSTIC ===')
-    console.log(`Section: "${firstRestricted.title}"`)
-    console.log(`Restriction text: "${firstRestricted.restrictionText}"`)
-    console.log(
-      `Activity names parsed: ${Array.from(activityNames)
-        .map((n) => `"${n}"`)
-        .join(', ')}`,
-    )
-    console.log(
-      `Admin activities: ${admin.sections.flatMap((s) => s.activities.map((a) => `"${a.name}"(visible=${a.isVisible}, completion=${a.hasCompletionTracking})`)).join(', ')}`,
-    )
+            const activities = section.querySelectorAll('.activity');
+            return Array.from(activities).map((act) => {
+                const nameEl = act.querySelector('[data-activityname]');
+                const linkEl = act.querySelector('a');
+                const completionEl = act.querySelector('.activity-completion');
+                const isDimmed = act.classList.contains('dimmed');
+                const modType
+                    = Array.from(act.classList)
+                        .find(c => c.startsWith('modtype_'))
+                        ?.replace('modtype_', '') || 'unknown';
+                const hasCheckbox = !!completionEl?.querySelector('input[type="checkbox"]');
+                const checkboxChecked
+                    = hasCheckbox && !!completionEl?.querySelector('input[type="checkbox"]:checked');
+                const autoComplete = completionEl?.classList.contains('completion-automatic');
+                const name
+                    = nameEl?.getAttribute('data-activityname')
+                        || linkEl?.textContent?.trim()
+                        || act.textContent?.trim().substring(0, 60)
+                        || 'UNNAMED';
 
-    for (const required of activityNames) {
-      const normalized = required.toLowerCase()
-      const matchingActivity = admin.sections
-        .flatMap((s) => s.activities)
-        .find(
-          (a) =>
-            a.name.toLowerCase().includes(normalized) || normalized.includes(a.name.toLowerCase()),
-        )
+                // Admin-only: availability info below restricted activities
+                const availEl = act.querySelector('.availabilityinfo');
+                const availabilityInfo = availEl
+                    ? (availEl.textContent || '')
+                            .replace(/Show\s+more\s*Show\s+less/gi, '')
+                            .replace(/\s+/g, ' ')
+                            .trim()
+                    : '';
 
-      console.log(`Required: "${required}" → matched: "${matchingActivity?.name ?? '(none)'}"`)
-
-      if (!matchingActivity) {
-        findings.push({
-          severity: 'critical',
-          sectionNumber: firstRestricted.number,
-          sectionTitle: firstRestricted.title,
-          message: `Actividad requerida "${required}" no encontrada en el curso`,
-          detail: `El módulo "${firstRestricted.title}" está bloqueado por "${required}" según su condición de disponibilidad, pero no existe ninguna actividad con ese nombre en el curso. Esto impide el avance de cualquier estudiante nuevo.`,
-          priority: 'high',
-          actionItem:
-            'Agregar la actividad faltante o corregir la condición de disponibilidad en la configuración del módulo bloqueado.',
-        })
-      } else if (!matchingActivity.hasCompletionTracking) {
-        const actSection = admin.sections.find((s) =>
-          s.activities.some((a) => a.name === matchingActivity.name),
-        )
-        const modData = apiModuleData?.get(matchingActivity.name.toLowerCase())
-        console.log(
-          `  apiModuleData for "${matchingActivity.name.toLowerCase()}": ${JSON.stringify(modData ?? '(none)')}`,
-        )
-        if (modData?.isautomatic === true) {
-          console.log(`  → SKIPPED (isautomatic=true)`)
-          continue
-        }
-        let severity: 'critical' | 'warning' = 'critical'
-        let detail: string
-        if (modData?.completion === 1) {
-          severity = 'warning'
-          detail = `Para desbloquear "${firstRestricted.title}" hace falta que "${required}" esté completada. El servidor indica que el seguimiento es manual (completion=1), pero la casilla de verificación no se renderiza en la página. Posible bug de interfaz o permiso faltante.`
-        } else {
-          detail = `Para desbloquear "${firstRestricted.title}" hace falta que "${required}" esté completada, pero al recorrer el curso como alumno nuevo no encontramos ninguna forma de marcarla como completada (no hay casilla de verificación ni progreso automático). Esto impide el avance a "${firstRestricted.title}" y a los módulos siguientes.`
-        }
-        findings.push({
-          severity,
-          sectionNumber: actSection?.number ?? firstRestricted.number,
-          sectionTitle: actSection?.title ?? firstRestricted.title,
-          message: `"${required}" está en "${actSection?.title ?? '?'}" pero no puede marcarse como completada`,
-          detail,
-          priority: 'high',
-          actionItem:
-            'Agregar la actividad faltante o corregir la condición de disponibilidad en la configuración del módulo bloqueado.',
-        })
-      }
+                return {
+                    name,
+                    type: modType,
+                    href: linkEl?.getAttribute('href') || '',
+                    isVisible: !isDimmed,
+                    hasCompletionTracking: hasCheckbox || !!autoComplete,
+                    isComplete: checkboxChecked || false,
+                    availabilityInfo,
+                };
+            });
+        }, sectionNumber);
     }
 
-    if (cascadeCount > 0) {
-      const cascadeNames = sectionsWithRestrictions
-        .slice(1)
-        .map((s) => `"${s.title}"`)
-        .join(', ')
-      findings.push({
-        severity: 'info',
-        sectionNumber: firstRestricted.number,
-        sectionTitle: firstRestricted.title,
-        message: `${cascadeCount} módulo(s) dependen de "${firstRestricted.title}"`,
-        detail: `Los módulos ${cascadeNames} están bloqueados porque dependen de "${firstRestricted.title}". No es un error nuevo — es consecuencia de la restricción anterior.`,
-        priority: 'low',
-        actionItem: 'No requiere acción directa — es consecuencia del hallazgo anterior.',
-      })
+    @atc('MC-5', { story: 'UNC-RE-1', feature: 'Course Scan' })
+    async getCourseName(): Promise<string> {
+        return this.page.title();
     }
 
-    if (student) {
-      const visibleStudentActivities = new Set(
-        student.sections
-          .flatMap((s) => s.activities)
-          .filter((a) => a.isVisible)
-          .map((a) => a.name.toLowerCase()),
-      )
-
-      const visibilityPhantoms: AuditFinding[] = []
-      const checkedNames = new Set<string>()
-
-      for (const required of activityNames) {
-        const normalized = required.toLowerCase()
-        if (checkedNames.has(normalized)) continue
-        checkedNames.add(normalized)
-
-        // Skip auto-completion activities — they work fine even if dimmed in UI
-        const actData = apiModuleData?.get(normalized)
-        if (actData?.isautomatic === true) {
-          console.log(`  → Visibility phantom: "${required}" is auto-complete, skipping`)
-          continue
-        }
-
-        const existsInAdmin = admin.sections
-          .flatMap((s) => s.activities)
-          .some(
-            (a) =>
-              a.name.toLowerCase().includes(normalized) ||
-              normalized.includes(a.name.toLowerCase()),
-          )
-        if (!existsInAdmin) continue
-
-        const existsInStudent = Array.from(visibleStudentActivities).some(
-          (v) => v.includes(normalized) || normalized.includes(v),
-        )
-
-        if (!existsInStudent) {
-          console.log(`  → Visibility phantom FIRED for "${required}"`)
-          visibilityPhantoms.push({
-            severity: 'critical',
-            sectionNumber: firstRestricted.number,
-            sectionTitle: firstRestricted.title,
-            message: `"${required}" existe en el curso pero NO es visible para estudiantes`,
-            detail: `El recurso "${required}" aparece en la vista de administrador pero no está disponible para los estudiantes. Las condiciones de disponibilidad del módulo bloqueado requieren esta actividad, creando un punto muerto.`,
-            actionItem:
-              'Revisar visibilidad del recurso en la configuración del curso. Si debe estar disponible para estudiantes, cambiar visible=1 en los ajustes del módulo.',
-            priority: 'high',
-          })
-        }
-      }
-
-      findings.push(...visibilityPhantoms)
+    @atc('MC-6', { story: 'UNC-RE-1', feature: 'Course Scan' })
+    async takeScreenshot(filename: string): Promise<void> {
+        await this.page
+            .locator('.course-content, #region-main')
+            .first()
+            .scrollIntoViewIfNeeded()
+            .catch(() => {});
+        await this.page.screenshot({ path: filename, fullPage: false });
     }
 
-    if (nelthorData) {
-      for (const finding of findings) {
-        if (finding.severity !== 'critical') continue
-        const nameMatch = finding.message.match(/"([^"]+)"/)
-        if (!nameMatch) continue
-        const originalName = nameMatch[1]
-        const nelthorEntry = nelthorData.get(originalName.toLowerCase())
-        if (nelthorEntry && nelthorEntry.state === 1) {
-          // Check if the activity is auto-complete — if so, trust nelthor's completion
-          // (auto-complete activities complete when viewed, so nelthor viewed them)
-          const isAutoComplete =
-            apiModuleData?.get(originalName.toLowerCase())?.isautomatic === true
-          if (!isAutoComplete && student) {
-            // Only downgrade if the activity is visible to students in switch-role view.
-            // If nelthor completed it but students can't see it, the completion was
-            // admin-assisted (downloaded/viewed as admin, not as student).
-            const visibleInStudent = student.sections
-              .flatMap((s) => s.activities)
-              .some(
-                (a) =>
-                  a.name.toLowerCase().includes(originalName.toLowerCase()) ||
-                  originalName.toLowerCase().includes(a.name.toLowerCase()),
-              )
-            if (!visibleInStudent) {
-              console.log(
-                `  → nelthor completed "${originalName}" but it's NOT visible to students — completion was admin-assisted, NOT downgrading`,
-              )
-              finding.detail +=
-                ' [Nelthor completó esta actividad como administrador (no como estudiante). Los estudiantes no pueden verla ni completarla por sí mismos.]'
-              continue
+    @atc('MC-10', { story: 'UNC-RE-1', feature: 'Show More Detection' })
+    async detectShowMoreBug(sectionNumber: number): Promise<{
+        hasShowMore: boolean;
+        showMoreExpands: boolean;
+        detail: string;
+    }> {
+        const result = { hasShowMore: false, showMoreExpands: false, detail: '' };
+
+        try {
+            // Ensure we're on the course page
+            const currentUrl = this.page.url();
+            if (!currentUrl.includes('/course/view.php')) {
+                // Navigate to course — find course ID from URL
+                const courseIdMatch
+                    = currentUrl.match(/[?&]course=(\d+)/) || currentUrl.match(/[?&]id=(\d+)/);
+                const cid = courseIdMatch ? courseIdMatch[1] : '269';
+                await this.goToCourse(cid);
             }
-          }
-          finding.severity = 'info'
-          finding.priority = 'low'
-          finding.detail +=
-            ' [Nelthor (estudiante real) completó esta actividad sin problemas antes de ser administrador. Esto no bloqueó su avance. El hallazgo puede deberse a un cambio posterior en la configuración del curso.]'
+
+            // Find the info/question-mark icon near the locked tab
+            // In onetopic format, this is a small icon at the tab's top-right corner
+            // It's typically inside the disabled <li> for the section
+            const infoIconSelectors = [
+                `li.disabled i[title="Information"], li.disabled i[title="Información"]`,
+                `li.disabled i[href*="section=${sectionNumber}"] i[title*="Information"], li.disabled i[href*="section=${sectionNumber}"] i[title*="Información"]`,
+                `i[href*="section=${sectionNumber}"] ~ i[title], i[href*="section=${sectionNumber}"] + i`,
+                `li:has(i[href*="section=${sectionNumber}"]) i.fi, li:has(i[href*="section=${sectionNumber}"]) i[aria-label]`,
+                `i[aria-label*="information"], i[aria-label*="información"]`,
+            ];
+
+            let infoIcon = this.page.locator(infoIconSelectors[0]).first();
+            for (const sel of infoIconSelectors) {
+                const loc = this.page.locator(sel).first();
+                const count = await loc.count();
+                if (count > 0) {
+                    infoIcon = loc;
+                    break;
+                }
+            }
+
+            // Try clicking the info icon to open the modal
+            await infoIcon.click({ timeout: 3000 }).catch(() => {});
+            await this.page.waitForTimeout(600);
+
+            // If no specific info icon found, try clicking the locked tab itself
+            // (locked tabs may also trigger the popover on click)
+            const tabExists = await infoIcon.count();
+            if (!tabExists) {
+                const tab = this.page.locator(`a.nav-link[href*="section=${sectionNumber}"]`).first();
+                const tabCount = await tab.count();
+                if (!tabCount) {
+                    result.detail = `No tab or info icon found for section ${sectionNumber}`;
+                    return result;
+                }
+                await tab.click({ timeout: 3000 }).catch(() => {});
+                await this.page.waitForTimeout(600);
+            }
+
+            // Check for a modal/popover that appeared
+            // The modal is typically a Bootstrap modal or a custom overlay
+            const modalSelectors = [
+                '.modal.show',
+                '.modal.in',
+                '.popover.show',
+                '.availabilityinfo-modal',
+                `#format_onetopic_winfo_tab-${sectionNumber}`,
+            ];
+
+            let modalFound = false;
+            for (const sel of modalSelectors) {
+                const loc = this.page.locator(sel).first();
+                const count = await loc.count();
+                if (count > 0) {
+                    const visible = await loc.isVisible().catch(() => false);
+                    if (visible) {
+                        modalFound = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!modalFound) {
+                // Modal might not have appeared — search page for "Show More" anyway
+                result.detail = `No modal appeared after clicking tab ${sectionNumber}`;
+            }
+
+            // Search for "Show More" / "Mostrar más" visible on the page
+            const showMoreTexts = ['Show more', 'Show less', 'Mostrar más', 'Mostrar menos'];
+            const showMoreEls = await this.page.evaluate((texts) => {
+                const all = Array.from(document.querySelectorAll('a, button, span'));
+                return all
+                    .filter(
+                        el =>
+                            texts.some(t =>
+                                (el.textContent || '').trim().toLowerCase().includes(t.toLowerCase()),
+                            ) && el.getBoundingClientRect().width > 0,
+                    )
+                    .map(el => ({
+                        text: (el.textContent || '').trim().substring(0, 60),
+                        tag: el.tagName,
+                    }));
+            }, showMoreTexts);
+
+            if (showMoreEls.length === 0) {
+                result.detail = result.detail
+                    ? `${result.detail} — no "Show More" found on page`
+                    : `No "Show More" found on page for section ${sectionNumber}`;
+                return result;
+            }
+
+            result.hasShowMore = true;
+
+            // Click the Show More link
+            const target = showMoreEls.find(e => e.tag === 'A') || showMoreEls[0];
+            const clicked = await this.page.evaluate((text) => {
+                const all = Array.from(document.querySelectorAll('a, button'));
+                const match = all.find(
+                    el =>
+                        (el.textContent || '').trim().toLowerCase().includes(text.toLowerCase())
+                        && el.getBoundingClientRect().width > 0,
+                );
+                if (match) {
+                    ;(match as HTMLElement).click();
+                    return true;
+                }
+                return false;
+            }, target.text);
+
+            if (!clicked) {
+                result.detail = `Found "${target.text}" but could not click`;
+                return result;
+            }
+
+            await this.page.waitForTimeout(500);
+
+            // Check expansion
+            const expanded = await this.page.evaluate(() => {
+                const hasShowLess = Array.from(document.querySelectorAll('*')).some(
+                    el =>
+                        (el.textContent || '').trim().toLowerCase().includes('show less')
+                        || (el.textContent || '').trim().toLowerCase().includes('mostrar menos'),
+                );
+                if (hasShowLess)
+                    return true;
+                const info = document.querySelector('.availabilityinfo, .modal-body, .modal-content');
+                if (info) {
+                    const links = info.querySelectorAll('a');
+                    return links.length > 2;
+                }
+                return false;
+            });
+
+            if (expanded) {
+                result.showMoreExpands = true;
+                result.detail = '"Show More" expands correctly';
+            }
+            else {
+                result.showMoreExpands = false;
+                result.detail = `"${target.text}" clicked but no expansion — dropdown does not work for current user role`;
+            }
         }
-      }
+        catch (err) {
+            result.detail = `Show More detection error: ${err instanceof Error ? err.message : String(err)}`;
+        }
+
+        return result;
     }
 
-    return findings
-  }
+    @atc('MC-7', { story: 'UNC-RE-1', feature: 'Course Scan' })
+    async analyze(courseId: string): Promise<CourseStructure> {
+        await this.goToCourse(courseId);
+        const courseName = await this.page.title();
+        const courseUrl = this.page.url();
+        const tabs = await this.getTabs();
 
-  @atc('MC-8', { story: 'UNC-RE-1', feature: 'Course Scan' })
-  async getActivityCompletionReport(courseId: string): Promise<ActivityCompletionSummary[]> {
-    await this.page.goto(`${this.baseUrl}/report/completion/index.php?course=${courseId}`)
-    await this.page.waitForLoadState('load')
-    await this.page
-      .locator('table')
-      .first()
-      .waitFor({ state: 'visible', timeout: 15000 })
-      .catch(() => {})
+        const sections: SectionData[] = [];
+        for (const tab of tabs) {
+            await this.navigateToSection(tab.sectionNumber);
+            const title = await this.page.evaluate(
+                () => document.querySelector('.sectionname')?.textContent?.trim() || '',
+            );
+            const activities = await this.getSectionActivities(tab.sectionNumber);
+            const restrictionText
+                = tab.restrictionText
+                    || (await this.page.evaluate((secNum) => {
+                        const section = document.querySelector(`#section-${secNum}, li#section-${secNum}`);
+                        if (!section)
+                            return '';
+                        const avail = section.querySelector(
+                            '.section_availability .availabilityinfo, .availabilityinfo',
+                        );
+                        return avail?.textContent?.trim() || '';
+                    }, tab.sectionNumber));
 
-    return this.page.evaluate(() => {
-      const table = document.querySelector('table')
-      if (!table) return []
+            const visibleWithTracking = activities.filter(a => a.isVisible && a.hasCompletionTracking);
+            const allVisibleComplete
+                = visibleWithTracking.length > 0 && visibleWithTracking.every(a => a.isComplete);
 
-      const rows = Array.from(table.querySelectorAll('tr'))
-      if (rows.length < 2) return []
-
-      const headerCells = rows[0].querySelectorAll('th, td')
-      const activityNames: string[] = []
-      const sectionNames: string[] = []
-      for (let c = 0; c < headerCells.length; c++) {
-        const text = headerCells[c].textContent?.trim() || ''
-        if (text && text !== 'Nombre' && text !== 'Apellido' && text !== 'Nombre/Apellido') {
-          const cellHtml = headerCells[c].innerHTML
-          const secMatch = cellHtml.match(/<br\s*\/?>\s*(.+?)(?:\s*<|$)/i)
-          sectionNames.push(secMatch ? secMatch[1].trim() : '')
-          activityNames.push(text.replace(/<br\s*\/?>.+$/i, '').trim())
+            sections.push({
+                number: tab.sectionNumber,
+                title: title || tab.title,
+                isLocked: tab.isDisabled,
+                restrictionText,
+                activities,
+                allVisibleComplete,
+            });
         }
-      }
 
-      const dataRows = rows.slice(1).filter((r) => r.querySelector('td, th'))
-      const totalStudents = dataRows.length
-      if (totalStudents === 0) return []
+        return { courseName, courseUrl, tabs, sections };
+    }
 
-      const completedCounts = Array.from({ length: activityNames.length }, () => 0)
-      for (const row of dataRows) {
-        const cells = row.querySelectorAll('td, th')
-        let actCol = 0
-        const nameCols = cells.length - activityNames.length
-        for (let c = nameCols; c < cells.length && actCol < activityNames.length; c++, actCol++) {
-          const checkbox = cells[c].querySelector('input[type="checkbox"]:checked')
-          if (checkbox) completedCounts[actCol]++
+    findPhantoms(
+        admin: CourseStructure,
+        student?: CourseStructure,
+        apiModuleData?: Map<string, { completion: number; isautomatic: boolean }>,
+        nelthorData?: Map<string, { state: number; timecompleted?: number }>,
+    ): AuditFinding[] {
+        const findings: AuditFinding[] = [];
+
+        const sectionsWithRestrictions = admin.sections.filter(
+            s => s.restrictionText && s.restrictionText.trim().length > 3,
+        );
+
+        if (sectionsWithRestrictions.length === 0)
+            return findings;
+
+        const firstRestricted = sectionsWithRestrictions[0];
+        const cleanText = firstRestricted.restrictionText
+            .replace(/Show\s+more\s*Show\s+less/gi, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        const activityNames = new Set<string>();
+
+        const conditionSegments = cleanText.split(/\.\.\.\s*/);
+        for (const segment of conditionSegments) {
+            const enPattern = /The activity\s+([^,."]+?)\s+is marked complete/gi;
+            for (const m of segment.matchAll(enPattern)) {
+                activityNames.add(m[1].trim());
+            }
+            const passedPattern = /The activity\s+([^,."]+?)\s+is complete and passed/gi;
+            for (const m of segment.matchAll(passedPattern)) {
+                activityNames.add(m[1].trim());
+            }
+            const esPattern
+                = /La actividad\s+([^,."]+?)\s+(?:est[ée] marcada como completada|debe marcarse como completada|este[ée] completada)/gi;
+            for (const m of segment.matchAll(esPattern)) {
+                activityNames.add(m[1].trim());
+            }
         }
-      }
 
-      return activityNames.map((name, i) => ({
-        activityName: name,
-        sectionName: sectionNames[i] || '',
-        totalStudents,
-        completedCount: completedCounts[i],
-        completionRate:
+        const quotePattern = /"([^"]+)"/g;
+        for (const m of cleanText.matchAll(quotePattern)) {
+            const name = m[1].trim();
+            if (name.length > 2 && name.length < 120)
+                activityNames.add(name);
+        }
+
+        const cascadeCount = sectionsWithRestrictions.length - 1;
+
+        console.log('\n=== PHANTOM DIAGNOSTIC ===');
+        console.log(`Section: "${firstRestricted.title}"`);
+        console.log(`Restriction text: "${firstRestricted.restrictionText}"`);
+        console.log(
+            `Activity names parsed: ${Array.from(activityNames)
+                .map(n => `"${n}"`)
+                .join(', ')}`,
+        );
+        console.log(
+            `Admin activities: ${admin.sections.flatMap(s => s.activities.map(a => `"${a.name}"(visible=${a.isVisible}, completion=${a.hasCompletionTracking})`)).join(', ')}`,
+        );
+
+        for (const required of activityNames) {
+            const normalized = required.toLowerCase();
+            const matchingActivity = admin.sections
+                .flatMap(s => s.activities)
+                .find(
+                    a =>
+                        a.name.toLowerCase().includes(normalized) || normalized.includes(a.name.toLowerCase()),
+                );
+
+            console.log(`Required: "${required}" → matched: "${matchingActivity?.name ?? '(none)'}"`);
+
+            if (!matchingActivity) {
+                findings.push({
+                    severity: 'critical',
+                    sectionNumber: firstRestricted.number,
+                    sectionTitle: firstRestricted.title,
+                    message: `Actividad requerida "${required}" no encontrada en el curso`,
+                    detail: `El módulo "${firstRestricted.title}" está bloqueado por "${required}" según su condición de disponibilidad, pero no existe ninguna actividad con ese nombre en el curso. Esto impide el avance de cualquier estudiante nuevo.`,
+                    priority: 'high',
+                    actionItem:
+            'Agregar la actividad faltante o corregir la condición de disponibilidad en la configuración del módulo bloqueado.',
+                });
+            }
+            else if (!matchingActivity.hasCompletionTracking) {
+                const actSection = admin.sections.find(s =>
+                    s.activities.some(a => a.name === matchingActivity.name),
+                );
+                const modData = apiModuleData?.get(matchingActivity.name.toLowerCase());
+                console.log(
+                    `  apiModuleData for "${matchingActivity.name.toLowerCase()}": ${JSON.stringify(modData ?? '(none)')}`,
+                );
+                if (modData?.isautomatic === true) {
+                    console.log(`  → SKIPPED (isautomatic=true)`);
+                    continue;
+                }
+                let severity: 'critical' | 'warning' = 'critical';
+                let detail: string;
+                if (modData?.completion === 1) {
+                    severity = 'warning';
+                    detail = `Para desbloquear "${firstRestricted.title}" hace falta que "${required}" esté completada. El servidor indica que el seguimiento es manual (completion=1), pero la casilla de verificación no se renderiza en la página. Posible bug de interfaz o permiso faltante.`;
+                }
+                else {
+                    detail = `Para desbloquear "${firstRestricted.title}" hace falta que "${required}" esté completada, pero al recorrer el curso como alumno nuevo no encontramos ninguna forma de marcarla como completada (no hay casilla de verificación ni progreso automático). Esto impide el avance a "${firstRestricted.title}" y a los módulos siguientes.`;
+                }
+                findings.push({
+                    severity,
+                    sectionNumber: actSection?.number ?? firstRestricted.number,
+                    sectionTitle: actSection?.title ?? firstRestricted.title,
+                    message: `"${required}" está en "${actSection?.title ?? '?'}" pero no puede marcarse como completada`,
+                    detail,
+                    priority: 'high',
+                    actionItem:
+            'Agregar la actividad faltante o corregir la condición de disponibilidad en la configuración del módulo bloqueado.',
+                });
+            }
+        }
+
+        if (cascadeCount > 0) {
+            const cascadeNames = sectionsWithRestrictions
+                .slice(1)
+                .map(s => `"${s.title}"`)
+                .join(', ');
+            findings.push({
+                severity: 'info',
+                sectionNumber: firstRestricted.number,
+                sectionTitle: firstRestricted.title,
+                message: `${cascadeCount} módulo(s) dependen de "${firstRestricted.title}"`,
+                detail: `Los módulos ${cascadeNames} están bloqueados porque dependen de "${firstRestricted.title}". No es un error nuevo — es consecuencia de la restricción anterior.`,
+                priority: 'low',
+                actionItem: 'No requiere acción directa — es consecuencia del hallazgo anterior.',
+            });
+        }
+
+        if (student) {
+            const visibleStudentActivities = new Set(
+                student.sections
+                    .flatMap(s => s.activities)
+                    .filter(a => a.isVisible)
+                    .map(a => a.name.toLowerCase()),
+            );
+
+            const visibilityPhantoms: AuditFinding[] = [];
+            const checkedNames = new Set<string>();
+
+            for (const required of activityNames) {
+                const normalized = required.toLowerCase();
+                if (checkedNames.has(normalized))
+                    continue;
+                checkedNames.add(normalized);
+
+                // Skip auto-completion activities — they work fine even if dimmed in UI
+                const actData = apiModuleData?.get(normalized);
+                if (actData?.isautomatic === true) {
+                    console.log(`  → Visibility phantom: "${required}" is auto-complete, skipping`);
+                    continue;
+                }
+
+                const existsInAdmin = admin.sections
+                    .flatMap(s => s.activities)
+                    .some(
+                        a =>
+                            a.name.toLowerCase().includes(normalized)
+                            || normalized.includes(a.name.toLowerCase()),
+                    );
+                if (!existsInAdmin)
+                    continue;
+
+                const existsInStudent = Array.from(visibleStudentActivities).some(
+                    v => v.includes(normalized) || normalized.includes(v),
+                );
+
+                if (!existsInStudent) {
+                    console.log(`  → Visibility phantom FIRED for "${required}"`);
+                    visibilityPhantoms.push({
+                        severity: 'critical',
+                        sectionNumber: firstRestricted.number,
+                        sectionTitle: firstRestricted.title,
+                        message: `"${required}" existe en el curso pero NO es visible para estudiantes`,
+                        detail: `El recurso "${required}" aparece en la vista de administrador pero no está disponible para los estudiantes. Las condiciones de disponibilidad del módulo bloqueado requieren esta actividad, creando un punto muerto.`,
+                        actionItem:
+              'Revisar visibilidad del recurso en la configuración del curso. Si debe estar disponible para estudiantes, cambiar visible=1 en los ajustes del módulo.',
+                        priority: 'high',
+                    });
+                }
+            }
+
+            findings.push(...visibilityPhantoms);
+        }
+
+        if (nelthorData) {
+            for (const finding of findings) {
+                if (finding.severity !== 'critical')
+                    continue;
+                const nameMatch = finding.message.match(/"([^"]+)"/);
+                if (!nameMatch)
+                    continue;
+                const originalName = nameMatch[1];
+                const nelthorEntry = nelthorData.get(originalName.toLowerCase());
+                if (nelthorEntry && nelthorEntry.state === 1) {
+                    // Check if the activity is auto-complete — if so, trust nelthor's completion
+                    // (auto-complete activities complete when viewed, so nelthor viewed them)
+                    const isAutoComplete
+                        = apiModuleData?.get(originalName.toLowerCase())?.isautomatic === true;
+                    if (!isAutoComplete && student) {
+                        // Only downgrade if the activity is visible to students in switch-role view.
+                        // If nelthor completed it but students can't see it, the completion was
+                        // admin-assisted (downloaded/viewed as admin, not as student).
+                        const visibleInStudent = student.sections
+                            .flatMap(s => s.activities)
+                            .some(
+                                a =>
+                                    a.name.toLowerCase().includes(originalName.toLowerCase())
+                                    || originalName.toLowerCase().includes(a.name.toLowerCase()),
+                            );
+                        if (!visibleInStudent) {
+                            console.log(
+                                `  → nelthor completed "${originalName}" but it's NOT visible to students — completion was admin-assisted, NOT downgrading`,
+                            );
+                            finding.detail
+                                += ' [Nelthor completó esta actividad como administrador (no como estudiante). Los estudiantes no pueden verla ni completarla por sí mismos.]';
+                            continue;
+                        }
+                    }
+                    finding.severity = 'info';
+                    finding.priority = 'low';
+                    finding.detail
+                        += ' [Nelthor (estudiante real) completó esta actividad sin problemas antes de ser administrador. Esto no bloqueó su avance. El hallazgo puede deberse a un cambio posterior en la configuración del curso.]';
+                }
+            }
+        }
+
+        return findings;
+    }
+
+    @atc('MC-8', { story: 'UNC-RE-1', feature: 'Course Scan' })
+    async getActivityCompletionReport(courseId: string): Promise<ActivityCompletionSummary[]> {
+        await this.page.goto(`${this.baseUrl}/report/completion/index.php?course=${courseId}`);
+        await this.page.waitForLoadState('load');
+        await this.page
+            .locator('table')
+            .first()
+            .waitFor({ state: 'visible', timeout: 15000 })
+            .catch(() => {});
+
+        return this.page.evaluate(() => {
+            const table = document.querySelector('table');
+            if (!table)
+                return [];
+
+            const rows = Array.from(table.querySelectorAll('tr'));
+            if (rows.length < 2)
+                return [];
+
+            const headerCells = rows[0].querySelectorAll('th, td');
+            const activityNames: string[] = [];
+            const sectionNames: string[] = [];
+            for (let c = 0; c < headerCells.length; c++) {
+                const text = headerCells[c].textContent?.trim() || '';
+                if (text && text !== 'Nombre' && text !== 'Apellido' && text !== 'Nombre/Apellido') {
+                    const cellHtml = headerCells[c].innerHTML;
+                    const secMatch = cellHtml.match(/<br\s*\/?>\s*(.+?)(?:\s*<|$)/i);
+                    sectionNames.push(secMatch ? secMatch[1].trim() : '');
+                    activityNames.push(text.replace(/<br\s*\/?>.+$/i, '').trim());
+                }
+            }
+
+            const dataRows = rows.slice(1).filter(r => r.querySelector('td, th'));
+            const totalStudents = dataRows.length;
+            if (totalStudents === 0)
+                return [];
+
+            const completedCounts = Array.from({ length: activityNames.length }, () => 0);
+            for (const row of dataRows) {
+                const cells = row.querySelectorAll('td, th');
+                let actCol = 0;
+                const nameCols = cells.length - activityNames.length;
+                for (let c = nameCols; c < cells.length && actCol < activityNames.length; c++, actCol++) {
+                    const checkbox = cells[c].querySelector('input[type="checkbox"]:checked');
+                    if (checkbox)
+                        completedCounts[actCol]++;
+                }
+            }
+
+            return activityNames.map((name, i) => ({
+                activityName: name,
+                sectionName: sectionNames[i] || '',
+                totalStudents,
+                completedCount: completedCounts[i],
+                completionRate:
           totalStudents > 0 ? Math.round((completedCounts[i] / totalStudents) * 10000) / 100 : 0,
-      }))
-    })
-  }
+            }));
+        });
+    }
 }
