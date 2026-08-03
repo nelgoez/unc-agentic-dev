@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="es" data-theme="catppuccin-mocha">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>QA Audit UNC · Propuesta</title>
+    <link rel="stylesheet" href="assets/fonts.css" />
+    <link rel="stylesheet" href="assets/base.css" />
+    <link rel="stylesheet" id="theme-link" href="assets/themes/pitch-deck-vc.css" />
+    <link rel="stylesheet" href="assets/animations/animations.css" />
+    <style>
+      .big-number {
+        font-size: 3.5em;
+        font-weight: 900;
+        color: var(--accent);
+        line-height: 1;
+      }
+      .big-number.warn {
+        color: var(--warn);
+      }
+      .big-number-bad {
+        color: var(--bad);
+        font-size: 3.5em;
+        font-weight: 900;
+        line-height: 1;
+      }
+      .truth-box {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 28px;
+        border: 2px solid var(--accent);
+        text-align: center;
+      }
+      .truth-box p {
+        font-size: 0.92em;
+        color: var(--text-2);
+        margin-top: 8px;
+      }
+      .arrow-down {
+        font-size: 2.5em;
+        text-align: center;
+        color: var(--accent);
+        padding: 8px 0;
+      }
+      .phase-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 20px 24px;
+        border-left: 4px solid var(--accent);
+      }
+      .phase-card.one {
+        border-left-color: var(--good);
+      }
+      .phase-card.two {
+        border-left-color: var(--accent);
+      }
+      .phase-card.three {
+        border-left-color: var(--warn);
+      }
+      .phase-label {
+        font-size: 0.72em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-2);
+        margin-bottom: 4px;
+      }
+      .price-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .price-box {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        text-align: center;
+        flex: 1;
+        min-width: 200px;
+        border: 1px solid var(--border);
+      }
+      .price-box .amount {
+        font-size: 1.8em;
+        font-weight: 900;
+        color: var(--accent);
+      }
+      .price-box .label {
+        font-size: 0.78em;
+        color: var(--text-2);
+        margin-top: 4px;
+      }
+      .evidence-link {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: var(--radius);
+        background: var(--accent);
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        margin-top: 12px;
+        font-size: 0.9em;
+      }
+      .conf-bars {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 12px;
+      }
+      .conf-bar {
+        flex: 1;
+        min-width: 140px;
+      }
+      .conf-bar .bar-label {
+        font-size: 0.75em;
+        color: var(--text-2);
+        margin-bottom: 4px;
+      }
+      .conf-bar .bar-track {
+        height: 6px;
+        background: var(--bg-soft);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .conf-bar .bar-fill {
+        height: 100%;
+        border-radius: 3px;
+      }
+      .bar-locked {
+        background: var(--good);
+        width: 100%;
+      }
+      .bar-docs {
+        background: var(--warn);
+        width: 17%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="deck">
+      <!-- Slide 1: The Hook -->
+      <section class="slide" data-title="El caso">
+        <p class="kicker">UNC Campus Virtual · Agosto 2026</p>
+        <h1>La calidad de un curso no se puede verificar a ojo</h1>
+        <div class="grid g2 mt-m">
+          <div>
+            <div class="big-number-bad">3</div>
+            <p class="dim2" style="font-size: 0.85em">
+              meses tardó en detectarse un error donde una actividad de referencia no existía y
+              bloqueaba el curso entero.
+            </p>
+          </div>
+          <div>
+            <div class="big-number">31</div>
+            <p class="dim2" style="font-size: 0.85em">
+              actividades por curso. Gates. Completion tracking. Certificados. Todo invisible sin
+              una herramienta.
+            </p>
+          </div>
+        </div>
+        <div class="truth-box mt-s">
+          <strong style="font-size: 1.1em"
+            >Nuestra propuesta: auditoría automática. Sin instalar nada. Sin cambiar
+            procesos.</strong
+          >
+          <p>
+            Un reporte que se actualiza solo y te dice exactamente qué funciona, qué no, y por qué.
+          </p>
+          <a
+            href="https://nelgoez.github.io/unc-agentic-dev/audit/304/latest.html"
+            class="evidence-link"
+            >Ver ejemplo real → Curso 304</a
+          >
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">Auditoría Automática de Cursos Moodle</span>
+          <span class="slide-number" data-current="1" data-total="6"></span>
+        </div>
+      </section>
+
+      <!-- Slide 2: How it works -->
+      <section class="slide" data-title="Cómo funciona">
+        <p class="kicker">Tecnología, no magia</p>
+        <h2>Dos capas de información</h2>
+        <div class="grid g2 mt-m">
+          <div class="phase-card one">
+            <div class="phase-label">Capa 1 — API de Moodle</div>
+            <h4>100% confiable</h4>
+            <p class="dim2" style="font-size: 0.82em">
+              Estructura del curso. Gates entre módulos. Completion tracking. Certificados.
+              Huérfanos. Todo lo que Moodle ya sabe, nosotros lo leemos.
+            </p>
+            <div class="conf-bar" style="margin-top: 12px">
+              <div class="bar-track"><div class="bar-fill bar-locked"></div></div>
+              <div class="bar-label">Precisión: 100%</div>
+            </div>
+          </div>
+          <div class="phase-card two">
+            <div class="phase-label">Capa 2 — Documentación del equipo</div>
+            <h4>Tan precisa como sus documentos</h4>
+            <p class="dim2" style="font-size: 0.82em">
+              Pre-montaje. Validación. Planilla de control. Si los nombres matchean, el mapeo es
+              perfecto. Si no, lo marcamos.
+            </p>
+            <div class="conf-bar" style="margin-top: 12px">
+              <div class="bar-track"><div class="bar-fill bar-docs"></div></div>
+              <div class="bar-label">Precisión: depende de docs</div>
+            </div>
+          </div>
+        </div>
+        <div class="truth-box mt-s">
+          <strong>No es una limitación. Es honestidad.</strong>
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">Auditoría Automática de Cursos Moodle</span>
+        </div>
+      </section>
+
+      <!-- Slide 3: The Core Truth -->
+      <section class="slide" data-title="El principio">
+        <p class="kicker">La verdad incómoda</p>
+        <h2>Cualquier herramienta de QA es tan buena como los procesos que audita</h2>
+        <div class="grid g2 mt-m">
+          <div class="phase-card one">
+            <h4>Si sus procesos son claros</h4>
+            <ul style="font-size: 0.85em; line-height: 2">
+              <li>Nombres estandarizados → mapeo 90%+</li>
+              <li>Gates documentados → 0 falsos positivos</li>
+              <li>Trazabilidad completa → auditoría quirúrgica</li>
+            </ul>
+          </div>
+          <div class="phase-card three">
+            <h4>Si sus procesos son los actuales</h4>
+            <ul style="font-size: 0.85em; line-height: 2">
+              <li>Nombres inconsistentes → mapeo bajo</li>
+              <li>Gates no documentados → verificación manual</li>
+              <li>Docs dispersos → reporte con advertencias</li>
+            </ul>
+          </div>
+        </div>
+        <p
+          class="mt-s"
+          style="font-size: 0.9em; color: var(--accent); font-weight: 600; text-align: center"
+        >
+          Por eso nuestra propuesta escala CON sus procesos. No les pedimos que cambien nada hoy.
+        </p>
+        <div class="deck-footer">
+          <span class="dim2">Auditoría Automática de Cursos Moodle</span>
+        </div>
+      </section>
+
+      <!-- Slide 4: The Ladder -->
+      <section class="slide" data-title="La escalera">
+        <p class="kicker">El camino propuesto</p>
+        <h2>Arrancar con lo que tienen → mejorar con datos</h2>
+
+        <div class="phase-card one" style="margin-bottom: 12px">
+          <div class="phase-label">Fase 1 — AHORA</div>
+          <h4>Herramienta de auditoría</h4>
+          <p class="dim2" style="font-size: 0.82em">
+            Setup inmediato. Sin cambiar procesos. Reportes web accesibles con un link. Re-ejecución
+            con 1 click. Actualización semanal automática.
+          </p>
+          <p style="font-size: 0.78em; color: var(--good); margin-top: 6px">
+            <strong>Setup USD 3.500-5.000 | Mantenimiento USD 500-800/mes</strong>
+          </p>
+        </div>
+        <div class="arrow-down">↓</div>
+        <div class="phase-card two" style="margin-bottom: 12px">
+          <div class="phase-label">Fase 2 — CON DATOS (2-3 meses)</div>
+          <h4>Los reportes revelan patrones</h4>
+          <p class="dim2" style="font-size: 0.82em">
+            "El 83% de las actividades no matchean con docs." "3 de 5 cursos tienen gates sin
+            documentar." Con evidencia concreta, la decisión de estandarizar se justifica sola.
+          </p>
+          <p style="font-size: 0.78em; color: var(--text-2); margin-top: 6px">
+            Sin costo adicional. Es parte del servicio.
+          </p>
+        </div>
+        <div class="arrow-down">↓</div>
+        <div class="phase-card three">
+          <div class="phase-label">Fase 3 — SI QUIEREN (opcional)</div>
+          <h4>Consultoría de estandarización</h4>
+          <p class="dim2" style="font-size: 0.82em">
+            Estandarizamos naming, templates, gates y trazabilidad. La herramienta pasa de ~17% a
+            ~90% de precisión en el mapeo doc↔producción. Reportes quirúrgicos.
+          </p>
+          <p style="font-size: 0.78em; color: var(--warn); margin-top: 6px">
+            Solo si los datos de la Fase 2 lo justifican. El costo de Fase 1 se descuenta.
+          </p>
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">Auditoría Automática de Cursos Moodle</span>
+        </div>
+      </section>
+
+      <!-- Slide 5: Evidence -->
+      <section class="slide" data-title="Evidencia">
+        <p class="kicker">No es teoría</p>
+        <h2>Ya auditamos dos cursos</h2>
+        <div class="grid g2 mt-m">
+          <div class="phase-card one">
+            <h4>Curso 304 — Violencias Digitales</h4>
+            <div class="kpi-row" style="justify-content: flex-start; margin: 12px 0">
+              <div style="text-align: center">
+                <div class="big-number" style="font-size: 1.8em">9</div>
+                <div class="dim2" style="font-size: 0.7em">secciones</div>
+              </div>
+              <div style="text-align: center">
+                <div class="big-number" style="font-size: 1.8em">31</div>
+                <div class="dim2" style="font-size: 0.7em">actividades</div>
+              </div>
+              <div style="text-align: center">
+                <div class="big-number" style="font-size: 1.8em">6</div>
+                <div class="dim2" style="font-size: 0.7em">gates OK</div>
+              </div>
+              <div style="text-align: center">
+                <div class="big-number warn" style="font-size: 1.8em">0</div>
+                <div class="dim2" style="font-size: 0.7em">errores</div>
+              </div>
+            </div>
+            <p class="dim2" style="font-size: 0.78em">
+              Con documentos de diseño instruccional. Mapeo doc↔producción al 17% — refleja la
+              dispersión de nombres en sus docs actuales.
+            </p>
+          </div>
+          <div class="phase-card two">
+            <h4>Curso 269 — Python</h4>
+            <div class="kpi-row" style="justify-content: flex-start; margin: 12px 0">
+              <div style="text-align: center">
+                <div class="big-number" style="font-size: 1.8em">5</div>
+                <div class="dim2" style="font-size: 0.7em">secciones</div>
+              </div>
+              <div style="text-align: center">
+                <div class="big-number" style="font-size: 1.8em">46</div>
+                <div class="dim2" style="font-size: 0.7em">actividades</div>
+              </div>
+              <div style="text-align: center">
+                <div class="big-number warn" style="font-size: 1.8em">0</div>
+                <div class="dim2" style="font-size: 0.7em">errores</div>
+              </div>
+            </div>
+            <p class="dim2" style="font-size: 0.78em">
+              Sin documentos. Solo auditoría de estructura API. Si nos pasan los docs de este curso,
+              se completa el mapeo.
+            </p>
+          </div>
+        </div>
+        <a href="https://nelgoez.github.io/unc-agentic-dev/audit/" class="evidence-link"
+          >Ver todos los reportes →</a
+        >
+        <div class="deck-footer">
+          <span class="dim2">Auditoría Automática de Cursos Moodle</span>
+        </div>
+      </section>
+
+      <!-- Slide 6: Next Step -->
+      <section class="slide" data-title="Próximo paso">
+        <p class="kicker">Concreto</p>
+        <h2>¿Qué necesitamos de ustedes?</h2>
+        <div class="grid g3 mt-m" style="grid-template-columns: repeat(3, 1fr); gap: 16px">
+          <div class="phase-card one">
+            <div class="phase-label">1</div>
+            <h4>Decisión</h4>
+            <p class="dim2" style="font-size: 0.8em">
+              Aprobar la Fase 1 (herramienta de auditoría). Sin compromiso a largo plazo.
+            </p>
+          </div>
+          <div class="phase-card two">
+            <div class="phase-label">2</div>
+            <h4>Acceso</h4>
+            <p class="dim2" style="font-size: 0.8em">
+              Lista de IDs de cursos que quieren auditar. Docs de diseño instruccional de los que
+              tengan.
+            </p>
+          </div>
+          <div class="phase-card three">
+            <div class="phase-label">3</div>
+            <h4>Tiempo</h4>
+            <p class="dim2" style="font-size: 0.8em">
+              1 semana para tener el primer reporte completo. Reunión de revisión a los 30 días.
+            </p>
+          </div>
+        </div>
+        <div class="truth-box mt-m">
+          <strong>Si funciona, escalamos. Si no, paramos.</strong>
+          <p>Sin contratos largos. Sin compromisos que no se puedan deshacer.</p>
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">Auditoría Automática de Cursos Moodle</span>
+          <span class="slide-number" data-current="1" data-total="6"></span>
+        </div>
+      </section>
+    </div>
+    <script src="assets/runtime.js"></script>
+  </body>
+</html>
