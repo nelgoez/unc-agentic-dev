@@ -1,78 +1,129 @@
-# Session 2026-08-03 — Live Audit Quality FIX & Proposal Finalization
+# Session 2026-08-03 — Live Audit Quality FIX, PDF, Pricing & Proposal Delivery
 
 ## Summary
 
-Audited all live assets (GitHub Pages + Netlify), found systemic quality issues, and fixed them across all workstreams. Consolidated formal proposal ready to send.
+Full audit of all live assets (GitHub Pages + Netlify), fixed systemic quality issues, restructured pricing based on UNC procurement research, generated PDF proposal, improved report UX, and email sent to UNC.
 
-## Audit findings (before fix)
+**Propuesta ya enviada por mail** a Ignacio/Fernando con CC a Patricia.
 
-### GitHub Pages — Grade: B-
+---
 
-- **Cero tildes** en todo el español (~40 palabras sin acentos)
-- Root page (C-): redirect pelado, sin viewport meta, sin branding
-- Audit index (B-): funcional pero sin tildes, sin branding, sin contacto
-- Reports 304/269: sin tildes, findings engine mostraba 0/0/0
-- Sin contacto en ninguna página
+## Phase 1 — Live Asset Audit & Quality Sweep
 
-### Netlify — Grade: C
+### GitHub Pages (nelgoez.github.io) — Before: B-, After: A
 
-- **3 historias de precio incompatibles**: $0 (index) vs ARS (focus) vs USD (qa)
-- Typo "Scannea" en slide 11 del pitch index
-- "Elegí" informal en lugar de "Elija"
-- propuesta-qa.html huérfana (sin links desde las otras páginas)
-- Sin contacto en ninguna página
+Fixes:
 
-## Fixes applied
-
-### Bloque 1 — Tipo de cambio y propuesta consolidada
-
-- **Pricing unificado a triple moneda**: Módulos UNC ($48.696, RESOL-2026-15-UNC-SGI#AGI) + ARS + USD
-- **Verificación independiente** del valor del módulo contra página oficial UNC
-- Documento consolidado: `.context/propuesta-qa-unc-consolidada.md`
-- Docs anteriores marcados como superseded
-
-### Bloque 2 — Tildes y branding (reports HTML)
-
-- `scripts/report/generateAuditHtml.ts`: ~25 tildes corregidas + contacto + branding
-- `scripts/report/buildAuditData.ts`: findings engine calibrado
+- **~25 tildes** added across `generateAuditHtml.ts`, `generateAuditIndex.ts` (sistemático)
+- **Root page** (`reports/index.html`): viewport meta, branding, contexto, contacto
+- **Contacto** (`nagomez@mi.unc.edu.ar`) in footer of every report + index
+- **Findings engine** calibrated in `buildAuditData.ts`:
   - Doc mapping <30% → warning
   - Doc mapping 30-60% → info
   - Duplicate section names → info
-- `scripts/report/generateAuditIndex.ts`: tildes + contacto + singular/plural
+- **"Solo en producción"** changed from flat callout → collapsible `<details>` dropdown
+- **"Solo en docs"** also now auto-expands when ≤5 items
 
-### Bloque 3 — Pitch decks Netlify
+### Netlify (unc-course-kit.netlify.app) — Before: C, After: A
 
-- `docs/pitch/index.html`: "Scannea"→"Escanea", "Elegí"→"Elija", backlinks
-- `docs/pitch/propuesta-qa-focus.html`: ARS→módulos+ARS, backlinks a propuesta-qa.html
-- `docs/pitch/propuesta-qa.html`: USD→módulos+ARS+USD, backlinks, contacto
+Fixes:
 
-### Bloque 4 — Root page + findings
+- **Pricing unified** to triple currency (Módulos UNC $48.696 + ARS + USD) across all 3 pages
+- **"Scannea" → "Escanea"**, **"Elegí" → "Elija"** in `index.html`
+- **Backlinks** added between all 3 pages (footer triangle: index ↔ focus ↔ 3-opciones)
+- **PDF download button** on both pitch decks
+- **Contact** on all pages
 
-- `reports/index.html`: viewport meta, branding, contacto, contexto
-- Findings ahora muestra 1 advertencia en 304 (mapeo al 17%)
+---
 
-### Bloque 5 — Email draft
+## Phase 2 — Pricing Research & Restructure
 
-- `.context/email-propuesta-qa-unc.md`: borrador para Ignacio/Fernando con CC sugerido a Patricia
+### UNC procurement modalities (verified via webfetch + Tavily)
 
-### Bloque 6 — Regenerated reports
+| Finding               | Detail                                                                       |
+| --------------------- | ---------------------------------------------------------------------------- |
+| Módulo 2026           | **$48.696** (RESOL-2026-15-UNC-SGI#AGI) — verified against UNC official page |
+| Contracting regime    | OHCS 4/2025 + OHCS 5/2012 (locación de servicios profesional independiente)  |
+| Portal                | SIU-Huarpe (https://proveedores.huarpe.unc.edu.ar)                           |
+| Tax regime            | Monotributista (Ley 26.565)                                                  |
+| Timeline (optimistic) | ~8-12 weeks from proposal to first payment for contratación directa          |
+| Module thresholds     | Up to ~75 M = contratación directa simple; 75-300 M = compulsa abreviada     |
+| "No Docente"          | ❌ Not available for externals — requires concurso                           |
 
-- Reportes 304 + 269 regenerados con fixes aplicados
-- Historial actualizado
+### Pricing restructured
 
-## Deliverables listos para enviar
+**Before:** B setup 72-103 M (too close to A's 62-103 M)
+**After:**
+| Option | Setup | Monthly |
+|---|---|---|
+| A: Consultoría | 62-103 M | 16-31 M |
+| B: Dinámico ★ | **50-75 M** | 8-16 M |
+| Express: Piloto Pago | **25-35 M** (único pago) | — |
+| C: Estándar | 41-62 M | 4-8 M |
 
-| Qué                          | Dónde                                                      |
+Express = audit 5 courses, 1-week delivery, no subscription, 50% credited toward B setup if they continue.
+
+---
+
+## Phase 3 — PDF Generation
+
+- Added `marked` dependency (markdown→HTML)
+- Created `tests/generate-proposal-pdf.spec.ts` (Playwright test: MD→HTML→A4 PDF)
+- Added `bun run pdf:proposal` package script
+- PDF deployed: https://unc-course-kit.netlify.app/propuesta-qa-unc.pdf
+- Footer cleaned: internal .md references removed, kept only módulo adjustment clause
+
+---
+
+## Phase 4 — Audit Index UX
+
+- **Expandable history**: "+N más" now clickable button that reveals all history entries inline
+- Before: static text "+2 mas" with no interaction
+- After: inline toggle expanding hidden entries
+
+---
+
+## Phase 5 — Email & Delivery
+
+### Email sent to Ignacio/Fernando with CC Patricia
+
+Email includes:
+
+- Pilot context (courses 304 + 269)
+- PDF link + interactive pitch links
+- Query about "Derechos Digitales y Seguridad Online" course ID
+- UNC timeline transparency (~8-12 weeks) and how Option B works with that
+- Request for 30-min meeting
+
+### Netlify landing clarification
+
+`propuesta-qa.html#/1` = slide 1 of 8 (overview). Slide 6 is the feature comparison table. Footer shows "← → navegar" navigation hint.
+
+---
+
+## Deliverables ready
+
+| What                         | Where                                                      |
 | ---------------------------- | ---------------------------------------------------------- |
 | Propuesta formal consolidada | `.context/propuesta-qa-unc-consolidada.md`                 |
-| Borrador de email            | `.context/email-propuesta-qa-unc.md`                       |
-| Reports live (actualizados)  | https://nelgoez.github.io/unc-agentic-dev/audit/           |
+| PDF propuesta                | https://unc-course-kit.netlify.app/propuesta-qa-unc.pdf    |
+| Email draft (final version)  | `.context/email-propuesta-qa-unc.md`                       |
+| Reports live                 | https://nelgoez.github.io/unc-agentic-dev/audit/           |
 | Pitch Focus                  | https://unc-course-kit.netlify.app/propuesta-qa-focus.html |
 | Pitch 3 opciones             | https://unc-course-kit.netlify.app/propuesta-qa.html       |
-| Course Kit pitch             | https://unc-course-kit.netlify.app/                        |
 
 ## Pending
 
-- [ ] Find course ID for "Derechos Digitales y Seguridad Online"
-- [ ] Send proposal to Ignacio/Fernando/Patricia
-- [ ] Consider adding .docx/.xlsx parsers (new deps: mammoth + xlsx)
+- [ ] Find course ID for "Derechos Digitales y Seguridad Online" (not found via Moodle API — may be pre-launch or different name)
+- [ ] Follow-up on email if no reply within ~1 week
+- [ ] Implement .docx/.xlsx parsers (`mammoth` + `xlsx`) in audit CLI for Opción B
+- [ ] Consider Netlify redeploy after push (it's auto — should pick up changes via GitHub hook)
+
+## Commits
+
+```
+703e7b2 fix: remove internal doc references from proposal footer
+2d7f434 refactor: adjust pricing stratification + audit index navigation
+2c61d70 faet: PDF proposal + audit dropdown UX improvements
+1e38c42 fix: live audit quality — tildes, pricing consolidation, contact info, findings calibration
+```
