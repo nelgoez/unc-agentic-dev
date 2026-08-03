@@ -173,4 +173,4 @@ Los montos se expresan en módulos como unidad primaria, con equivalencias en AR
 
 ---
 
-_Esta propuesta reemplaza y consolida documentos anteriores (propuesta-qa-unc.md, propuesta-formal-qa-unc.md). Los precios en módulos UNC se ajustan al valor del módulo vigente a la fecha de contratación. Equivalencias en ARS y USD calculadas a tipo de cambio oficial estimado. Verificar al momento de presentación._
+_Los precios se expresan en módulos UNC. El valor del módulo se ajusta al vigente a la fecha de contratación. Equivalencias en ARS y USD a tipo de cambio oficial estimado. Propuesta válida por 60 días desde su emisión._
