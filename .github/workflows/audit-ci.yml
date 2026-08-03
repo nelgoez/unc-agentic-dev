@@ -217,6 +217,13 @@ jobs:
             cp reports/audit/index.html _site/audit/index.html || true
           fi
 
+      - name: Copy landing page
+        continue-on-error: true
+        run: |
+          if [ -f reports/index.html ]; then
+            cp reports/index.html _site/index.html
+          fi
+
       - name: Setup Pages
         uses: actions/configure-pages@v6
 
