@@ -5,16 +5,18 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+  schedule:
+    - cron: '0 6 * * 1'
   workflow_dispatch:
     inputs:
       course_id:
-        description: 'Course ID to audit (default: 269)'
+        description: 'Course ID to audit'
         required: false
-        default: '269'
+        default: '304'
 
 env:
   MOODLE_BASE_URL: ${{ secrets.MOODLE_BASE_URL }}
-  TEST_COURSE_ID: ${{ inputs.course_id || '269' }}
+  TEST_COURSE_ID: ${{ inputs.course_id || '304' }}
   CI: true
 
 jobs:

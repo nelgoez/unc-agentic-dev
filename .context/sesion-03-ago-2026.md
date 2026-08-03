@@ -75,7 +75,23 @@ Express = audit 5 courses, 1-week delivery, no subscription, 50% credited toward
 
 ---
 
-## Phase 4 — Audit Index UX
+## Phase 6 — CI Weekly Schedule + Deck Footer Fix
+
+### audit-ci.yml
+
+- **Added cron schedule**: `0 6 * * 1` (lunes 6am UTC) — weekly auto-audit now live
+- **Switched workflow_dispatch default** from 269 → 304 (curso con docs, más representativo)
+- Prompted by audit: pitch claimed "actualización semanal automática" but it wasn't implemented
+
+### Deck footer links
+
+- `.deck-footer` had `z-index: 10` in `base.css`, same as click overlays
+- Overlays appeared later in DOM → won stacking → footer links unclickable
+- Fixed: inline `z-index: 11` in both pitch deck `<style>` blocks
+
+---
+
+## Phase 7 — Delivery Status
 
 - **Expandable history**: "+N más" now clickable button that reveals all history entries inline
 - Before: static text "+2 mas" with no interaction
@@ -122,6 +138,7 @@ Email includes:
 ## Commits
 
 ```
+23b1979 fix: deck footer links unclickable — z-index below click overlays
 703e7b2 fix: remove internal doc references from proposal footer
 2d7f434 refactor: adjust pricing stratification + audit index navigation
 2c61d70 faet: PDF proposal + audit dropdown UX improvements
