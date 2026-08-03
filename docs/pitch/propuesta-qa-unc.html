@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNC QA Audit — Propuesta de Servicios</title>
+<style>
+  @page { margin: 2cm 2.5cm; size: A4; }
+  body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #1e293b;
+    max-width: 720px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  h1 { font-size: 1.5em; color: #0f172a; margin-top: 0; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; }
+  h2 { font-size: 1.2em; color: #1e40af; margin-top: 28px; }
+  h3 { font-size: 1.05em; color: #334155; margin-top: 20px; }
+  h4 { font-size: 1em; color: #475569; margin-top: 16px; font-weight: 700; }
+  p { margin: 8px 0; }
+  strong { color: #0f172a; }
+  a { color: #3b82f6; text-decoration: none; }
+  blockquote {
+    border-left: 3px solid #3b82f6;
+    margin: 12px 0; padding: 8px 16px;
+    background: #f8fafc;
+    border-radius: 0 6px 6px 0;
+    color: #475569; font-size: 0.95em;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9em; }
+  th { background: #f1f5f9; padding: 8px 10px; text-align: left; border-bottom: 2px solid #e2e8f0; font-weight: 600; color: #475569; }
+  td { padding: 7px 10px; border-bottom: 1px solid #f1f5f9; }
+  tr:last-child td { border-bottom: none; }
+  code { background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-size: 0.9em; }
+  hr { border: none; border-top: 1px solid #e2e8f0; margin: 24px 0; }
+  .footer-print { margin-top: 40px; padding-top: 14px; border-top: 1px solid #e2e8f0; font-size: 0.8em; color: #94a3b8; }
+</style>
+</head>
+<body>
+<h1>Propuesta de Servicios — Auditoría Automática de Cursos Moodle</h1>
+<p><strong>Para:</strong> Dirección del Campus Virtual — Universidad Nacional de Córdoba (UNC)<br><strong>Atención:</strong> Patricia Altamirano (Dirección), Ignacio Acuña y Fernando Acosta (Diseño Instruccional)<br><strong>Fecha:</strong> Agosto 2026<br><strong>Proponente:</strong> Nahuel Gómez — Desarrollo de Software &amp; QA<br><strong>Contacto:</strong> <a href="mailto:nagomez@mi.unc.edu.ar">nagomez@mi.unc.edu.ar</a></p>
+<hr>
+<h2>1. Resumen Ejecutivo</h2>
+<p>La presente propuesta técnico-económica contempla la provisión, despliegue y consultoría de un <strong>Sistema de Auditoría Automatizada de Cursos Moodle</strong>, diseñado para validar de forma integral la consistencia entre el diseño instruccional documentado y la configuración real en producción.</p>
+<p>La solución resuelve de manera preventiva fallas críticas de navegación —como el caso del curso 269 donde una actividad inexistente bloqueaba el módulo 3—, garantizando la continuidad pedagógica y mitigando la carga de soporte técnico sobre el Campus Virtual.</p>
+<hr>
+<h2>2. Evidencia de Factibilidad Técnica (Piloto)</h2>
+<p>Como prueba de concepto, se ejecutó una auditoría piloto sobre las aulas virtuales activas:</p>
+<table>
+<thead>
+<tr>
+<th>Curso</th>
+<th>ID</th>
+<th>Hallazgos API</th>
+<th>Documentación</th>
+<th>Resultado</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Violencias Digitales</td>
+<td>304</td>
+<td>9 secciones, 31 actividades, 6 gates, 0 errores</td>
+<td>33 actividades en docs</td>
+<td>✅ Sin errores estructurales</td>
+</tr>
+<tr>
+<td>Python 1</td>
+<td>269</td>
+<td>5 secciones, 46 actividades</td>
+<td>Sin docs disponibles</td>
+<td>⚠️ Revisión parcial</td>
+</tr>
+</tbody></table>
+<p>Los reportes están disponibles públicamente y se actualizan en forma automática:<br>→ <strong><a href="https://nelgoez.github.io/unc-agentic-dev/audit/">https://nelgoez.github.io/unc-agentic-dev/audit/</a></strong></p>
+<hr>
+<h2>3. Principio Rector</h2>
+<blockquote>
+<p><strong>La precisión de nuestros reportes refleja la claridad de los procesos del equipo.</strong></p>
+<p>Procesos documentados y estandarizados → reportes limpios, accionables, sin ruido.<br>Procesos sin convenciones ni trazabilidad → reportes con advertencias que requieren interpretación.</p>
+<p>No vendemos una herramienta mágica. Vendemos un espejo honesto: lo que está bien documentado se audita con precisión quirúrgica. Lo que está disperso o inconsistente genera advertencias que el equipo interpreta. En ambos casos, la información es accionable.</p>
+</blockquote>
+<hr>
+<h2>4. Modelos de Implementación y Cuadro Económico</h2>
+<p><strong>Unidad de contratación: Módulo UNC (M)</strong> — Valor vigente: <strong>$48.696 ARS</strong> (RESOL-2026-15-UNC-SGI#AGI, 20/03/2026).<br>Los montos se expresan en módulos como unidad primaria, con equivalencias en ARS y USD a tipo de cambio oficial estimado (~$1.200 ARS/USD).</p>
+<h3>Opción A: Consultoría de Procesos + Staff Técnico</h3>
+<p><strong>Alcance:</strong></p>
+<ul>
+<li>Auditoría inicial del pipeline de diseño instruccional (pre-montaje → validación → autotesting → publicación)</li>
+<li>Definición de estándares: naming conventions, tipos de actividad, estructuras de gates, templates de documentación</li>
+<li>Implementación de trazabilidad completa de extremo a extremo</li>
+<li>Capacitación al equipo en las convenciones definidas</li>
+<li>Herramienta de QA integrada al nuevo flujo</li>
+<li>Soporte continuo: reuniones periódicas, ajustes según nuevos cursos</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Concepto</th>
+<th>Módulos UNC</th>
+<th>ARS</th>
+<th>≈ USD</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Setup inicial</td>
+<td>62–103</td>
+<td>$3.000.000–$5.000.000</td>
+<td>$2.500–$4.200</td>
+</tr>
+<tr>
+<td>Mantenimiento/mes</td>
+<td>16–31</td>
+<td>$800.000–$1.500.000</td>
+<td>$670–$1.250</td>
+</tr>
+</tbody></table>
+<p><strong>Resultado esperado (3-6 meses):</strong> Proceso estandarizado donde cada curso nuevo pasa por validación automática antes de publicarse. Reportes precisos, accionables, sin interpretación manual.</p>
+<h3>Opción B: Herramienta Dinámica Adaptativa ★ (recomendada)</h3>
+<p><strong>Alcance:</strong></p>
+<ul>
+<li>Plataforma de auditoría desplegada en la web (acceso vía URL, sin instalación)</li>
+<li>Parser inteligente con fuzzy matching que se adapta a formatos actuales (.md, .csv, .docx, .xlsx)</li>
+<li>Reportes con niveles de confianza visuales (verde = 100% API, naranja = depende de docs)</li>
+<li>Re-ejecución con 1 click desde el mismo reporte</li>
+<li>Historial automático de todas las ejecuciones</li>
+<li>Actualización semanal automática vía CI</li>
+<li>Soporte para carga de documentos vía web (formatos .docx/.xlsx/.csv/.md)</li>
+<li>Ajustes de parser según nuevos formatos que surjan</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Concepto</th>
+<th>Módulos UNC</th>
+<th>ARS</th>
+<th>≈ USD</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Setup inicial</td>
+<td>72–103</td>
+<td>$3.500.000–$5.000.000</td>
+<td>$2.900–$4.200</td>
+</tr>
+<tr>
+<td>Mantenimiento/mes</td>
+<td>8–16</td>
+<td>$400.000–$800.000</td>
+<td>$330–$670</td>
+</tr>
+</tbody></table>
+<p><strong>Resultado esperado (1-2 semanas):</strong> Reportes activos, equipo accede vía URL, sin cambiar procesos. Precisión proporcional a la calidad de la documentación actual.</p>
+<h3>Opción C: Herramienta Autónoma Estándar</h3>
+<p><strong>Alcance:</strong></p>
+<ul>
+<li>CLI + reporte web autónomo que procesa archivos en formato fijo</li>
+<li>Reportes con: estructura, gates, completion tracking, certificados, huérfanos, mapeo doc↔producción</li>
+<li>Despliegue en URL pública sin servidor</li>
+<li>Documentación de uso para el equipo</li>
+</ul>
+<p><strong>No incluye:</strong> adaptación a formatos no estándar, consultoría de procesos, capacitación más allá de la documentación escrita.</p>
+<table>
+<thead>
+<tr>
+<th>Concepto</th>
+<th>Módulos UNC</th>
+<th>ARS</th>
+<th>≈ USD</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Setup inicial</td>
+<td>41–62</td>
+<td>$2.000.000–$3.000.000</td>
+<td>$1.700–$2.500</td>
+</tr>
+<tr>
+<td>Mantenimiento/mes</td>
+<td>4–8</td>
+<td>$200.000–$400.000</td>
+<td>$170–$330</td>
+</tr>
+</tbody></table>
+<p><strong>Resultado esperado (1 semana):</strong> Reporte funcional. Requiere que el equipo adopte formatos estándar para los documentos.</p>
+<hr>
+<h2>5. Comparación Rápida</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>A: Consultoría</th>
+<th>B: Dinámico ★</th>
+<th>C: Estándar</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Setup (módulos)</strong></td>
+<td>62–103</td>
+<td>72–103</td>
+<td>41–62</td>
+</tr>
+<tr>
+<td><strong>Mantenimiento (módulos/mes)</strong></td>
+<td>16–31</td>
+<td>8–16</td>
+<td>4–8</td>
+</tr>
+<tr>
+<td><strong>Estandarización de procesos</strong></td>
+<td>✅ Completa</td>
+<td>⚠️ Progresiva</td>
+<td>❌ Depende del equipo</td>
+</tr>
+<tr>
+<td><strong>Precisión de reportes</strong></td>
+<td>🔒 Alta</td>
+<td>📄 Variable (docs)</td>
+<td>📄 Depende del formato</td>
+</tr>
+<tr>
+<td><strong>Re-ejecución 1-click</strong></td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><strong>Tiempo hasta valor</strong></td>
+<td>2-3 meses</td>
+<td>1-2 semanas</td>
+<td>1 semana</td>
+</tr>
+<tr>
+<td><strong>Requiere cambio de procesos</strong></td>
+<td>Sí (guiado)</td>
+<td>No (gradual)</td>
+<td>Sí (formato fijo)</td>
+</tr>
+<tr>
+<td><strong>Soporte .docx/.xlsx</strong></td>
+<td>✅</td>
+<td>✅</td>
+<td>❌ (solo .csv/.md)</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>6. Cronograma Estimado</h2>
+<table>
+<thead>
+<tr>
+<th>Semana</th>
+<th>Actividad</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Setup inicial. Reportes de cursos piloto. Índice web.</td>
+</tr>
+<tr>
+<td>2-4</td>
+<td>Incorporación de nuevos cursos a pedido. Ajustes de parser para formatos UNC.</td>
+</tr>
+<tr>
+<td>4-12</td>
+<td>Ejecuciones semanales automáticas. Acumulación de métricas y patrones.</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Revisión: ¿los datos justifican avanzar a consultoría de procesos (Opción A)?</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>7. Condiciones</h2>
+<ul>
+<li><strong>Sin contrato de permanencia.</strong> Facturación mensual. Cancelación en cualquier momento.</li>
+<li><strong>Sin costo de herramientas.</strong> Todo el stack es open source / free tier. Solo se cobra el servicio profesional.</li>
+<li><strong>Propiedad de los datos.</strong> Todos los reportes e históricos son de la UNC. Formatos abiertos (HTML + JSON).</li>
+<li><strong>Confidencialidad.</strong> Los tokens de acceso a Moodle se manejan como secrets de CI, sin exposición.</li>
+<li><strong>Modalidad de contratación:</strong> Servicios profesionales bajo normativa UNC vigente (OHCS 4/2025). Módulo UNC como unidad de contratación, liquidable vía SIU-Diaguita.</li>
+<li><strong>Ajuste por inflación:</strong> Si el pago se demora más de 60 días, el monto en módulos se recalcula al valor del módulo vigente al momento del pago.</li>
+<li><strong>Validez de la propuesta:</strong> 60 días desde la fecha de emisión.</li>
+</ul>
+<hr>
+<h2>8. Próximos Pasos</h2>
+<ol>
+<li>Revisión de esta propuesta por parte de Patricia y el equipo de Diseño Instruccional</li>
+<li>Si hay interés, reunión de 30 min para resolver dudas y ajustar alcance (sugerimos incluir a Patricia, Ignacio y Fernando)</li>
+<li>Definición de cursos a incorporar al piloto y acceso a documentación</li>
+<li>Firma de acuerdo simple (1 página) para arrancar la Fase 1</li>
+</ol>
+<hr>
+<p><strong>Contacto:</strong> Nahuel Gómez · <a href="mailto:nagomez@mi.unc.edu.ar">nagomez@mi.unc.edu.ar</a><br><strong>Reportes de evidencia:</strong> <a href="https://nelgoez.github.io/unc-agentic-dev/audit/">https://nelgoez.github.io/unc-agentic-dev/audit/</a><br><strong>Propuesta interactiva:</strong> <a href="https://unc-course-kit.netlify.app/propuesta-qa-focus.html">https://unc-course-kit.netlify.app/propuesta-qa-focus.html</a></p>
+<hr>
+<p><em>Esta propuesta reemplaza y consolida documentos anteriores (propuesta-qa-unc.md, propuesta-formal-qa-unc.md). Los precios en módulos UNC se ajustan al valor del módulo vigente a la fecha de contratación. Equivalencias en ARS y USD calculadas a tipo de cambio oficial estimado. Verificar al momento de presentación.</em></p>
+
+<div class="footer-print">
+  <strong>Contacto:</strong> Nahuel Gómez · nagomez@mi.unc.edu.ar<br>
+  <strong>Documento generado:</strong> 3 de agosto de 2026
+</div>
+</body>
+</html>

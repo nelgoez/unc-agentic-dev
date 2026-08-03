@@ -269,15 +269,18 @@ ${d.reconciliation.matched
 
     if (d.reconciliation.docOnly.length > 0) {
       html += `
-<details>
-<summary>Solo en docs (${d.reconciliation.docOnly.length})</summary>
+<details ${d.reconciliation.docOnly.length > 5 ? '' : 'open'}>
+<summary><strong>Solo en docs</strong> (${d.reconciliation.docOnly.length} actividades)</summary>
 <div class="detail-content">${esc(d.reconciliation.docOnly.join(', '))}</div>
 </details>`;
     }
 
     if (d.reconciliation.prodOnly.length > 0) {
       html += `
-<div class="callout"><strong>Solo en producción (${d.reconciliation.prodOnly.length}):</strong> ${esc(d.reconciliation.prodOnly.map(p => `${p.name} (${p.id})`).join(', '))}</div>`;
+<details ${d.reconciliation.prodOnly.length > 3 ? '' : 'open'}>
+<summary><strong>Solo en producción</strong> (${d.reconciliation.prodOnly.length} actividades)</summary>
+<div class="detail-content">${esc(d.reconciliation.prodOnly.map(p => `${p.name} (cmid ${p.id})`).join('\n'))}</div>
+</details>`;
     }
 
     html += `
@@ -334,10 +337,9 @@ function buildTechnicalDetails(d: AuditData): string {
     }
   }
 
-  let html
-    = `<details><summary><strong>Catálogo completo de actividades</strong> (${
-      allMods.length
-    } actividades, cmid, tipo, completion)</summary>`;
+  let html = `<details><summary><strong>Catálogo completo de actividades</strong> (${
+    allMods.length
+  } actividades, cmid, tipo, completion)</summary>`;
   html
     += '<table class="cm-table"><thead><tr><th>cmid</th><th>Nombre</th><th>Tipo</th><th>Completion</th><th>Sección</th></tr></thead><tbody>';
   for (const m of allMods) {
@@ -364,10 +366,9 @@ function buildTechnicalDetails(d: AuditData): string {
   }
 
   if (restrictedWithJson.length > 0) {
-    html
-      += `<details style="margin-top:8px"><summary><strong>Restricciones de disponibilidad</strong> (JSON crudo, ${
-        restrictedWithJson.length
-      } actividades)</summary>`;
+    html += `<details style="margin-top:8px"><summary><strong>Restricciones de disponibilidad</strong> (JSON crudo, ${
+      restrictedWithJson.length
+    } actividades)</summary>`;
     for (const r of restrictedWithJson) {
       html += `<p style="margin:6px 0;font-size:.8em"><strong>${esc(r.name)}:</strong></p>`;
       html += `<pre class="raw-json">${esc(r.rawJson)}</pre>`;

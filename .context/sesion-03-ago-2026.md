@@ -1,71 +1,78 @@
-# Session 2026-08-03 — Audit Infrastructure & QA Proposal
+# Session 2026-08-03 — Live Audit Quality FIX & Proposal Finalization
 
 ## Summary
 
-Built complete audit infrastructure for Moodle courses with deployment to GitHub Pages + Netlify.
+Audited all live assets (GitHub Pages + Netlify), found systemic quality issues, and fixed them across all workstreams. Consolidated formal proposal ready to send.
 
-## Deliverables
+## Audit findings (before fix)
 
-### Audit CLI (`bun run audit:curso <id> [docsDir] [--name "Name"]`)
+### GitHub Pages — Grade: B-
 
-- `cli/audit-curso.ts` — CLI entry point
-- `scripts/parsers/parseValidacion.ts` — CSV validacion parser
-- `scripts/parsers/parsePreMontaje.ts` — MD pre-montaje parser
-- `scripts/reconcile/reconcileDocsToProd.ts` — fuzzy doc↔production matching
-- `scripts/report/buildAuditData.ts` — shared data computation
-- `scripts/report/generateAuditMd.ts` — markdown output
-- `scripts/report/generateAuditHtml.ts` — self-contained HTML output
-- `scripts/report/generateAuditIndex.ts` — index with historial + trigger
-- `scripts/store/saveReport.ts` — historic storage
+- **Cero tildes** en todo el español (~40 palabras sin acentos)
+- Root page (C-): redirect pelado, sin viewport meta, sin branding
+- Audit index (B-): funcional pero sin tildes, sin branding, sin contacto
+- Reports 304/269: sin tildes, findings engine mostraba 0/0/0
+- Sin contacto en ninguna página
 
-### Reports deployed
+### Netlify — Grade: C
 
-- `reports/audit/304/` — Violencias Digitales (with docs)
-- `reports/audit/269/` — Python 1 (API-only)
-- `reports/audit/index.html` — Landing with trigger button + historial
-- `reports/index.html` — Root redirect to /audit/
+- **3 historias de precio incompatibles**: $0 (index) vs ARS (focus) vs USD (qa)
+- Typo "Scannea" en slide 11 del pitch index
+- "Elegí" informal en lugar de "Elija"
+- propuesta-qa.html huérfana (sin links desde las otras páginas)
+- Sin contacto en ninguna página
 
-### Pitch decks
+## Fixes applied
 
-- `docs/pitch/propuesta-qa-focus.html` — 6-slide QA proposal (B→A ladder)
-- `docs/pitch/propuesta-qa.html` — 8-slide 3-option comparison
+### Bloque 1 — Tipo de cambio y propuesta consolidada
 
-### Proposal docs
+- **Pricing unificado a triple moneda**: Módulos UNC ($48.696, RESOL-2026-15-UNC-SGI#AGI) + ARS + USD
+- **Verificación independiente** del valor del módulo contra página oficial UNC
+- Documento consolidado: `.context/propuesta-qa-unc-consolidada.md`
+- Docs anteriores marcados como superseded
 
-- `.context/propuesta-qa-unc.md` — 3-option proposal
-- `.context/propuesta-formal-qa-unc.md` — Formal document for Ignacio/Patricia
+### Bloque 2 — Tildes y branding (reports HTML)
 
-### Fixes applied
+- `scripts/report/generateAuditHtml.ts`: ~25 tildes corregidas + contacto + branding
+- `scripts/report/buildAuditData.ts`: findings engine calibrado
+  - Doc mapping <30% → warning
+  - Doc mapping 30-60% → info
+  - Duplicate section names → info
+- `scripts/report/generateAuditIndex.ts`: tildes + contacto + singular/plural
 
-- `tests/components/ui/MoodleAuditor.ts` — Completion state enum (e=0..3)
-- `tests/components/api/MoodleApiClient.ts` — Propagate `e` field in availability callbacks
-- `reports/audit/audit-304-vs-docs.md` — False CRITICAL corrected
+### Bloque 3 — Pitch decks Netlify
 
-### CI changes
+- `docs/pitch/index.html`: "Scannea"→"Escanea", "Elegí"→"Elija", backlinks
+- `docs/pitch/propuesta-qa-focus.html`: ARS→módulos+ARS, backlinks a propuesta-qa.html
+- `docs/pitch/propuesta-qa.html`: USD→módulos+ARS+USD, backlinks, contacto
 
-- `.github/workflows/audit-ci.yml` — course-audit job, artifact paths, landing page copy
-- `.gitignore` — Allow `reports/audit/` deployment
+### Bloque 4 — Root page + findings
 
-### Netlify
+- `reports/index.html`: viewport meta, branding, contacto, contexto
+- Findings ahora muestra 1 advertencia en 304 (mapeo al 17%)
 
-- `netlify.toml` — Functions + redirects + CORS
-- `docs/pitch/netlify/functions/trigger-audit.mjs` — One-click CI trigger
-- `docs/setup-rerun-button.md` — Activation guide
+### Bloque 5 — Email draft
 
-### Navigation
+- `.context/email-propuesta-qa-unc.md`: borrador para Ignacio/Fernando con CC sugerido a Patricia
 
-```
-/ → redirect → /audit/ → [304, 269] → ← Volver al indice → /audit/
-```
+### Bloque 6 — Regenerated reports
 
-## URLs
+- Reportes 304 + 269 regenerados con fixes aplicados
+- Historial actualizado
 
-- Landing: https://nelgoez.github.io/unc-agentic-dev/
-- Audit index: https://nelgoez.github.io/unc-agentic-dev/audit/
-- 304 report: https://nelgoez.github.io/unc-agentic-dev/audit/304/latest.html
-- Pitch (Netlify): https://unc-course-kit.netlify.app/propuesta-qa-focus.html
+## Deliverables listos para enviar
+
+| Qué                          | Dónde                                                      |
+| ---------------------------- | ---------------------------------------------------------- |
+| Propuesta formal consolidada | `.context/propuesta-qa-unc-consolidada.md`                 |
+| Borrador de email            | `.context/email-propuesta-qa-unc.md`                       |
+| Reports live (actualizados)  | https://nelgoez.github.io/unc-agentic-dev/audit/           |
+| Pitch Focus                  | https://unc-course-kit.netlify.app/propuesta-qa-focus.html |
+| Pitch 3 opciones             | https://unc-course-kit.netlify.app/propuesta-qa.html       |
+| Course Kit pitch             | https://unc-course-kit.netlify.app/                        |
 
 ## Pending
 
-- Review `.context/propuesta-formal-qa-unc.md` before sending to Ignacio/Patricia
-- Find course ID for "Derechos Digitales y Seguridad Online"
+- [ ] Find course ID for "Derechos Digitales y Seguridad Online"
+- [ ] Send proposal to Ignacio/Fernando/Patricia
+- [ ] Consider adding .docx/.xlsx parsers (new deps: mammoth + xlsx)
