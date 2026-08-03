@@ -1,75 +1,92 @@
 # Activar el boton "Re-ejecutar auditoria"
 
-El boton que aparece en cada reporte llama a una Netlify Function que dispara el CI de GitHub.
-Para que funcione, necesitas dos cosas configuradas:
+## Arquitectura
+
+```
+GitHub Pages (nelgoez.github.io/unc-agentic-dev/)
+  └── audit/     ← Los reportes se sirven aca (desplegados por CI)
+
+Netlify (unc-course-kit.netlify.app)
+  ├── index.html, propuesta-qa.html  ← Pitch + propuesta QA
+  └── api/trigger-audit             ← Netlify Function (dispara el CI)
+```
+
+Dos servicios que conviven. El reporte llama a la funcion en Netlify,
+la funcion dispara el CI en GitHub, el CI regenera y deploya a GitHub Pages.
 
 ---
 
-## Paso 1: Crear un GitHub PAT (Personal Access Token)
+## Paso 1: Linkear el sitio de Netlify al repo de GitHub
 
-1. Anda a https://github.com/settings/tokens
-2. Clickea **"Generate new token"** → **"Fine-grained token"**
-3. Completa:
-   - **Token name:** `unc-qa-trigger`
-   - **Resource owner:** `nelgoez`
-   - **Repository access:** "Only select repositories" → `nelgoez/unc-agentic-dev`
-   - **Permissions:**
-     - **Actions:** Read and write
-     - **Contents:** Read-only
-4. Clickea **"Generate token"**
-5. **Copia el token.** Solo se muestra una vez. Guardalo en algun lado seguro.
+Esto reemplaza el Drop manual. La config ya esta en `netlify.toml` (en el repo).
 
----
+1. Anda a https://app.netlify.com
+2. Selecciona el sitio `unc-course-kit`
+3. Ve a **Site settings > Build & deploy > Continuous Deployment**
+4. Clickea **"Link site to Git"**
+5. Elegi GitHub > autorizas > selecciona el repo `nelgoez/unc-agentic-dev`
+6. Branch: `master`
+7. **Build command:** (dejalo vacio)
+8. **Publish directory:** `docs/pitch`
+9. **Functions directory:** `netlify/functions`
+10. Clickea **"Deploy site"**
 
-## Paso 2: Agregar el token a Netlify
-
-1. Anda a https://app.netlify.com/ → elegi el sitio `unc-course-kit-pitch` (o el que uses para UNC)
-2. Ve a **Site settings** → **Environment variables**
-3. Agrega una variable:
-   - **Key:** `GITHUB_PAT`
-   - **Value:** (el token que copiaste en el paso 1)
-4. Clickea **Save**
+> El `netlify.toml` ya tiene `publish = "docs/pitch"` y `functions = "netlify/functions"`,
+> asi que Netlify lo lee y lo usa. Pero configuralo en UI tambien por si acaso.
 
 ---
 
-## Paso 3: Verificar que las Netlify Functions estan deployadas
+## Paso 2: Agregar el GitHub PAT como variable de entorno en Netlify
 
-Los archivos que necesitan estar en Netlify:
+(Ya lo hiciste — verificamos que este)
 
-```
-netlify.toml                        ← config de funciones y redirects
-netlify/functions/trigger-audit.mjs ← la funcion serverless
-```
-
-Cuando hagas deploy a Netlify (automatico si ya esta linkeado a GitHub), la funcion
-va a estar disponible en:
-
-```
-https://TU-SITIO.netlify.app/.netlify/functions/trigger-audit
-```
+1. **Site settings > Environment variables**
+2. Key: `GITHUB_PAT`
+3. Value: el token con scope `workflow` que creaste en GitHub
+4. Guardar
 
 ---
 
-## Paso 4: Testear
+## Paso 3: Verificar el deploy
 
-1. Abri el reporte de auditoria en GitHub Pages (o local)
+Despues del primer deploy linkeado, proba:
+
+```bash
+curl -X POST https://unc-course-kit.netlify.app/api/trigger-audit \
+  -H "Content-Type: application/json" \
+  -d '{"courseId":304}'
+```
+
+Debe responder: `{"ok":true,"message":"Auditoria disparada..."}`
+
+Si responde 404, es porque:
+
+- El deploy no termino. Anda a Deploys en Netlify y verifica.
+- O la funcion tiene errores. Anda a Functions en Netlify y mira los logs.
+
+---
+
+## Paso 4: Probar el boton en el reporte
+
+1. Abri https://nelgoez.github.io/unc-agentic-dev/audit/304/latest.html
 2. Clickea **"Re-ejecutar auditoria"**
-3. Deberia aparecer "Auditoria disparada. Refresca en 2-3 min."
-4. Anda a https://github.com/nelgoez/unc-agentic-dev/actions → deberias ver un workflow corriendo
-5. Cuando termine (~3 min), refresca el reporte → timestamp actualizado
+3. Debe aparecer "Auditoria disparada. Refresca en 2-3 min."
+4. Anda a https://github.com/nelgoez/unc-agentic-dev/actions — debe haber un workflow corriendo
+5. Cuando termine (~3 min), refresca el reporte — timestamp actualizado
 
 ---
 
-## Troubleshooting
+## Paso 5 (opcional): Activar despliegue automatico semanal
 
-**"Error de conexion":** La Netlify function no esta deployada o el sitio no esta linkeado.
-Verifica que `netlify.toml` y `netlify/functions/trigger-audit.mjs` esten en el repo.
+El CI ya tiene un job `course-audit` que se ejecuta en cada push a master.
+Para que corra automaticamente aunque no haya cambios, agrega esto al workflow:
 
-**"GitHub API error" con status 404:** El workflow file name no coincide.
-En la funcion, revisa que `workflowFile = 'audit-ci.yml'` sea correcto.
+```yaml
+on:
+  push:
+    branches: [master]
+  schedule:
+    - cron: '0 6 * * 1' # Todos los lunes a las 06:00 UTC
+```
 
-**"GitHub API error" con status 422:** El input `course_id` es invalido.
-El workflow espera un string con el ID del curso.
-
-**"GITHUB_PAT not configured":** La variable de entorno no esta seteada en Netlify.
-Volve al Paso 2.
+Esto ya esta en el archivo `.github/workflows/audit-ci.yml`. Descomentalo.
