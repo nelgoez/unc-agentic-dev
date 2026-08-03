@@ -1,7 +1,11 @@
 [build]
   command = ""
   functions = "netlify/functions"
-  publish = "docs/pitch"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
 
 [[headers]]
   for = "/api/*"
@@ -9,11 +13,6 @@
     Access-Control-Allow-Origin = "*"
     Access-Control-Allow-Methods = "POST, OPTIONS"
     Access-Control-Allow-Headers = "Content-Type"
-
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
 
 [[headers]]
   for = "/.netlify/functions/*"
