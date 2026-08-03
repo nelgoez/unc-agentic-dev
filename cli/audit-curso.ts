@@ -62,19 +62,25 @@ function findMd(file: string | null, dir: string): string | null {
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
   if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
-    console.log('Usage: bun cli/audit-curso.ts <courseId> [docsDir]')
+    console.log('Usage: bun cli/audit-curso.ts <courseId> [docsDir] [--name "Course Name"]')
     console.log('  courseId  Moodle course ID (required)')
     console.log('  docsDir   Directory with pre-montaje.md and validacion.csv (optional)')
+    console.log('  --name    Display name for the course (optional, overrides auto-detection)')
     process.exit(0)
   }
 
-  const courseId = Number(args[0])
+  const nameIdx = args.indexOf('--name')
+  const name = nameIdx !== -1 && nameIdx + 1 < args.length ? args[nameIdx + 1] : null
+
+  const filtered = args.filter((_, i) => i !== nameIdx && i !== nameIdx + 1)
+
+  const courseId = Number(filtered[0])
   if (Number.isNaN(courseId) || courseId <= 0) {
-    console.error(`ERROR: Invalid courseId: ${args[0]}`)
+    console.error(`ERROR: Invalid courseId: ${filtered[0]}`)
     process.exit(1)
   }
 
-  const docsDir = args[1] || null
+  const docsDir = filtered[1] || null
 
   const baseUrl = process.env.MOODLE_BASE_URL
   const token = process.env.MOODLE_WS_TOKEN
@@ -94,7 +100,8 @@ async function main(): Promise<void> {
   const orphans = await client.findOrphanedCmIds(sections)
 
   const totalActivities = breakdown.totalActivities
-  const courseName = sections[0]?.name || sections[0]?.modules[0]?.name || `Curso ${courseId}`
+  const courseName =
+    name || sections[0]?.name || sections[0]?.modules[0]?.name || `Curso ${courseId}`
 
   let hasDocs = false
   let reconciliation: ReturnType<typeof reconcileDocsToProd> = {

@@ -1,8 +1,8 @@
 <!-- audit:curso meta
 {
-  "timestamp": "2026-08-03T15:44:54.693Z",
+  "timestamp": "2026-08-03T17:08:46.502Z",
   "courseId": 269,
-  "courseName": "Bienvenida",
+  "courseName": "Python 1",
   "sections": 5,
   "activities": 46,
   "critical": 0,
@@ -11,7 +11,7 @@
 }
 -->
 
-# QA Audit: Bienvenida (269) — 2026-08-03 15:44
+# QA Audit: Python 1 (269) — 2026-08-03 17:08
 
 ## Resumen — ✅ OK · 0 críticos · 0 warnings · 0 info | Confianza: baja (sin docs)
 

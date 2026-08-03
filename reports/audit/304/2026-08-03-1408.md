@@ -1,8 +1,8 @@
 <!-- audit:curso meta
 {
-  "timestamp": "2026-08-03T15:44:54.049Z",
+  "timestamp": "2026-08-03T17:08:45.703Z",
   "courseId": 304,
-  "courseName": "General",
+  "courseName": "Violencias Digitales",
   "sections": 9,
   "activities": 31,
   "critical": 0,
@@ -11,7 +11,7 @@
 }
 -->
 
-# QA Audit: General (304) — 2026-08-03 15:44
+# QA Audit: Violencias Digitales (304) — 2026-08-03 17:08
 
 ## Resumen — ✅ OK · 0 críticos · 0 warnings · 0 info | Confianza: media
 

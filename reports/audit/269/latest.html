@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QA Audit: Bienvenida (269) — 2026-08-03 15:44</title>
+<title>QA Audit: Python 1 (269) — 2026-08-03 17:08</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f1f5f9;color:#1e293b;padding:24px}
@@ -73,7 +73,7 @@ async function reRunAudit() {
     const res = await fetch('https://unc-course-kit.netlify.app/api/trigger-audit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ courseId: 269, courseName: "Bienvenida" })
+      body: JSON.stringify({ courseId: 269, courseName: "Python 1" })
     });
     const data = await res.json();
     if (data.ok) {
@@ -97,9 +97,9 @@ async function reRunAudit() {
 
 <div class="header">
 <div class="status-badge">✅ OK</div>
-<h1>Bienvenida (269)</h1>
+<h1>Python 1 (269)</h1>
 <div class="sub">
-  <p>Fecha: 2026-08-03 15:44</p>
+  <p>Fecha: 2026-08-03 17:08</p>
   <p>Confianza general: baja (sin docs)</p>
   <p style="margin-top:10px">
     <button class="rerun-btn" id="rerun-btn" onclick="reRunAudit()">Re-ejecutar auditoria</button>
@@ -229,7 +229,7 @@ async function reRunAudit() {
 </div>
 
 <div class="footer">
-Generado automaticamente por UNC QA Audit &mdash; 2026-08-03 15:44
+Generado automaticamente por UNC QA Audit &mdash; 2026-08-03 17:08
 </div>
 </div>
 </body>

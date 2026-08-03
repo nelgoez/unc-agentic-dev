@@ -159,6 +159,10 @@ tr:last-child td{border-bottom:none}
 .action-bar a{display:inline-block;padding:8px 18px;border-radius:8px;text-decoration:none;font-weight:500;font-size:.85em;white-space:nowrap}
 .btn-primary{background:#3b82f6;color:#fff}
 .btn-primary:hover{background:#2563eb}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.trigger-form{display:flex;gap:6px;align-items:center}
+.trigger-form input{width:100px;padding:7px 10px;border:1px solid var(--border, #e2e8f0);border-radius:8px;font-size:.85em;font-family:inherit}
+.trigger-msg{font-size:.78em;margin-left:8px}
 .footer{text-align:center;color:#94a3b8;font-size:.78em;margin-top:28px;padding-top:14px;border-top:1px solid #e2e8f0}
 </style>
 </head>
@@ -177,9 +181,36 @@ ${
 </table>`
 }
 <div class="action-bar">
-<p><strong>Actualizacion automatica:</strong> Todos los cursos se auditan semanalmente (lunes) y al hacer cambios en los documentos. Los reportes se actualizan solos.</p>
-<a href="mailto:nagomez@mi.unc.edu.ar?subject=Re-auditar%20curso&body=Curso%20ID%3A%20%0ADocumentos%3A%20" class="btn-primary">Solicitar nueva auditoria</a>
+<p><strong>Actualizacion automatica:</strong> Todos los cursos se auditan semanalmente (lunes). Los reportes se actualizan solos.</p>
+<div class="trigger-form">
+  <input type="number" id="new-course-id" placeholder="ID del curso" min="1">
+  <button class="btn-primary" onclick="triggerAudit()">Auditar ahora</button>
+  <span class="trigger-msg" id="trigger-msg"></span>
 </div>
+</div>
+<script>
+async function triggerAudit() {
+  const inp = document.getElementById('new-course-id');
+  const btn = inp.nextElementSibling;
+  const msg = document.getElementById('trigger-msg');
+  const id = parseInt(inp.value);
+  if (!id || id < 1) { msg.textContent = 'Ingresa un ID valido'; msg.style.color = '#dc2626'; return; }
+  btn.disabled = true;
+  msg.textContent = 'Disparando...';
+  msg.style.color = '';
+  try {
+    const res = await fetch('https://unc-course-kit.netlify.app/api/trigger-audit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ courseId: id })
+    });
+    const data = await res.json();
+    if (data.ok) { msg.textContent = 'Enviado! Visible en 2-3 min.'; msg.style.color='#16a34a'; }
+    else { msg.textContent = data.error || 'Error'; msg.style.color='#dc2626'; }
+  } catch(e) { msg.textContent = 'Error de conexion'; msg.style.color='#dc2626'; }
+  btn.disabled = false;
+}
+</script>
 <div class="footer">Generado automaticamente por UNC QA Audit</div>
 </div>
 </body>
