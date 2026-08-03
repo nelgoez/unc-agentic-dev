@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UNC QA Audit — Indice de Reportes</title>
+<title>UNC QA Audit — Índice de Reportes</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f1f5f9;color:#1e293b;padding:24px}
@@ -32,40 +32,40 @@ tr:last-child td{border-bottom:none}
 <div class="container">
 <div class="header">
 <h1>UNC QA Audit</h1>
-<p>Reportes de auditoria automatica de cursos Moodle. Cada ejecucion queda registrada para comparar avances.</p>
+<p>Reportes de auditoría automática de cursos Moodle. Cada ejecución queda registrada para comparar avances.</p>
 </div>
 <table>
-<thead><tr><th></th><th>Curso</th><th>ID</th><th>Ultima ejecucion</th><th>Secc</th><th>Act</th><th></th><th>Historial</th></tr></thead>
+<thead><tr><th></th><th>Curso</th><th>ID</th><th>Última ejecución</th><th>Secc</th><th>Act</th><th></th><th>Historial</th></tr></thead>
 <tbody>
     <tr>
       <td><span style="background:#f0fdf4;color:#16a34a;padding:2px 8px;border-radius:10px;font-size:.75em;font-weight:600">OK</span></td>
       <td><a href="269/latest.html" style="color:#3b82f6;text-decoration:none;font-weight:500">Python 1</a></td>
       <td>269</td>
-      <td>3 de ago de 2026 14:42</td>
+      <td>3 de ago de 2026 15:44</td>
       <td>5</td>
       <td>46</td>
-      <td>1 ejecuciones</td>
+      <td>2 ejecuciones</td>
       <td style="font-size:.78em">
-        <a href="269/2026-08-03-1442.html" style="color:#3b82f6;text-decoration:none;margin-right:8px">3/8 14:42</a>
+        <a href="269/2026-08-03-1544.html" style="color:#3b82f6;text-decoration:none;margin-right:8px">3/8 15:44</a><a href="269/2026-08-03-1442.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 14:42</a>
         
       </td>
     </tr>
     <tr>
-      <td><span style="background:#f0fdf4;color:#16a34a;padding:2px 8px;border-radius:10px;font-size:.75em;font-weight:600">OK</span></td>
+      <td><span style="background:#fffbeb;color:#d97706;padding:2px 8px;border-radius:10px;font-size:.75em;font-weight:600">ADVERTENCIAS</span></td>
       <td><a href="304/latest.html" style="color:#3b82f6;text-decoration:none;font-weight:500">Violencias Digitales</a></td>
       <td>304</td>
-      <td>3 de ago de 2026 14:42</td>
+      <td>3 de ago de 2026 15:44</td>
       <td>9</td>
       <td>31</td>
-      <td>1 ejecuciones</td>
+      <td>3 ejecuciones</td>
       <td style="font-size:.78em">
-        <a href="304/2026-08-03-1442.html" style="color:#3b82f6;text-decoration:none;margin-right:8px">3/8 14:42</a>
+        <a href="304/2026-08-03-1544.html" style="color:#3b82f6;text-decoration:none;margin-right:8px">3/8 15:44</a><a href="304/2026-08-03-1544.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 15:44</a><a href="304/2026-08-03-1442.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 14:42</a>
         
       </td>
     </tr></tbody>
 </table>
 <div class="action-bar">
-<p><strong>Actualizacion automatica:</strong> Todos los cursos se auditan semanalmente (lunes). Los reportes se actualizan solos.</p>
+<p><strong>Actualización automática:</strong> Todos los cursos se auditan semanalmente (lunes). Los reportes se actualizan solos.</p>
 <div class="trigger-form">
   <input type="number" id="new-course-id" placeholder="ID del curso" min="1">
   <button class="btn-primary" onclick="triggerAudit()">Auditar ahora</button>
@@ -78,7 +78,7 @@ async function triggerAudit() {
   const btn = inp.nextElementSibling;
   const msg = document.getElementById('trigger-msg');
   const id = parseInt(inp.value);
-  if (!id || id < 1) { msg.textContent = 'Ingresa un ID valido'; msg.style.color = '#dc2626'; return; }
+  if (!id || id < 1) { msg.textContent = 'Ingresá un ID válido'; msg.style.color = '#dc2626'; return; }
   btn.disabled = true;
   msg.textContent = 'Disparando...';
   msg.style.color = '';
@@ -91,11 +91,11 @@ async function triggerAudit() {
     const data = await res.json();
     if (data.ok) { msg.textContent = 'Enviado! Visible en 2-3 min.'; msg.style.color='#16a34a'; }
     else { msg.textContent = data.error || 'Error'; msg.style.color='#dc2626'; }
-  } catch(e) { msg.textContent = 'Error de conexion'; msg.style.color='#dc2626'; }
+  } catch(e) { msg.textContent = 'Error de conexión'; msg.style.color='#dc2626'; }
   btn.disabled = false;
 }
 </script>
-<div class="footer">Generado automaticamente por UNC QA Audit</div>
+<div class="footer">Generado automáticamente por UNC QA Audit · <a href="mailto:nagomez@mi.unc.edu.ar" style="color:#3b82f6">nagomez@mi.unc.edu.ar</a></div>
 </div>
 </body>
 </html>

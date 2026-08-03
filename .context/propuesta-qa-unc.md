@@ -1,5 +1,8 @@
 # Propuesta UNC — QA de Cursos Moodle
 
+> ⚠️ **Este documento fue reemplazado por `.context/propuesta-qa-unc-consolidada.md`** (Agosto 2026).
+> Se conserva como referencia histórica. No usar para presentaciones a la UNC.
+
 > Para: Patricia (Dirección Campus Virtual) vía Ignacio y Fernando (Diseño Instruccional)
 > Fecha: Agosto 2026
 > Contexto: Auditoría piloto cursos 269 y 304 completada. Herramienta funcional.

@@ -1,86 +1,86 @@
-import type { MoodleSection } from '../../tests/components/api/MoodleApiClient'
-import type { Reconciliation } from '../reconcile/reconcileDocsToProd'
-import { COMPLETION_STATE_LABELS } from '../reconcile/reconcileDocsToProd'
+import type { MoodleSection } from '../../tests/components/api/MoodleApiClient';
+import type { Reconciliation } from '../reconcile/reconcileDocsToProd';
+import { COMPLETION_STATE_LABELS } from '../reconcile/reconcileDocsToProd';
 
 export interface GateCondition {
-  type: string
-  cm?: number
-  id?: number
-  min?: number
-  max?: number
-  e?: number
+  type: string;
+  cm?: number;
+  id?: number;
+  min?: number;
+  max?: number;
+  e?: number;
 }
 
 export interface OrphanInfo {
-  cmid: number
-  sectionName: string
-  moduleName?: string
-  conditionType: string
+  cmid: number;
+  sectionName: string;
+  moduleName?: string;
+  conditionType: string;
 }
 
 interface BreakdownResult {
   sections: Array<{
-    section: number
-    name: string
-    moduleCount: number
-    hasSectionRestriction: boolean
-    sectionConditions: GateCondition[]
+    section: number;
+    name: string;
+    moduleCount: number;
+    hasSectionRestriction: boolean;
+    sectionConditions: GateCondition[];
     modulesWithRestrictions: Array<{
-      id: number
-      name: string
-      conditions: GateCondition[]
-    }>
+      id: number;
+      name: string;
+      conditions: GateCondition[];
+    }>;
     modules: Array<{
-      id: number
-      name: string
-      completion: number
-    }>
-  }>
-  totalActivities: number
-  restrictedActivities: number
+      id: number;
+      name: string;
+      completion: number;
+    }>;
+  }>;
+  totalActivities: number;
+  restrictedActivities: number;
 }
 
 interface ModuleInfo {
-  id: number
-  name: string
-  type: string
+  id: number;
+  name: string;
+  type: string;
 }
 
 interface GateFound {
-  module: string
-  description: string
+  module: string;
+  description: string;
 }
 
 interface CertInfo {
-  name: string
-  description: string
+  name: string;
+  description: string;
 }
 
 export interface AuditData {
-  courseId: number
-  courseName: string
-  timestamp: string
-  badge: string
-  criticalCount: number
-  warningCount: number
-  infoCount: number
-  docsConfidence: string
-  sections: number
-  totalActivities: number
-  restrictedActivities: number
-  completionAuto: number
-  completionManual: number
-  completionNone: number
-  docTotal: number
-  docMatched: number
-  hasDocs: boolean
-  breakdown: BreakdownResult
-  allModules: Map<number, ModuleInfo>
-  gatesFound: GateFound[]
-  certModules: CertInfo[]
-  orphans: OrphanInfo[]
-  gatesWithE0orE3: string[]
-  reconciliation: Reconciliation
+  courseId: number;
+  courseName: string;
+  timestamp: string;
+  badge: string;
+  criticalCount: number;
+  warningCount: number;
+  infoCount: number;
+  docsConfidence: string;
+  sections: number;
+  totalActivities: number;
+  restrictedActivities: number;
+  completionAuto: number;
+  completionManual: number;
+  completionNone: number;
+  docTotal: number;
+  docMatched: number;
+  hasDocs: boolean;
+  breakdown: BreakdownResult;
+  allModules: Map<number, ModuleInfo>;
+  gatesFound: GateFound[];
+  certModules: CertInfo[];
+  orphans: OrphanInfo[];
+  gatesWithE0orE3: string[];
+  reconciliation: Reconciliation;
 }
 
 export function buildAuditData(
@@ -92,100 +92,143 @@ export function buildAuditData(
   orphans: OrphanInfo[],
   hasDocs: boolean,
 ): AuditData {
-  const now = new Date().toISOString().replace(/T/, ' ').slice(0, 16)
+  const now = new Date().toISOString().replace(/T/, ' ').slice(0, 16);
 
-  const allModules = new Map<number, ModuleInfo>()
+  const allModules = new Map<number, ModuleInfo>();
   for (const s of sections) {
     for (const m of s.modules) {
-      allModules.set(m.id, { id: m.id, name: m.name, type: m.modplural })
+      allModules.set(m.id, { id: m.id, name: m.name, type: m.modplural });
     }
   }
 
-  let criticalCount = 0
-  let warningCount = 0
+  let criticalCount = 0;
+  let warningCount = 0;
+  let infoCount = 0;
 
-  if (orphans.length > 0) criticalCount += orphans.length
+  if (orphans.length > 0)
+    criticalCount += orphans.length;
 
   const completionAuto = sections.reduce(
-    (s, sec) => s + sec.modules.filter((m) => m.completion === 2).length,
+    (s, sec) => s + sec.modules.filter(m => m.completion === 2).length,
     0,
-  )
+  );
   const completionManual = sections.reduce(
-    (s, sec) => s + sec.modules.filter((m) => m.completion === 1).length,
+    (s, sec) => s + sec.modules.filter(m => m.completion === 1).length,
     0,
-  )
+  );
   const completionNone = sections.reduce(
-    (s, sec) => s + sec.modules.filter((m) => m.completion === 0).length,
+    (s, sec) => s + sec.modules.filter(m => m.completion === 0).length,
     0,
-  )
+  );
 
-  const gatesWithE0orE3: string[] = []
+  const gatesWithE0orE3: string[] = [];
   for (const s of breakdown.sections) {
     for (const mr of s.modulesWithRestrictions) {
       for (const c of mr.conditions) {
         if (c.e !== undefined && (c.e === 0 || c.e === 3)) {
-          gatesWithE0orE3.push(`${mr.name}: ${COMPLETION_STATE_LABELS[c.e] ?? c.e}`)
+          gatesWithE0orE3.push(`${mr.name}: ${COMPLETION_STATE_LABELS[c.e] ?? c.e}`);
         }
       }
     }
   }
-  if (gatesWithE0orE3.length > 0) warningCount += gatesWithE0orE3.length
+  if (gatesWithE0orE3.length > 0)
+    warningCount += gatesWithE0orE3.length;
 
-  const gatesFound: GateFound[] = []
+  const docTotal = reconciliation.matched.length + reconciliation.docOnly.length;
+  const docMatched = reconciliation.matched.length;
+
+  if (hasDocs && docTotal > 0) {
+    const docMatchPct = Math.round((docMatched / docTotal) * 100);
+    if (docMatchPct < 30) {
+      warningCount += 1;
+      gatesWithE0orE3.push(
+        `Mapeo doc↔producción al ${docMatchPct}% — posible desincronización entre docs y curso`,
+      );
+    }
+    else if (docMatchPct < 60) {
+      infoCount += 1;
+    }
+  }
+
+  const duplicateSections = new Set<string>();
+  const dupeNames = new Set<string>();
+  for (const s of sections) {
+    if (duplicateSections.has(s.name)) {
+      dupeNames.add(s.name);
+    }
+    duplicateSections.add(s.name);
+  }
+  if (dupeNames.size > 0) {
+    infoCount += dupeNames.size;
+    const dupes = Array.from(dupeNames).join(', ');
+    gatesWithE0orE3.push(
+      `Secciones duplicadas detectadas: ${dupes}. Verificar en Moodle si son intencionales.`,
+    );
+  }
+
+  const gatesFound: GateFound[] = [];
   for (const s of breakdown.sections) {
     for (const mr of s.modulesWithRestrictions) {
       if (mr.conditions.length > 0) {
         const desc = mr.conditions
           .map((c) => {
             if (c.type === 'completion' && c.cm) {
-              const mod = allModules.get(c.cm)
-              const name = mod?.name || `cmid ${c.cm}`
-              const state = c.e !== undefined ? (COMPLETION_STATE_LABELS[c.e] ?? `e=${c.e}`) : ''
-              return state ? `"${name}" (${state})` : `"${name}"`
+              const mod = allModules.get(c.cm);
+              const name = mod?.name || `cmid ${c.cm}`;
+              const state = c.e !== undefined ? (COMPLETION_STATE_LABELS[c.e] ?? `e=${c.e}`) : '';
+              return state ? `"${name}" (${state})` : `"${name}"`;
             }
-            if (c.type === 'grade' && c.id) return `nota item ${c.id} ≥ ${c.min ?? 0}`
-            return `condición tipo ${c.type}`
+            if (c.type === 'grade' && c.id)
+              return `nota item ${c.id} ≥ ${c.min ?? 0}`;
+            return `condición tipo ${c.type}`;
           })
-          .join(' + ')
-        gatesFound.push({ module: mr.name, description: desc })
+          .join(' + ');
+        gatesFound.push({ module: mr.name, description: desc });
       }
     }
   }
 
-  const certModules: CertInfo[] = []
+  const certModules: CertInfo[] = [];
   for (const s of sections) {
     for (const m of s.modules) {
       if (m.modplural.toLowerCase().includes('certif') || m.name.toLowerCase().includes('certif')) {
         if (m.availability) {
           try {
-            const tree = JSON.parse(m.availability)
-            const conds = collectConditions(tree)
+            const tree = JSON.parse(m.availability);
+            const conds = collectConditions(tree);
             const desc = conds
               .map((c) => {
                 if (c.type === 'completion' && c.cm) {
-                  const mod = allModules.get(c.cm)
-                  const name = mod?.name || `cmid ${c.cm}`
-                  const state =
-                    c.e !== undefined ? `(${COMPLETION_STATE_LABELS[c.e] ?? `e=${c.e}`})` : ''
-                  return `"${name}" ${state}`
+                  const mod = allModules.get(c.cm);
+                  const name = mod?.name || `cmid ${c.cm}`;
+                  const state
+                    = c.e !== undefined ? `(${COMPLETION_STATE_LABELS[c.e] ?? `e=${c.e}`})` : '';
+                  return `"${name}" ${state}`;
                 }
-                if (c.type === 'grade' && c.id) return `nota item ${c.id} ≥ ${c.min ?? 0}`
-                return c.type
+                if (c.type === 'grade' && c.id)
+                  return `nota item ${c.id} ≥ ${c.min ?? 0}`;
+                return c.type;
               })
-              .join(', ')
-            certModules.push({ name: m.name, description: desc })
-          } catch {
-            certModules.push({ name: m.name, description: 'Condiciones no parseables' })
+              .join(', ');
+            certModules.push({ name: m.name, description: desc });
+          }
+          catch {
+            certModules.push({ name: m.name, description: 'Condiciones no parseables' });
           }
         }
       }
     }
   }
 
-  const docTotal = reconciliation.matched.length + reconciliation.docOnly.length
-  const docMatched = reconciliation.matched.length
-  const badge = criticalCount > 0 ? 'CRÍTICO' : warningCount > 0 ? '⚠️ ADVERTENCIAS' : '✅ OK'
-  const docsConfidence = hasDocs ? 'media' : 'baja (sin docs)'
+  const badge
+    = criticalCount > 0
+      ? 'CRÍTICO'
+      : warningCount > 0
+        ? '⚠️ ADVERTENCIAS'
+        : infoCount > 0
+          ? 'ℹ️ INFO'
+          : '✅ OK';
+  const docsConfidence = hasDocs ? 'media' : 'baja (sin docs)';
 
   return {
     courseId,
@@ -194,7 +237,7 @@ export function buildAuditData(
     badge,
     criticalCount,
     warningCount,
-    infoCount: 0,
+    infoCount,
     docsConfidence,
     sections: sections.length,
     totalActivities: breakdown.totalActivities,
@@ -212,12 +255,13 @@ export function buildAuditData(
     orphans,
     gatesWithE0orE3,
     reconciliation,
-  }
+  };
 }
 
 function collectConditions(node: any): GateCondition[] {
-  const result: GateCondition[] = []
-  if (!node || typeof node !== 'object') return result
+  const result: GateCondition[] = [];
+  if (!node || typeof node !== 'object')
+    return result;
   if (node.type && typeof node.type === 'string') {
     result.push({
       type: node.type,
@@ -226,10 +270,10 @@ function collectConditions(node: any): GateCondition[] {
       min: node.min,
       max: node.max,
       e: node.e,
-    })
+    });
   }
   if (node.c && Array.isArray(node.c)) {
-    for (const child of node.c) result.push(...collectConditions(child))
+    for (const child of node.c) result.push(...collectConditions(child));
   }
-  return result
+  return result;
 }

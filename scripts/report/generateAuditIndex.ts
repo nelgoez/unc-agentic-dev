@@ -1,51 +1,53 @@
-import { mkdirSync, writeFileSync, existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
-import { join } from 'node:path'
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 interface ReportEntry {
-  courseId: number
-  courseName: string
-  timestamp: string
-  file: string
-  htmlFile: string
-  sections: number
-  activities: number
-  critical: number
-  warnings: number
+  courseId: number;
+  courseName: string;
+  timestamp: string;
+  file: string;
+  htmlFile: string;
+  sections: number;
+  activities: number;
+  critical: number;
+  warnings: number;
 }
 
-const REPORTS_ROOT = join(process.cwd(), 'reports', 'audit')
-const INDEX_PATH = join(REPORTS_ROOT, 'index.html')
+const REPORTS_ROOT = join(process.cwd(), 'reports', 'audit');
+const INDEX_PATH = join(REPORTS_ROOT, 'index.html');
 
 function collectReports(): ReportEntry[] {
-  const entries: ReportEntry[] = []
-  if (!existsSync(REPORTS_ROOT)) return entries
+  const entries: ReportEntry[] = [];
+  if (!existsSync(REPORTS_ROOT))
+    return entries;
 
-  const dirs = readdirSync(REPORTS_ROOT, { withFileTypes: true }).filter((d) => d.isDirectory())
+  const dirs = readdirSync(REPORTS_ROOT, { withFileTypes: true }).filter(d => d.isDirectory());
 
   for (const dir of dirs) {
-    const historyPath = join(REPORTS_ROOT, dir.name, 'history.json')
-    if (!existsSync(historyPath)) continue
+    const historyPath = join(REPORTS_ROOT, dir.name, 'history.json');
+    if (!existsSync(historyPath))
+      continue;
 
     try {
       const history: Array<{
-        timestamp: string
-        courseId: number
-        courseName: string
-        sections: number
-        activities: number
-        critical: number
-        warnings: number
-      }> = JSON.parse(readFileSync(historyPath, 'utf-8'))
+        timestamp: string;
+        courseId: number;
+        courseName: string;
+        sections: number;
+        activities: number;
+        critical: number;
+        warnings: number;
+      }> = JSON.parse(readFileSync(historyPath, 'utf-8'));
 
-      const courseDir = join(REPORTS_ROOT, dir.name)
-      const files = readdirSync(courseDir).filter((f) => f.endsWith('.html'))
+      const courseDir = join(REPORTS_ROOT, dir.name);
+      const files = readdirSync(courseDir).filter(f => f.endsWith('.html'));
 
       for (const h of history) {
-        const ts = new Date(h.timestamp)
-        const pad = (n: number) => String(n).padStart(2, '0')
-        const tsStr = `${ts.getFullYear()}-${pad(ts.getMonth() + 1)}-${pad(ts.getDate())}-${pad(ts.getHours())}${pad(ts.getMinutes())}`
-        const mdFile = `${tsStr}.md`
-        const htmlFile = `${tsStr}.html`
+        const ts = new Date(h.timestamp);
+        const pad = (n: number) => String(n).padStart(2, '0');
+        const tsStr = `${ts.getFullYear()}-${pad(ts.getMonth() + 1)}-${pad(ts.getDate())}-${pad(ts.getHours())}${pad(ts.getMinutes())}`;
+        const mdFile = `${tsStr}.md`;
+        const htmlFile = `${tsStr}.html`;
 
         entries.push({
           courseId: h.courseId,
@@ -57,15 +59,16 @@ function collectReports(): ReportEntry[] {
           activities: h.activities,
           critical: h.critical,
           warnings: h.warnings,
-        })
+        });
       }
-    } catch {
-      continue
+    }
+    catch {
+      continue;
     }
   }
 
-  entries.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-  return entries
+  entries.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  return entries;
 }
 
 function esc(s: string): string {
@@ -73,40 +76,44 @@ function esc(s: string): string {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
+    .replace(/"/g, '&quot;');
 }
 
 export function generateAuditIndex(): string {
-  const reports = collectReports()
+  const reports = collectReports();
 
-  const grouped = new Map<number, ReportEntry[]>()
+  const grouped = new Map<number, ReportEntry[]>();
   for (const r of reports) {
-    if (!grouped.has(r.courseId)) grouped.set(r.courseId, [])
-    grouped.get(r.courseId)!.push(r)
+    if (!grouped.has(r.courseId))
+      grouped.set(r.courseId, []);
+    grouped.get(r.courseId)!.push(r);
   }
 
-  let rows = ''
+  let rows = '';
   for (const [courseId, entries] of grouped) {
-    const latest = entries[0]
-    if (!latest) continue
+    const latest = entries[0];
+    if (!latest)
+      continue;
 
-    const badge =
-      latest.critical > 0
+    const badge
+      = latest.critical > 0
         ? '<span style="background:#fef2f2;color:#dc2626;padding:2px 8px;border-radius:10px;font-size:.75em;font-weight:600">CRITICO</span>'
         : latest.warnings > 0
           ? '<span style="background:#fffbeb;color:#d97706;padding:2px 8px;border-radius:10px;font-size:.75em;font-weight:600">ADVERTENCIAS</span>'
-          : '<span style="background:#f0fdf4;color:#16a34a;padding:2px 8px;border-radius:10px;font-size:.75em;font-weight:600">OK</span>'
+          : '<span style="background:#f0fdf4;color:#16a34a;padding:2px 8px;border-radius:10px;font-size:.75em;font-weight:600">OK</span>';
 
     const date = new Date(latest.timestamp).toLocaleDateString('es-AR', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
-    })
+    });
     const time = new Date(latest.timestamp).toLocaleTimeString('es-AR', {
       hour: '2-digit',
       minute: '2-digit',
-    })
+    });
 
+    const ejecuciones = entries.length;
+    const label = ejecuciones === 1 ? 'ejecución' : 'ejecuciones';
     rows += `
     <tr>
       <td>${badge}</td>
@@ -115,7 +122,7 @@ export function generateAuditIndex(): string {
       <td>${date} ${time}</td>
       <td>${latest.sections}</td>
       <td>${latest.activities}</td>
-      <td>${entries.length} ejecuciones</td>
+      <td>${ejecuciones} ${label}</td>
       <td style="font-size:.78em">
         ${entries
           .slice(0, 3)
@@ -123,17 +130,17 @@ export function generateAuditIndex(): string {
             const d = new Date(e.timestamp).toLocaleDateString('es-AR', {
               day: '2-digit',
               month: '2-digit',
-            })
+            });
             const h = new Date(e.timestamp).toLocaleTimeString('es-AR', {
               hour: '2-digit',
               minute: '2-digit',
-            })
-            return `<a href="${courseId}/${e.htmlFile}" style="color:${i === 0 ? '#3b82f6' : '#94a3b8'};text-decoration:none;margin-right:8px">${d} ${h}</a>`
+            });
+            return `<a href="${courseId}/${e.htmlFile}" style="color:${i === 0 ? '#3b82f6' : '#94a3b8'};text-decoration:none;margin-right:8px">${d} ${h}</a>`;
           })
           .join('')}
         ${entries.length > 3 ? `<span style="color:#94a3b8">+${entries.length - 3} mas</span>` : ''}
       </td>
-    </tr>`
+    </tr>`;
   }
 
   return `<!DOCTYPE html>
@@ -141,7 +148,7 @@ export function generateAuditIndex(): string {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UNC QA Audit — Indice de Reportes</title>
+<title>UNC QA Audit — Índice de Reportes</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f1f5f9;color:#1e293b;padding:24px}
@@ -170,18 +177,18 @@ tr:last-child td{border-bottom:none}
 <div class="container">
 <div class="header">
 <h1>UNC QA Audit</h1>
-<p>Reportes de auditoria automatica de cursos Moodle. Cada ejecucion queda registrada para comparar avances.</p>
+<p>Reportes de auditoría automática de cursos Moodle. Cada ejecución queda registrada para comparar avances.</p>
 </div>
 ${
   reports.length === 0
     ? '<div class="empty"><p>No hay reportes todavia.</p><p style="margin-top:8px">Ejecuta <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px">bun run audit:curso &lt;courseId&gt; [docsDir]</code> para generar el primero.</p></div>'
     : `<table>
-<thead><tr><th></th><th>Curso</th><th>ID</th><th>Ultima ejecucion</th><th>Secc</th><th>Act</th><th></th><th>Historial</th></tr></thead>
+<thead><tr><th></th><th>Curso</th><th>ID</th><th>Última ejecución</th><th>Secc</th><th>Act</th><th></th><th>Historial</th></tr></thead>
 <tbody>${rows}</tbody>
 </table>`
 }
 <div class="action-bar">
-<p><strong>Actualizacion automatica:</strong> Todos los cursos se auditan semanalmente (lunes). Los reportes se actualizan solos.</p>
+<p><strong>Actualización automática:</strong> Todos los cursos se auditan semanalmente (lunes). Los reportes se actualizan solos.</p>
 <div class="trigger-form">
   <input type="number" id="new-course-id" placeholder="ID del curso" min="1">
   <button class="btn-primary" onclick="triggerAudit()">Auditar ahora</button>
@@ -194,7 +201,7 @@ async function triggerAudit() {
   const btn = inp.nextElementSibling;
   const msg = document.getElementById('trigger-msg');
   const id = parseInt(inp.value);
-  if (!id || id < 1) { msg.textContent = 'Ingresa un ID valido'; msg.style.color = '#dc2626'; return; }
+  if (!id || id < 1) { msg.textContent = 'Ingresá un ID válido'; msg.style.color = '#dc2626'; return; }
   btn.disabled = true;
   msg.textContent = 'Disparando...';
   msg.style.color = '';
@@ -207,17 +214,17 @@ async function triggerAudit() {
     const data = await res.json();
     if (data.ok) { msg.textContent = 'Enviado! Visible en 2-3 min.'; msg.style.color='#16a34a'; }
     else { msg.textContent = data.error || 'Error'; msg.style.color='#dc2626'; }
-  } catch(e) { msg.textContent = 'Error de conexion'; msg.style.color='#dc2626'; }
+  } catch(e) { msg.textContent = 'Error de conexión'; msg.style.color='#dc2626'; }
   btn.disabled = false;
 }
 </script>
-<div class="footer">Generado automaticamente por UNC QA Audit</div>
+<div class="footer">Generado automáticamente por UNC QA Audit · <a href="mailto:nagomez@mi.unc.edu.ar" style="color:#3b82f6">nagomez@mi.unc.edu.ar</a></div>
 </div>
 </body>
-</html>`
+</html>`;
 }
 
 export function saveAuditIndex(): void {
-  mkdirSync(REPORTS_ROOT, { recursive: true })
-  writeFileSync(INDEX_PATH, generateAuditIndex(), 'utf-8')
+  mkdirSync(REPORTS_ROOT, { recursive: true });
+  writeFileSync(INDEX_PATH, generateAuditIndex(), 'utf-8');
 }

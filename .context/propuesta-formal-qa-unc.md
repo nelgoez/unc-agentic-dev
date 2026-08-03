@@ -1,5 +1,8 @@
 # Propuesta de Servicios — Auditoría Automática de Cursos Moodle
 
+> ⚠️ **Este documento fue reemplazado por `.context/propuesta-qa-unc-consolidada.md`** (Agosto 2026).
+> Se conserva como referencia histórica. No usar para presentaciones a la UNC.
+
 **Para:** Campus Virtual UNC — Dirección y Área de Diseño Instruccional
 **Contacto:** Ignacio Acuña, Fernando Acosta
 **Fecha:** Agosto 2026

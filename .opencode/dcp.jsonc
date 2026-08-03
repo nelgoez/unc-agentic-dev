@@ -8,15 +8,15 @@
     "mode": "range",
     "permission": "allow",
     "maxContextLimit": 80000,
-    "minContextLimit": 30000
+    "minContextLimit": 30000,
   },
   "strategies": {
     "deduplication": {
-      "enabled": true
+      "enabled": true,
     },
     "purgeErrors": {
       "enabled": true,
-      "turns": 4
-    }
-  }
+      "turns": 4,
+    },
+  },
 }

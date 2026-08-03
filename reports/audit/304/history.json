@@ -8,5 +8,25 @@
     "critical": 0,
     "warnings": 0,
     "info": 0
+  },
+  {
+    "timestamp": "2026-08-03T18:44:19.855Z",
+    "courseId": 304,
+    "courseName": "Violencias Digitales",
+    "sections": 9,
+    "activities": 31,
+    "critical": 0,
+    "warnings": 0,
+    "info": 0
+  },
+  {
+    "timestamp": "2026-08-03T18:44:30.617Z",
+    "courseId": 304,
+    "courseName": "Violencias Digitales",
+    "sections": 9,
+    "activities": 31,
+    "critical": 0,
+    "warnings": 1,
+    "info": 0
   }
 ]

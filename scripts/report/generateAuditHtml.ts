@@ -1,40 +1,40 @@
-import type { AuditData } from './buildAuditData'
+import type { AuditData } from './buildAuditData';
 
 function esc(s: string): string {
   return s
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
+    .replace(/"/g, '&quot;');
 }
 
 export function generateAuditHtml(data: AuditData): string {
-  const d = data
+  const d = data;
 
   const statCards = `
-    <div class="stat-card stat-critical"><div class="stat-number">${d.criticalCount}</div><div class="stat-label">Criticos</div></div>
+    <div class="stat-card stat-critical"><div class="stat-number">${d.criticalCount}</div><div class="stat-label">Críticos</div></div>
     <div class="stat-card stat-warning"><div class="stat-number">${d.warningCount}</div><div class="stat-label">Advertencias</div></div>
     <div class="stat-card stat-info"><div class="stat-number">${d.infoCount}</div><div class="stat-label">Info</div></div>
     <div class="stat-card"><div class="stat-number">${d.sections}</div><div class="stat-label">Secciones</div></div>
     <div class="stat-card"><div class="stat-number">${d.totalActivities}</div><div class="stat-label">Actividades</div></div>
-  `
+  `;
 
-  const badgeColor = d.criticalCount > 0 ? '#dc2626' : d.warningCount > 0 ? '#f59e0b' : '#16a34a'
+  const badgeColor = d.criticalCount > 0 ? '#dc2626' : d.warningCount > 0 ? '#f59e0b' : '#16a34a';
 
   const metricsRows = [
     ['Secciones', String(d.sections)],
     ['Actividades', String(d.totalActivities)],
     ['Actividades con restricciones', String(d.restrictedActivities)],
-    ['Completion automatico', String(d.completionAuto)],
+    ['Completion automático', String(d.completionAuto)],
     ['Completion manual', String(d.completionManual)],
     ['Sin completion tracking', String(d.completionNone)],
-  ]
+  ];
   if (d.hasDocs) {
-    metricsRows.push(['Doc actividades', String(d.docTotal)])
+    metricsRows.push(['Doc actividades', String(d.docTotal)]);
     metricsRows.push([
       'Doc mapeadas a prod',
       `${d.docMatched} (${d.docTotal > 0 ? Math.round((d.docMatched / d.docTotal) * 100) : 0}%)`,
-    ])
+    ]);
   }
 
   let html = `<!DOCTYPE html>
@@ -116,14 +116,14 @@ async function reRunAudit() {
     });
     const data = await res.json();
     if (data.ok) {
-      msg.textContent = 'Auditoria disparada. Refresca en 2-3 min.';
+      msg.textContent = 'Auditoría disparada. Refrescá en 2-3 min.';
       msg.className = 'rerun-msg ok';
     } else {
       msg.textContent = data.error || 'Error al disparar';
       msg.className = 'rerun-msg err';
     }
   } catch(e) {
-    msg.textContent = 'Error de conexion';
+    msg.textContent = 'Error de conexión';
     msg.className = 'rerun-msg err';
   }
   btn.disabled = false;
@@ -132,7 +132,7 @@ async function reRunAudit() {
 </head>
 <body>
 <div class="container">
-<a href="../" class="nav-link">\u2190 Volver al indice</a>
+<a href="../" class="nav-link">\u2190 Volver al índice</a>
 
 <div class="header">
 <div class="status-badge">${esc(d.badge)}</div>
@@ -141,7 +141,7 @@ async function reRunAudit() {
   <p>Fecha: ${d.timestamp}</p>
   <p>Confianza general: ${d.docsConfidence}</p>
   <p style="margin-top:10px">
-    <button class="rerun-btn" id="rerun-btn" onclick="reRunAudit()">Re-ejecutar auditoria</button>
+    <button class="rerun-btn" id="rerun-btn" onclick="reRunAudit()">Re-ejecutar auditoría</button>
     <span id="rerun-msg"></span>
   </p>
 </div>
@@ -149,11 +149,11 @@ async function reRunAudit() {
 </div>
 
 <div class="section">
-<h2>Metricas</h2>
+<h2>Métricas</h2>
 <table>
-<thead><tr><th>Metrica</th><th>Valor</th></tr></thead>
+<thead><tr><th>Métrica</th><th>Valor</th></tr></thead>
 <tbody>
-${metricsRows.map((r) => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('\n')}
+${metricsRows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('\n')}
 </tbody>
 </table>
 </div>
@@ -161,9 +161,9 @@ ${metricsRows.map((r) => `<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('\n')
 <div class="section">
 <h2>Estructura <span class="conf-badge conf-locked">100% confiable</span></h2>
 <table>
-<thead><tr><th>#</th><th>Seccion</th><th>Actividades</th></tr></thead>
+<thead><tr><th>#</th><th>Sección</th><th>Actividades</th></tr></thead>
 <tbody>
-${d.breakdown.sections.map((s) => `<tr><td>${s.section}</td><td>${esc(s.name)}</td><td>${s.moduleCount}</td></tr>`).join('\n')}
+${d.breakdown.sections.map(s => `<tr><td>${s.section}</td><td>${esc(s.name)}</td><td>${s.moduleCount}</td></tr>`).join('\n')}
 </tbody>
 </table>
 <div class="confidence-bar">
@@ -171,7 +171,7 @@ ${d.breakdown.sections.map((s) => `<tr><td>${s.section}</td><td>${esc(s.name)}</
   <div class="bar-track"><div class="bar-fill locked"></div></div>
   <span>Datos directos de API Moodle</span>
 </div>
-</div>`
+</div>`;
 
   if (d.gatesFound.length > 0) {
     html += `
@@ -180,7 +180,7 @@ ${d.breakdown.sections.map((s) => `<tr><td>${s.section}</td><td>${esc(s.name)}</
 <table>
 <thead><tr><th>Actividad restringida</th><th>Requiere</th></tr></thead>
 <tbody>
-${d.gatesFound.map((g) => `<tr><td>${esc(g.module)}</td><td>${esc(g.description)}</td></tr>`).join('\n')}
+${d.gatesFound.map(g => `<tr><td>${esc(g.module)}</td><td>${esc(g.description)}</td></tr>`).join('\n')}
 </tbody>
 </table>
 <div class="confidence-bar">
@@ -188,7 +188,7 @@ ${d.gatesFound.map((g) => `<tr><td>${esc(g.module)}</td><td>${esc(g.description)
   <div class="bar-track"><div class="bar-fill locked"></div></div>
   <span>Datos directos de API Moodle</span>
 </div>
-</div>`
+</div>`;
   }
 
   html += `
@@ -202,7 +202,7 @@ ${d.gatesFound.map((g) => `<tr><td>${esc(g.module)}</td><td>${esc(g.description)
 <tr><td>Sin tracking (completion=0)</td><td>${d.completionNone}</td></tr>
 </tbody>
 </table>
-</div>`
+</div>`;
 
   if (d.certModules.length > 0) {
     html += `
@@ -211,60 +211,60 @@ ${d.gatesFound.map((g) => `<tr><td>${esc(g.module)}</td><td>${esc(g.description)
 <table>
 <thead><tr><th>Certificado</th><th>Condiciones</th></tr></thead>
 <tbody>
-${d.certModules.map((c) => `<tr><td><strong>${esc(c.name)}</strong></td><td>${esc(c.description)}</td></tr>`).join('\n')}
+${d.certModules.map(c => `<tr><td><strong>${esc(c.name)}</strong></td><td>${esc(c.description)}</td></tr>`).join('\n')}
 </tbody>
 </table>
-</div>`
+</div>`;
   }
 
   if (d.orphans.length > 0) {
     html += `
 <div class="section">
-<h2>Huerfanos <span class="conf-badge conf-locked">100% confiable</span></h2>
-${d.orphans.map((o) => `<div class="finding finding-critical"><div class="finding-icon">\u{1F534}</div><div><div class="finding-title">cmid ${o.cmid} no existe</div><div>Referenciado por: ${esc(o.moduleName || '-')} en "${esc(o.sectionName)}"</div></div></div>`).join('\n')}
-<div class="callout orphan-callout">Actividades referenciadas como gate que no existen en el curso. Suelen ser actividades eliminadas cuya restriccion persiste en la base de datos.</div>
-</div>`
+<h2>Huérfanos <span class="conf-badge conf-locked">100% confiable</span></h2>
+${d.orphans.map(o => `<div class="finding finding-critical"><div class="finding-icon">\u{1F534}</div><div><div class="finding-title">cmid ${o.cmid} no existe</div><div>Referenciado por: ${esc(o.moduleName || '-')} en "${esc(o.sectionName)}"</div></div></div>`).join('\n')}
+<div class="callout orphan-callout">Actividades referenciadas como gate que no existen en el curso. Suelen ser actividades eliminadas cuya restricción persiste en la base de datos.</div>
+</div>`;
   }
 
   if (d.gatesWithE0orE3.length > 0) {
     html += `
 <div class="section">
 <h2>Advertencias <span class="conf-badge conf-locked">100% confiable</span></h2>
-${d.gatesWithE0orE3.map((g) => `<div class="finding finding-warning"><div class="finding-icon">\u26A0\uFE0F</div><div><div class="finding-title">${esc(g)}</div></div></div>`).join('\n')}
+${d.gatesWithE0orE3.map(g => `<div class="finding finding-warning"><div class="finding-icon">\u26A0\uFE0F</div><div><div class="finding-title">${esc(g)}</div></div></div>`).join('\n')}
 <div class="callout">e=0 requiere que la actividad este INCOMPLETA. e=3 requiere que este COMPLETA Y SUSPENSA. Verificar que sea intencional.</div>
-</div>`
+</div>`;
   }
 
   if (
-    d.hasDocs &&
-    d.reconciliation.matched.length +
-      d.reconciliation.docOnly.length +
-      d.reconciliation.prodOnly.length >
-      0
+    d.hasDocs
+    && d.reconciliation.matched.length
+    + d.reconciliation.docOnly.length
+    + d.reconciliation.prodOnly.length
+    > 0
   ) {
-    const docMatchPct = Math.round((d.docMatched / Math.max(d.docTotal, 1)) * 100)
+    const docMatchPct = Math.round((d.docMatched / Math.max(d.docTotal, 1)) * 100);
     html += `
 <div class="section">
-<h2>Doc vs Produccion <span class="conf-badge conf-docs">depende de docs</span></h2>
+<h2>Doc vs Producción <span class="conf-badge conf-docs">depende de docs</span></h2>
 <div class="confidence-bar">
   <span>Mapeo:</span>
   <div class="bar-track"><div class="bar-fill docs"></div></div>
   <span>${d.docMatched}/${d.docTotal} (${docMatchPct}%)</span>
-</div>`
+</div>`;
 
     if (d.reconciliation.matched.length > 0) {
       html += `
 <table>
-<thead><tr><th></th><th>Documentacion</th><th>Produccion (cmid)</th><th>Score</th></tr></thead>
+<thead><tr><th></th><th>Documentación</th><th>Producción (cmid)</th><th>Score</th></tr></thead>
 <tbody>
 ${d.reconciliation.matched
   .map((m) => {
-    const icon = m.score >= 80 ? '\u2705' : m.score >= 60 ? '\uD83D\uDFE1' : '\u26A0\uFE0F'
-    return `<tr><td>${icon}</td><td>${esc(m.docName)}</td><td>${esc(m.prodName)} (${m.prodId})</td><td>${m.score}%</td></tr>`
+    const icon = m.score >= 80 ? '\u2705' : m.score >= 60 ? '\uD83D\uDFE1' : '\u26A0\uFE0F';
+    return `<tr><td>${icon}</td><td>${esc(m.docName)}</td><td>${esc(m.prodName)} (${m.prodId})</td><td>${m.score}%</td></tr>`;
   })
   .join('\n')}
 </tbody>
-</table>`
+</table>`;
     }
 
     if (d.reconciliation.docOnly.length > 0) {
@@ -272,17 +272,17 @@ ${d.reconciliation.matched
 <details>
 <summary>Solo en docs (${d.reconciliation.docOnly.length})</summary>
 <div class="detail-content">${esc(d.reconciliation.docOnly.join(', '))}</div>
-</details>`
+</details>`;
     }
 
     if (d.reconciliation.prodOnly.length > 0) {
       html += `
-<div class="callout"><strong>Solo en produccion (${d.reconciliation.prodOnly.length}):</strong> ${esc(d.reconciliation.prodOnly.map((p) => `${p.name} (${p.id})`).join(', '))}</div>`
+<div class="callout"><strong>Solo en producción (${d.reconciliation.prodOnly.length}):</strong> ${esc(d.reconciliation.prodOnly.map(p => `${p.name} (${p.id})`).join(', '))}</div>`;
     }
 
     html += `
-<div class="callout">Esta seccion depende de la calidad de los documentos. Nombres ambiguos o faltantes reducen la precision del mapeo.</div>
-</div>`
+<div class="callout">Esta seccion depende de la calidad de los documentos. Nombres ambiguos o faltantes reducen la precisión del mapeo.</div>
+</div>`;
   }
 
   html += `
@@ -290,100 +290,101 @@ ${d.reconciliation.matched
 <h2>Limitaciones</h2>
 ${
   d.hasDocs
-    ? '<p style="font-size:.9em;color:#475569">El mapeo doc\u2194produccion usa fuzzy matching. Nombres muy distintos entre docs y Moodle pueden generar falsos negativos.</p>'
+    ? '<p style="font-size:.9em;color:#475569">El mapeo doc\u2194producción usa fuzzy matching. Nombres muy distintos entre docs y Moodle pueden generar falsos negativos.</p>'
     : '<p style="font-size:.9em;color:#475569">Sin documentos de entrada: no se puede hacer mapeo doc\u2194produccion. Solo se reporta lo visible desde la API.</p>'
 }
-<p style="font-size:.9em;color:#475569;margin-top:6px">Las condiciones de nota requieren verificacion manual de que el item de calificacion exista.</p>
-<p style="font-size:.9em;color:#475569;margin-top:6px">Este reporte usa solo la API de Moodle. No incluye verificacion visual (UI/Playwright).</p>
+<p style="font-size:.9em;color:#475569;margin-top:6px">Las condiciones de nota requieren verificación manual de que el item de calificación exista.</p>
+<p style="font-size:.9em;color:#475569;margin-top:6px">Este reporte usa solo la API de Moodle. No incluye verificación visual (UI/Playwright).</p>
 </div>
 
 <div class="section tech-section">
-<h2>Detalles tecnicos</h2>
+<h2>Detalles técnicos</h2>
 ${buildTechnicalDetails(d)}
 </div>
 
 <div class="footer">
-Generado automaticamente por UNC QA Audit &mdash; ${d.timestamp}
+Generado automáticamente por UNC QA Audit &mdash; ${d.timestamp}<br>
+<span style="font-size:.85em">Contacto: <a href="mailto:nagomez@mi.unc.edu.ar" style="color:#3b82f6">nagomez@mi.unc.edu.ar</a> · Nahuel Gómez</span>
 </div>
 </div>
 </body>
-</html>`
+</html>`;
 
-  return html
+  return html;
 }
 
 function buildTechnicalDetails(d: AuditData): string {
   const allMods: Array<{
-    section: string
-    id: number
-    name: string
-    modname: string
-    completion: number
-  }> = []
+    section: string;
+    id: number;
+    name: string;
+    modname: string;
+    completion: number;
+  }> = [];
   for (const s of d.breakdown.sections) {
     for (const m of s.modules) {
-      const mod = d.allModules.get(m.id)
+      const mod = d.allModules.get(m.id);
       allMods.push({
         section: `Sec ${s.section}: ${s.name}`,
         id: m.id,
         name: mod?.name || m.name,
         modname: mod?.type || '',
         completion: m.completion,
-      })
+      });
     }
   }
 
-  let html =
-    '<details><summary><strong>Catalogo completo de actividades</strong> (' +
-    allMods.length +
-    ' actividades, cmid, tipo, completion)</summary>'
-  html +=
-    '<table class="cm-table"><thead><tr><th>cmid</th><th>Nombre</th><th>Tipo</th><th>Completion</th><th>Seccion</th></tr></thead><tbody>'
+  let html
+    = `<details><summary><strong>Catálogo completo de actividades</strong> (${
+      allMods.length
+    } actividades, cmid, tipo, completion)</summary>`;
+  html
+    += '<table class="cm-table"><thead><tr><th>cmid</th><th>Nombre</th><th>Tipo</th><th>Completion</th><th>Sección</th></tr></thead><tbody>';
   for (const m of allMods) {
-    const compTag =
-      m.completion === 2
+    const compTag
+      = m.completion === 2
         ? '<span class="tag tag-auto">auto</span>'
         : m.completion === 1
           ? '<span class="tag tag-manual">manual</span>'
-          : '<span class="tag tag-none">sin tracking</span>'
-    html += `<tr><td class="mono">${m.id}</td><td>${esc(m.name)}</td><td>${esc(m.modname)}</td><td>${compTag}</td><td style="font-size:.75em;color:#64748b">${esc(m.section)}</td></tr>`
+          : '<span class="tag tag-none">sin tracking</span>';
+    html += `<tr><td class="mono">${m.id}</td><td>${esc(m.name)}</td><td>${esc(m.modname)}</td><td>${compTag}</td><td style="font-size:.75em;color:#64748b">${esc(m.section)}</td></tr>`;
   }
-  html += '</tbody></table></details>'
+  html += '</tbody></table></details>';
 
-  const restrictedWithJson: Array<{ name: string; rawJson: string }> = []
+  const restrictedWithJson: Array<{ name: string; rawJson: string }> = [];
   for (const s of d.breakdown.sections) {
     for (const mr of s.modulesWithRestrictions) {
       if (mr.conditions.length > 0) {
         restrictedWithJson.push({
           name: mr.name,
           rawJson: JSON.stringify(mr.conditions, null, 2),
-        })
+        });
       }
     }
   }
 
   if (restrictedWithJson.length > 0) {
-    html +=
-      '<details style="margin-top:8px"><summary><strong>Restricciones de disponibilidad</strong> (JSON crudo, ' +
-      restrictedWithJson.length +
-      ' actividades)</summary>'
+    html
+      += `<details style="margin-top:8px"><summary><strong>Restricciones de disponibilidad</strong> (JSON crudo, ${
+        restrictedWithJson.length
+      } actividades)</summary>`;
     for (const r of restrictedWithJson) {
-      html += `<p style="margin:6px 0;font-size:.8em"><strong>${esc(r.name)}:</strong></p>`
-      html += `<pre class="raw-json">${esc(r.rawJson)}</pre>`
+      html += `<p style="margin:6px 0;font-size:.8em"><strong>${esc(r.name)}:</strong></p>`;
+      html += `<pre class="raw-json">${esc(r.rawJson)}</pre>`;
     }
-    html += '</details>'
+    html += '</details>';
   }
 
   if (d.orphans.length > 0) {
-    html +=
-      '<details style="margin-top:8px"><summary><strong>Huerfanos detectados</strong> (cmid inexistentes)</summary>'
-    html +=
-      '<table><thead><tr><th>cmid</th><th>Referenciado por</th><th>Seccion</th></tr></thead><tbody>'
+    html
+      += '<details style="margin-top:8px"><summary><strong>Huérfanos detectados</strong> (cmid inexistentes)</summary>';
+    html
+      += '<table><thead><tr><th>cmid</th><th>Referenciado por</th><th>Seccion</th></tr></thead><tbody>';
     for (const o of d.orphans) {
-      html += `<tr><td class="mono">${o.cmid}</td><td>${esc(o.moduleName || '-')}</td><td>${esc(o.sectionName)}</td></tr>`
+      html += `<tr><td class="mono">${o.cmid}</td><td>${esc(o.moduleName || '-')}</td><td>${esc(o.sectionName)}</td></tr>`;
     }
-    html += '</tbody></table></details>'
+    html += '</tbody></table></details>';
   }
 
-  return html
+  return html;
 }

@@ -2,26 +2,59 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="refresh" content="0;url=audit/" />
-    <title>UNC Campus Virtual — QA Audit</title>
+    <title>UNC QA Audit — Auditoría Automática de Cursos Moodle</title>
     <style>
       body {
         font-family: system-ui, sans-serif;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         min-height: 100vh;
         margin: 0;
         background: #f5f7fa;
         color: #2b4f6a;
+        text-align: center;
+        padding: 24px;
+      }
+      h1 {
+        font-size: 1.3em;
+        margin-bottom: 4px;
+        color: #0f172a;
+      }
+      p {
+        color: #64748b;
+        font-size: 0.9em;
+        margin-bottom: 20px;
       }
       a {
         color: #3b82f6;
-        font-size: 1.1em;
+        font-size: 1.05em;
+        text-decoration: none;
+        font-weight: 500;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .contact {
+        margin-top: 32px;
+        font-size: 0.78em;
+        color: #94a3b8;
+      }
+      .contact a {
+        font-size: inherit;
+        font-weight: 400;
       }
     </style>
   </head>
   <body>
-    <a href="audit/">Ir a los reportes de auditoria →</a>
+    <h1>UNC QA Audit</h1>
+    <p>Auditoría automática de cursos Moodle — Campus Virtual UNC</p>
+    <a href="audit/">Ir a los reportes de auditoría →</a>
+    <div class="contact">
+      Contacto: <a href="mailto:nagomez@mi.unc.edu.ar">nagomez@mi.unc.edu.ar</a> · Nahuel Gómez
+    </div>
   </body>
 </html>
