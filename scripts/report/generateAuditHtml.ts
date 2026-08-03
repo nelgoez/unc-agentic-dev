@@ -128,7 +128,7 @@ async function reRunAudit() {
   }
   btn.disabled = false;
 }
-</style>
+</script>
 </head>
 <body>
 <div class="container">
