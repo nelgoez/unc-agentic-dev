@@ -110,7 +110,7 @@ export function generateAuditIndex(): string {
     rows += `
     <tr>
       <td>${badge}</td>
-      <td><a href="${courseId}/${latest.htmlFile}" style="color:#3b82f6;text-decoration:none;font-weight:500">${esc(latest.courseName)}</a></td>
+      <td><a href="${courseId}/latest.html" style="color:#3b82f6;text-decoration:none;font-weight:500">${esc(latest.courseName)}</a></td>
       <td>${courseId}</td>
       <td>${date} ${time}</td>
       <td>${latest.sections}</td>
