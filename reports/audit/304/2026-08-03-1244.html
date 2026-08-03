@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QA Audit: General (304) — 2026-08-03 15:12</title>
+<title>QA Audit: General (304) — 2026-08-03 15:44</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#f1f5f9;color:#1e293b;padding:24px}
@@ -70,7 +70,7 @@ async function reRunAudit() {
   msg.textContent = 'Disparando...';
   msg.className = 'rerun-msg';
   try {
-    const res = await fetch('/.netlify/functions/trigger-audit', {
+    const res = await fetch('https://unc-course-kit.netlify.app/api/trigger-audit', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ courseId: 304, courseName: "General" })
@@ -99,7 +99,7 @@ async function reRunAudit() {
 <div class="status-badge">✅ OK</div>
 <h1>General (304)</h1>
 <div class="sub">
-  <p>Fecha: 2026-08-03 15:12</p>
+  <p>Fecha: 2026-08-03 15:44</p>
   <p>Confianza general: media</p>
   <p style="margin-top:10px">
     <button class="rerun-btn" id="rerun-btn" onclick="reRunAudit()">Re-ejecutar auditoria</button>
@@ -343,7 +343,7 @@ async function reRunAudit() {
 </div>
 
 <div class="footer">
-Generado automaticamente por UNC QA Audit &mdash; 2026-08-03 15:12
+Generado automaticamente por UNC QA Audit &mdash; 2026-08-03 15:44
 </div>
 </div>
 </body>

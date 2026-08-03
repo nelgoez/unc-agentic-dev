@@ -1,7 +1,14 @@
 [build]
-  command = "echo 'Netlify functions only'"
+  command = ""
   functions = "netlify/functions"
-  publish = "."
+  publish = "docs/pitch"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "POST, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type"
 
 [[redirects]]
   from = "/api/*"
