@@ -1,6 +1,6 @@
 <!-- audit:curso meta
 {
-  "timestamp": "2026-08-03T17:28:04.113Z",
+  "timestamp": "2026-08-03T17:42:46.729Z",
   "courseId": 269,
   "courseName": "Python 1",
   "sections": 5,
@@ -11,7 +11,7 @@
 }
 -->
 
-# QA Audit: Python 1 (269) — 2026-08-03 17:28
+# QA Audit: Python 1 (269) — 2026-08-03 17:42
 
 ## Resumen — ✅ OK · 0 críticos · 0 warnings · 0 info | Confianza: baja (sin docs)
 

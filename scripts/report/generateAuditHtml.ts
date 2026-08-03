@@ -132,7 +132,7 @@ async function reRunAudit() {
 </head>
 <body>
 <div class="container">
-<a href="../../index.html" class="nav-link">\u2190 Volver al indice</a>
+<a href="../" class="nav-link">\u2190 Volver al indice</a>
 
 <div class="header">
 <div class="status-badge">${esc(d.badge)}</div>
