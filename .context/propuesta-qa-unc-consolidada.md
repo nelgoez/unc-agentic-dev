@@ -79,10 +79,26 @@ Los montos se expresan en módulos como unidad primaria, con equivalencias en AR
 
 | Concepto          | Módulos UNC | ARS                   | ≈ USD         |
 | ----------------- | ----------- | --------------------- | ------------- |
-| Setup inicial     | 72–103      | $3.500.000–$5.000.000 | $2.900–$4.200 |
+| Setup inicial     | 50–75       | $2.435.000–$3.652.000 | $2.000–$3.040 |
 | Mantenimiento/mes | 8–16        | $400.000–$800.000     | $330–$670     |
 
-**Resultado esperado (1-2 semanas):** Reportes activos, equipo accede vía URL, sin cambiar procesos. Precisión proporcional a la calidad de la documentación actual.
+**Resultado esperado (1-2 semanas):** Reportes activos, equipo accede vía URL, sin cambiar procesos. Precisión proporcional a la calidad de la documentación actual. Setup más accesible que la Opción A porque no incluye consultoría de procesos.
+
+### Opción Express: Piloto Pago (una sola vez)
+
+**Alcance:**
+
+- Auditoría de hasta 5 cursos con documentación
+- Mismos reportes que la Opción B (estructura, gates, completion, certificados, huérfanos, mapeo doc↔producción)
+- Índice web con historial
+- Acceso a la herramienta por 30 días (re-ejecuciones ilimitadas)
+- Sin contrato de permanencia ni suscripción
+
+| Concepto   | Módulos UNC | ARS                   | ≈ USD         |
+| ---------- | ----------- | --------------------- | ------------- |
+| Único pago | 25–35       | $1.217.000–$1.704.000 | $1.000–$1.420 |
+
+**Ideal para:** validar la herramienta con datos reales antes de comprometer una suscripción. Si después quieren continuar, el 50% de este pago se descuenta del setup de la Opción B.
 
 ### Opción C: Herramienta Autónoma Estándar
 
@@ -108,7 +124,7 @@ Los montos se expresan en módulos como unidad primaria, con equivalencias en AR
 
 |                                 | A: Consultoría | B: Dinámico ★      | C: Estándar            |
 | ------------------------------- | -------------- | ------------------ | ---------------------- |
-| **Setup (módulos)**             | 62–103         | 72–103             | 41–62                  |
+| **Setup (módulos)**             | 62–103         | 50–75              | 41–62                  |
 | **Mantenimiento (módulos/mes)** | 16–31          | 8–16               | 4–8                    |
 | **Estandarización de procesos** | ✅ Completa    | ⚠️ Progresiva      | ❌ Depende del equipo  |
 | **Precisión de reportes**       | 🔒 Alta        | 📄 Variable (docs) | 📄 Depende del formato |

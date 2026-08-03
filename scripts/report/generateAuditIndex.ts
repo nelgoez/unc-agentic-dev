@@ -138,7 +138,26 @@ export function generateAuditIndex(): string {
             return `<a href="${courseId}/${e.htmlFile}" style="color:${i === 0 ? '#3b82f6' : '#94a3b8'};text-decoration:none;margin-right:8px">${d} ${h}</a>`;
           })
           .join('')}
-        ${entries.length > 3 ? `<span style="color:#94a3b8">+${entries.length - 3} mas</span>` : ''}
+        ${
+          entries.length > 3
+            ? `<span id="hist-${courseId}" style="display:none">${entries
+              .slice(3)
+              .map((e) => {
+                const d = new Date(e.timestamp).toLocaleDateString('es-AR', {
+                  day: '2-digit',
+                  month: '2-digit',
+                });
+                const h = new Date(e.timestamp).toLocaleTimeString('es-AR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                });
+                return `<a href="${courseId}/${e.htmlFile}" style="color:#94a3b8;text-decoration:none;margin-right:8px">${d} ${h}</a>`;
+              })
+              .join(
+                '',
+              )}</span><button onclick="document.getElementById('hist-${courseId}').style.display='inline';this.style.display='none'" style="background:none;border:none;color:#3b82f6;cursor:pointer;font-size:.9em;padding:0">+${entries.length - 3} más</button>`
+            : ''
+        }
       </td>
     </tr>`;
   }
