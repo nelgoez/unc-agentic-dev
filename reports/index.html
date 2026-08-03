@@ -4,20 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>UNC Campus Virtual — Reportes</title>
-<meta http-equiv="refresh" content="0; url=mvp-demo/index.html">
 <style>
-  body { font-family: system-ui, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; background: #f5f7fa; color: #2b4f6a; }
-  .loading { text-align: center; }
-  .loading h1 { font-size: 1.5rem; font-weight: 400; }
-  .spinner { width: 40px; height: 40px; margin: 20px auto; border: 3px solid #e0e0e0; border-top-color: #2b4f6a; border-radius: 50%; animation: spin .8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  body{font-family:system-ui,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#f5f7fa;color:#2b4f6a}
+  .menu{text-align:center}
+  .menu h1{font-size:1.5rem;font-weight:400;margin-bottom:24px}
+  .menu a{display:block;padding:12px 32px;margin:8px auto;background:white;border-radius:8px;text-decoration:none;color:#2b4f6a;font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,0.1);max-width:300px;transition:box-shadow .2s}
+  .menu a:hover{box-shadow:0 2px 8px rgba(0,0,0,0.15)}
+  .menu a.primary{background:#3b82f6;color:white}
 </style>
 </head>
 <body>
-<div class="loading">
-  <div class="spinner"></div>
-  <h1>Redirigiendo al reporte...</h1>
-  <p><a href="mvp-demo/index.html">Click acá si no redirige automáticamente</a></p>
+<div class="menu">
+  <h1>UNC Campus Virtual — Reportes</h1>
+  <a href="audit/index.html" class="primary">QA Audit de Cursos</a>
+  <a href="allure">Reportes de Test (Allure)</a>
 </div>
 </body>
 </html>

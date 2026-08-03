@@ -334,6 +334,7 @@ export class MoodleApiClient {
       id?: number;
       min?: number;
       max?: number;
+      e?: number;
     }) => void,
   ): void {
     if (!node || typeof node !== 'object')
@@ -439,11 +440,19 @@ export class MoodleApiClient {
         id?: number;
         min?: number;
         max?: number;
+        e?: number;
       }>;
       modulesWithRestrictions: Array<{
         id: number;
         name: string;
-        conditions: Array<{ type: string; cm?: number; id?: number; min?: number; max?: number }>;
+        conditions: Array<{
+          type: string;
+          cm?: number;
+          id?: number;
+          min?: number;
+          max?: number;
+          e?: number;
+        }>;
       }>;
       modules: Array<{
         id: number;
@@ -466,6 +475,7 @@ export class MoodleApiClient {
         id?: number;
         min?: number;
         max?: number;
+        e?: number;
       }> = [];
       if (hasSectionRestriction) {
         try {
@@ -484,6 +494,7 @@ export class MoodleApiClient {
             id?: number;
             min?: number;
             max?: number;
+            e?: number;
           }> = [];
           try {
             const tree = JSON.parse(mod.availability!);

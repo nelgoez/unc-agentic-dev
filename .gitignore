@@ -61,8 +61,20 @@ allure-report/
 # Graphify knowledge graph
 graphify-out/
 
-# Generated reports (audits, evidence, screenshots)
-/reports/
+# Generated reports
+/reports/allure/
+/reports/audit/*.png
+/reports/audit/*-api.json
+/reports/audit/audit-results.json
+/reports/audit/api-audit-results.json
+/reports/audit/audit-course-269.html
+/reports/audit/audit-304-vs-docs.md
+/reports/informe/
+/reports/informe-curso-269/
+/reports/evidence/
+/reports/admin-explore/
+/reports/mvp-demo/
+
 
 # Playwright cache
 playwright/.cache/

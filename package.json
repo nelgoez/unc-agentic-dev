@@ -15,6 +15,7 @@
     "lint:fix": "eslint --fix .",
     "types:check": "tsc --noEmit",
     "create:curso": "bun packages/unc-course-kit/src/index.ts",
+    "audit:curso": "dotenv -e .env -- bun cli/audit-curso.ts",
     "test": "playwright test",
     "test:allure": "ALLURE_DIR=allure-results playwright test",
     "report:generate": "bun scripts/generate-evidence-report.ts",
@@ -28,6 +29,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "google-spreadsheet": "^5.3.0",
     "pptxgenjs": "^4.0.1"
   },
   "devDependencies": {

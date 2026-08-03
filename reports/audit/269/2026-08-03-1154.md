@@ -1,0 +1,63 @@
+<!-- audit:curso meta
+{
+  "timestamp": "2026-08-03T14:54:21.391Z",
+  "courseId": 269,
+  "courseName": "Bienvenida",
+  "sections": 5,
+  "activities": 46,
+  "critical": 0,
+  "warnings": 0,
+  "info": 0
+}
+-->
+
+# QA Audit: Bienvenida (269) — 2026-08-03 14:54
+
+## Resumen — ✅ OK · 0 críticos · 0 warnings · 0 info | Confianza: baja (sin docs)
+
+| Métrica                       | Valor |
+| ----------------------------- | ----- |
+| Secciones                     | 5     |
+| Actividades                   | 46    |
+| Actividades con restricciones | 2     |
+| Completion auto               | 27    |
+| Completion manual             | 1     |
+| Sin completion tracking       | 18    |
+
+---
+
+## Estructura [🔒 100%]
+
+| #   | Sección    | Actividades |
+| --- | ---------- | ----------- |
+| 0   | Bienvenida | 10          |
+| 1   | Módulo 1   | 9           |
+| 2   | Módulo 2   | 9           |
+| 3   | Módulo 3   | 9           |
+| 4   | Cierre     | 9           |
+
+## Puertas / Gates [🔒 100%]
+
+| Actividad restringida     | Requiere                                                                                                                                |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Certificado de aprobación | nota item 1424 ≥ 60 + "Encuesta de satisfacción del curso" (completa) + nota item 1390 ≥ 60 + nota item 1416 ≥ 60 + nota item 1423 ≥ 60 |
+| Certificado de asistencia | "Encuesta de satisfacción del curso" (completa)                                                                                         |
+
+## Completion Tracking [🔒 100%]
+
+| Estado                      | Cantidad |
+| --------------------------- | -------- |
+| Automático (completion=2)   | 27       |
+| Manual (completion=1)       | 1        |
+| Sin tracking (completion=0) | 18       |
+
+## Certificados y condiciones especiales [🔒 100%]
+
+| **Certificado de aprobación** | Requiere: nota item 1424 ≥ 60, "Encuesta de satisfacción del curso" (completa), nota item 1390 ≥ 60, nota item 1416 ≥ 60, nota item 1423 ≥ 60 |
+| **Certificado de asistencia** | Requiere: "Encuesta de satisfacción del curso" (completa) |
+
+## Limitaciones
+
+- Sin documentos de entrada: no se puede hacer mapeo doc↔producción. Solo se reporta lo visible desde la API.
+- Las condiciones de nota (grade conditions) requieren verificación manual de que el item de calificación exista.
+- Este reporte usa solo la API de Moodle. No incluye verificación visual (UI/Playwright).

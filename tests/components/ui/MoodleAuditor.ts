@@ -31,6 +31,13 @@ export interface JsonAuditFinding {
   cmid?: number;
 }
 
+const COMPLETION_STATE_LABELS = {
+  0: 'COMPLETION_INCOMPLETE',
+  1: 'COMPLETION_COMPLETE',
+  2: 'COMPLETION_COMPLETE_PASS',
+  3: 'COMPLETION_COMPLETE_FAIL',
+} as const;
+
 function parseAvailabilityTree(node: any, conditions: AvailabilityCondition[]): void {
   if (!node || typeof node !== 'object')
     return;
@@ -43,11 +50,8 @@ function parseAvailabilityTree(node: any, conditions: AvailabilityCondition[]): 
           cm: child.cm,
           e: child.e,
           expectedState:
-            child.e === 1
-              ? 'COMPLETION_COMPLETE'
-              : child.e === 0
-                ? 'COMPLETION_INCOMPLETE'
-                : `state_${child.e}`,
+            COMPLETION_STATE_LABELS[child.e as keyof typeof COMPLETION_STATE_LABELS]
+            ?? `state_${child.e}`,
         });
       }
       else if (child.type === 'grade') {
