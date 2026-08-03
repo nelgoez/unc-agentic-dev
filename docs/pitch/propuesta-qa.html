@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="es" data-theme="catppuccin-mocha">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>UNC QA Audit · Propuesta</title>
+    <link rel="stylesheet" href="assets/fonts.css" />
+    <link rel="stylesheet" href="assets/base.css" />
+    <link rel="stylesheet" id="theme-link" href="assets/themes/catppuccin-mocha.css" />
+    <link rel="stylesheet" href="assets/animations/animations.css" />
+    <style>
+      .card-accent {
+        border-left: 4px solid var(--accent);
+      }
+      .card-good {
+        border-left: 4px solid var(--good);
+      }
+      .card-warn {
+        border-left: 4px solid var(--warn);
+      }
+      .card-bad {
+        border-left: 4px solid var(--bad);
+      }
+      .badge {
+        display: inline-block;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.78em;
+        font-weight: 600;
+      }
+      .badge-ok {
+        background: var(--good);
+        color: #fff;
+      }
+      .badge-warn {
+        background: var(--warn);
+        color: #000;
+      }
+      .badge-bad {
+        background: var(--bad);
+        color: #fff;
+      }
+      .kpi-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .kpi {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 20px 24px;
+        text-align: center;
+        min-width: 120px;
+        border: 1px solid var(--border);
+      }
+      .kpi .num {
+        font-size: 2.2em;
+        font-weight: 900;
+        color: var(--accent);
+      }
+      .kpi .desc {
+        font-size: 0.8em;
+        color: var(--text-2);
+        margin-top: 4px;
+      }
+      .step-row {
+        display: flex;
+        gap: 0;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .step {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 16px 20px;
+        text-align: center;
+        min-width: 100px;
+        border: 1px solid var(--border);
+      }
+      .step-arrow {
+        font-size: 1.5em;
+        color: var(--accent-2);
+        padding: 0 8px;
+      }
+      .price-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        flex: 1;
+        min-width: 240px;
+        border: 1px solid var(--border);
+      }
+      .price-card h3 {
+        color: var(--accent);
+        margin-bottom: 8px;
+      }
+      .price-card .price {
+        font-size: 1.8em;
+        font-weight: 900;
+        color: var(--text-1);
+      }
+      .price-card .period {
+        color: var(--text-2);
+        font-size: 0.8em;
+      }
+      table.pricing {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8em;
+      }
+      table.pricing th {
+        text-align: left;
+        padding: 10px 14px;
+        background: var(--bg-soft);
+        border-bottom: 2px solid var(--border);
+      }
+      table.pricing td {
+        padding: 9px 14px;
+        border-bottom: 1px solid var(--border);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="deck">
+      <!-- 1. Title -->
+      <section class="slide" data-title="Portada">
+        <p class="kicker">UNC Campus Virtual · Agosto 2026</p>
+        <h1>QA Automático de Cursos</h1>
+        <p class="h2 dim2">Auditoría continua y trazabilidad del diseño instruccional</p>
+        <div class="kpi-row mt-m">
+          <div class="kpi">
+            <div class="num">2</div>
+            <div class="desc">cursos auditados</div>
+          </div>
+          <div class="kpi">
+            <div class="num">77</div>
+            <div class="desc">actividades analizadas</div>
+          </div>
+          <div class="kpi">
+            <div class="num">6</div>
+            <div class="desc">gates verificados</div>
+          </div>
+          <div class="kpi">
+            <div class="num">0</div>
+            <div class="desc">errores estructurales</div>
+          </div>
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC QA Audit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="8"></span>
+        </div>
+      </section>
+
+      <!-- 2. The Problem -->
+      <section class="slide" data-title="El problema">
+        <p class="kicker">El caso que lo motivó todo</p>
+        <h2 class="h2">¿Cómo detectamos errores HOY en los cursos?</h2>
+        <div class="grid g2 mt-s">
+          <div class="card card-soft card-bad">
+            <h4>🔴 Curso 269 — Python</h4>
+            <p class="dim2">Módulo 3 bloqueado. Actividad "Notebook Funcion-Lambda" no existe.</p>
+            <p class="dim2" style="margin-top: 8px">Cierre bloqueado en cascada.</p>
+            <p style="margin-top: 8px; color: var(--bad); font-weight: 600">
+              Detectado cuando un estudiante lo reportó.
+            </p>
+          </div>
+          <div class="card card-soft card-warn">
+            <h4>🟡 Curso 304 — Violencias Digitales</h4>
+            <p class="dim2">
+              Certificados con condiciones complejas de aprobación. Videos sin tracking individual.
+            </p>
+            <p style="margin-top: 8px; color: var(--warn); font-weight: 600">
+              20 videos embebidos, sin forma de saber quién los vio.
+            </p>
+          </div>
+        </div>
+        <div
+          class="callout mt-s"
+          style="
+            background: var(--bg-soft);
+            border-left: 4px solid var(--bad);
+            padding: 12px 16px;
+            border-radius: var(--radius);
+          "
+        >
+          <strong>El proceso actual:</strong> los errores se detectan cuando un estudiante se queja.
+          No hay validación automática antes de publicar.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC QA Audit · Propuesta</span>
+        </div>
+      </section>
+
+      <!-- 3. How it works -->
+      <section class="slide" data-title="La herramienta">
+        <p class="kicker">Evidencia concreta</p>
+        <h2 class="h2">Lo que ya sabemos del curso 304</h2>
+        <div class="step-row mt-s">
+          <div class="step">
+            <div class="num" style="color: var(--accent); font-size: 1.6em; font-weight: 900">
+              1
+            </div>
+            <div class="desc">API Moodle<br /><small>courseId + token</small></div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step">
+            <div class="num" style="color: var(--accent); font-size: 1.6em; font-weight: 900">
+              2
+            </div>
+            <div class="desc">Parseo<br /><small>estructura + gates</small></div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step">
+            <div class="num" style="color: var(--accent); font-size: 1.6em; font-weight: 900">
+              3
+            </div>
+            <div class="desc">Docs<br /><small>pre-montaje + validación</small></div>
+          </div>
+          <div class="step-arrow">→</div>
+          <div class="step">
+            <div class="num" style="color: var(--accent); font-size: 1.6em; font-weight: 900">
+              4
+            </div>
+            <div class="desc">Reporte<br /><small>HTML autónomo</small></div>
+          </div>
+        </div>
+        <div class="grid g2 mt-s">
+          <div class="card card-soft card-good">
+            <h4>🔒 100% confiable (API)</h4>
+            <p class="dim2" style="font-size: 0.85em">
+              9 secciones · 31 actividades · 6 gates verificados · 24/31 con completion automático ·
+              Certificados con condiciones correctas
+            </p>
+          </div>
+          <div class="card card-soft card-warn">
+            <h4>📄 Depende de docs</h4>
+            <p class="dim2" style="font-size: 0.85em">
+              33 actividades documentadas · 6 mapeadas a producción (17%) · El resto no matchea por
+              nombres inconsistentes entre docs y Moodle
+            </p>
+          </div>
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC QA Audit · Propuesta</span>
+        </div>
+      </section>
+
+      <!-- 4. The Core Principle -->
+      <section class="slide" data-title="El principio">
+        <p class="kicker">Honestidad técnica</p>
+        <h2 class="h2">Nuestra precisión = tu claridad de procesos</h2>
+        <div class="grid g2 mt-m">
+          <div class="card card-soft card-good">
+            <h4>✅ Con procesos claros</h4>
+            <ul style="font-size: 0.88em; line-height: 1.8">
+              <li>Nombres estandarizados → mapeo 90%+</li>
+              <li>Gates documentados → 0 falsos positivos</li>
+              <li>Templates consistentes → parser automático</li>
+              <li>Reportes accionables, sin ruido</li>
+            </ul>
+          </div>
+          <div class="card card-soft card-warn">
+            <h4>⚠️ Con procesos actuales</h4>
+            <ul style="font-size: 0.88em; line-height: 1.8">
+              <li>Nombres inconsistentes → mapeo ~17%</li>
+              <li>Gates no documentados → verificación manual</li>
+              <li>Formatos variables → parser limitado</li>
+              <li>Reportes con advertencias que requieren interpretación</li>
+            </ul>
+          </div>
+        </div>
+        <div
+          class="callout mt-s"
+          style="
+            background: var(--bg-soft);
+            padding: 14px;
+            border-radius: var(--radius);
+            text-align: center;
+            font-size: 0.9em;
+          "
+        >
+          <strong>No es una limitación de la herramienta.</strong> Es la realidad de cualquier
+          sistema de QA: la calidad del output depende de la calidad del input.
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC QA Audit · Propuesta</span>
+        </div>
+      </section>
+
+      <!-- 5. Three Options Overview -->
+      <section class="slide" data-title="Tres caminos">
+        <p class="kicker">Propuesta comercial</p>
+        <h2 class="h2">Tres formas de avanzar</h2>
+        <div class="grid g3 mt-s" style="grid-template-columns: repeat(3, 1fr); gap: 16px">
+          <div class="price-card">
+            <span class="badge badge-warn" style="margin-bottom: 8px; display: inline-block"
+              >Opción A</span
+            >
+            <h3>Consultoría + Staff</h3>
+            <p class="dim2" style="font-size: 0.8em; margin-bottom: 12px">
+              Estandarización completa del proceso de diseño instruccional. Trazabilidad de punta a
+              punta.
+            </p>
+            <div class="price">USD 800<span class="period">-1.500/mes</span></div>
+            <p class="dim2" style="font-size: 0.75em; margin-top: 4px">+ setup USD 3.000-5.000</p>
+          </div>
+          <div class="price-card" style="border-color: var(--accent); border-width: 2px">
+            <span class="badge badge-ok" style="margin-bottom: 8px; display: inline-block"
+              >Opción B ★</span
+            >
+            <h3>Herramienta Dinámica</h3>
+            <p class="dim2" style="font-size: 0.8em; margin-bottom: 12px">
+              Se adapta a sus docs actuales. Reportes con niveles de confianza. Auto-servicio.
+            </p>
+            <div class="price">USD 500<span class="period">-800/mes</span></div>
+            <p class="dim2" style="font-size: 0.75em; margin-top: 4px">+ setup USD 3.500-5.000</p>
+          </div>
+          <div class="price-card">
+            <span
+              class="badge"
+              style="
+                background: var(--text-2);
+                color: #fff;
+                margin-bottom: 8px;
+                display: inline-block;
+              "
+              >Opción C</span
+            >
+            <h3>Producto Listo</h3>
+            <p class="dim2" style="font-size: 0.8em; margin-bottom: 12px">
+              Formato fijo. Ustedes adaptan sus docs. Setup rápido, mantenimiento mínimo.
+            </p>
+            <div class="price">USD 200<span class="period">-400/mes</span></div>
+            <p class="dim2" style="font-size: 0.75em; margin-top: 4px">+ setup USD 2.000-3.000</p>
+          </div>
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC QA Audit · Propuesta</span>
+        </div>
+      </section>
+
+      <!-- 6. Comparison -->
+      <section class="slide" data-title="Comparación">
+        <p class="kicker">Detalle</p>
+        <h2 class="h2">¿Qué incluye cada opción?</h2>
+        <table class="pricing mt-s">
+          <thead>
+            <tr>
+              <th></th>
+              <th>A: Consultoría</th>
+              <th>B: Dinámico ★</th>
+              <th>C: Listo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Auditoría API (gates, completion, huérfanos)</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>Mapeo doc vs producción</td>
+              <td>✅ preciso</td>
+              <td>✅ fuzzy</td>
+              <td>✅ formato fijo</td>
+            </tr>
+            <tr>
+              <td>Reportes HTML autónomos</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>Re-ejecución 1-click</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>Historial por curso</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>Actualización semanal automática</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+            <tr>
+              <td>Estandarización de procesos</td>
+              <td>✅ guiada</td>
+              <td>⚠️ progresiva</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>Capacitación del equipo</td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td>Soporte y ajustes de parser</td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>⚠️ opcional</td>
+            </tr>
+            <tr>
+              <td>Precisión del mapeo doc↔prod</td>
+              <td>🔒 Alta</td>
+              <td>📄 Variable</td>
+              <td>📄 Depende del formato</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="deck-footer">
+          <span class="dim2">UNC QA Audit · Propuesta</span>
+        </div>
+      </section>
+
+      <!-- 7. Recommendation -->
+      <section class="slide" data-title="Recomendación">
+        <p class="kicker">Nuestra sugerencia</p>
+        <h2 class="h2">B → A. Escalera, no elección.</h2>
+        <div class="mt-s">
+          <div class="card card-soft card-good" style="margin-bottom: 16px">
+            <h4>Fase 1: Arrancar con B (ya)</h4>
+            <p class="dim2" style="font-size: 0.85em">
+              La herramienta ya funciona con el curso 304. Sumamos 269 y los que quieran. Sin
+              cambiar nada de su lado. Cada reporte acumula evidencia de dónde están los problemas
+              de estandarización.
+            </p>
+          </div>
+          <div class="step-arrow" style="text-align: center; font-size: 2em; padding: 4px">↓</div>
+          <div class="card card-soft card-accent" style="margin-bottom: 16px">
+            <h4>Fase 2: Datos → decisión informada (1-2 meses)</h4>
+            <p class="dim2" style="font-size: 0.85em">
+              "El 83% de las actividades no matchean por nombres inconsistentes." "3 de 5 cursos
+              tienen gates sin documentar." Con esto, Patricia ve el costo real del desorden.
+            </p>
+          </div>
+          <div class="step-arrow" style="text-align: center; font-size: 2em; padding: 4px">↓</div>
+          <div class="card card-soft card-accent">
+            <h4>Fase 3: Estandarizar con A (3-6 meses)</h4>
+            <p class="dim2" style="font-size: 0.85em">
+              Con la evidencia acumulada, la consultoría de procesos pasa de ser "deberían
+              ordenarse" a "miren cuánto les está costando no ordenarse". El costo de B se descuenta
+              del setup de A.
+            </p>
+          </div>
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC QA Audit · Propuesta</span>
+        </div>
+      </section>
+
+      <!-- 8. Next Step -->
+      <section class="slide" data-title="Próximo paso">
+        <p class="kicker">Concreto y accionable</p>
+        <h2 class="h2">¿Qué necesitamos para arrancar?</h2>
+        <div class="grid g3 mt-m" style="grid-template-columns: repeat(3, 1fr); gap: 16px">
+          <div class="step" style="text-align: left">
+            <div class="num" style="color: var(--accent); font-size: 1.4em; font-weight: 900">
+              1
+            </div>
+            <div class="desc" style="font-size: 0.85em; margin-top: 8px">
+              <strong>Decisión de Patricia</strong><br />¿Cuál de los tres caminos?<br />Recomendamos
+              B para empezar.
+            </div>
+          </div>
+          <div class="step" style="text-align: left">
+            <div class="num" style="color: var(--accent); font-size: 1.4em; font-weight: 900">
+              2
+            </div>
+            <div class="desc" style="font-size: 0.85em; margin-top: 8px">
+              <strong>IDs de cursos</strong><br />Sumar más cursos al piloto. Ya tenemos 269 y 304.
+            </div>
+          </div>
+          <div class="step" style="text-align: left">
+            <div class="num" style="color: var(--accent); font-size: 1.4em; font-weight: 900">
+              3
+            </div>
+            <div class="desc" style="font-size: 0.85em; margin-top: 8px">
+              <strong>Docs para 269</strong><br />Pre-montaje y validación. Sin docs, el mapeo queda
+              incompleto.
+            </div>
+          </div>
+        </div>
+        <div
+          class="callout mt-m"
+          style="
+            background: var(--bg-soft);
+            padding: 20px;
+            border-radius: var(--radius);
+            text-align: center;
+          "
+        >
+          <p style="font-size: 1.1em; font-weight: 600; color: var(--accent)">
+            Ver el reporte del curso 304
+          </p>
+          <p style="font-size: 0.85em; color: var(--text-2); margin-top: 6px">
+            https://nelgoez.github.io/unc-agentic-dev/audit/304/latest.html
+          </p>
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">UNC QA Audit · Propuesta</span>
+          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+          <span class="slide-number" data-current="1" data-total="8"></span>
+        </div>
+      </section>
+    </div>
+    <script src="assets/runtime.js"></script>
+  </body>
+</html>

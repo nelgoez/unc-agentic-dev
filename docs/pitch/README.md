@@ -10,6 +10,7 @@
 | ------------------------ | -------------------------------------------------------------------------------- |
 | **Propuesta de negocio** | ✅ `PROPUESTA-unc-course-kit.md` — documento completo listo para revisión        |
 | **Presentación**         | ✅ `index.html` — 14 slides, interactiva, con screenshots de Gemini CLI          |
+| **Propuesta QA**         | ✅ `propuesta-qa.html` — 8 slides, auditoría automática de cursos, 3 opciones    |
 | **Código**               | ⏳ Pre-implementación — `packages/unc-course-kit/` existe pero requiere refactor |
 | **Cliente/usuario**      | ⏳ En espera de decisión — el equipo prompters necesita optar                    |
 
