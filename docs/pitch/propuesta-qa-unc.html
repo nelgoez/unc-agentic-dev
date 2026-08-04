@@ -149,7 +149,14 @@
 <td>&quot;Según la planilla, la actividad 3 debería llamarse &#39;TP Funciones&#39;&quot; — es la mejor interpretación, pero si la planilla está desactualizada el dato es incorrecto.</td>
 </tr>
 </tbody></table>
-<p>En el caso del curso 269: sin documentación disponible, todos los datos se infirieron → reporte forzosamente naranja. El curso 304, con documentación completa y actualizada, produjo un reporte con predominancia verde.</p>
+<p>Los reportes reales lo demuestran con claridad:</p>
+<ul>
+<li><p><strong>Curso 269 (sin documentación):</strong> el reporte muestra ✅ OK en verde. La estructura, las condiciones de acceso, el seguimiento de avance y los certificados están 100% correctos según la API de Moodle. Pero el reporte está incompleto: sin documentos, <strong>no puede detectar</strong> si lo que el equipo diseñó coincide con lo publicado. Es un reporte verde, pero ciego a las discrepancias documentales.</p>
+</li>
+<li><p><strong>Curso 304 (con documentación):</strong> el reporte muestra ⚠️ ADVERTENCIAS en ámbar. Las mismas secciones de API están 100% verdes. Pero ahora <strong>existe la sección doc↔producción</strong>, y revela que solo el 17% de las actividades documentadas se corresponden con producción. Ese warning ámbar no es un error de la herramienta: es su valor. Detectó un problema que sin documentación habría sido invisible.</p>
+</li>
+</ul>
+<p>La paradoja es intencional: tener documentación <strong>no garantiza</strong> un reporte más verde; garantiza un reporte <strong>más honesto</strong>. Sin docs, todo parece funcionar porque no hay contra qué comparar. Con docs, el espejo refleja tanto lo que está bien como lo que no — y eso es exactamente lo que queremos.</p>
 <h3>4.2 ¿Por qué impacta en costo y riesgo?</h3>
 <p>La proporción entre verde y naranja no es solo un indicador visual: tiene consecuencias concretas sobre el proyecto.</p>
 <table>

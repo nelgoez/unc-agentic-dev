@@ -66,7 +66,13 @@ Cada dato del reporte muestra de un vistazo de dónde salió la información:
 | 🟢 **Verde**   | Leído directamente de Moodle vía API    | "El curso tiene 5 secciones" — es un hecho, Moodle devuelve ese número.                                                                                          |
 | 🟠 **Naranja** | Inferido de la documentación del equipo | "Según la planilla, la actividad 3 debería llamarse 'TP Funciones'" — es la mejor interpretación, pero si la planilla está desactualizada el dato es incorrecto. |
 
-En el caso del curso 269: sin documentación disponible, todos los datos se infirieron → reporte forzosamente naranja. El curso 304, con documentación completa y actualizada, produjo un reporte con predominancia verde.
+Los reportes reales lo demuestran con claridad:
+
+- **Curso 269 (sin documentación):** el reporte muestra ✅ OK en verde. La estructura, las condiciones de acceso, el seguimiento de avance y los certificados están 100% correctos según la API de Moodle. Pero el reporte está incompleto: sin documentos, **no puede detectar** si lo que el equipo diseñó coincide con lo publicado. Es un reporte verde, pero ciego a las discrepancias documentales.
+
+- **Curso 304 (con documentación):** el reporte muestra ⚠️ ADVERTENCIAS en ámbar. Las mismas secciones de API están 100% verdes. Pero ahora **existe la sección doc↔producción**, y revela que solo el 17% de las actividades documentadas se corresponden con producción. Ese warning ámbar no es un error de la herramienta: es su valor. Detectó un problema que sin documentación habría sido invisible.
+
+La paradoja es intencional: tener documentación **no garantiza** un reporte más verde; garantiza un reporte **más honesto**. Sin docs, todo parece funcionar porque no hay contra qué comparar. Con docs, el espejo refleja tanto lo que está bien como lo que no — y eso es exactamente lo que queremos.
 
 ### 4.2 ¿Por qué impacta en costo y riesgo?
 
