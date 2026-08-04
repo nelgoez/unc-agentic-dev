@@ -123,6 +123,23 @@
       .deck-footer {
         position: relative;
         z-index: 11;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        margin-top: auto;
+        padding-top: 8px;
+      }
+      .deck-footer a,
+      .deck-footer span {
+        pointer-events: auto;
+      }
+      .deck-footer .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
       }
     </style>
   </head>
@@ -381,7 +398,7 @@
             <tr>
               <td>Mapeo doc vs producción</td>
               <td>✅ preciso</td>
-              <td>✅ fuzzy</td>
+              <td>✅ aproximado</td>
               <td>✅ formato fijo</td>
             </tr>
             <tr>
@@ -550,23 +567,25 @@
           </p>
         </div>
         <div class="deck-footer">
-          <span class="dim2">UNC QA Audit · Propuesta</span>
-          <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
-          <a
-            href="index.html"
-            style="color: var(--accent); text-decoration: none; font-size: 0.75em; margin-left: 8px"
-            >Course Kit →</a
-          >
-          <a
-            href="propuesta-qa-focus.html"
-            style="color: var(--accent); text-decoration: none; font-size: 0.75em; margin-left: 8px"
-            >Focus →</a
-          >
-          <a
-            href="mailto:nagomez@mi.unc.edu.ar"
-            style="color: var(--text-2); text-decoration: none; font-size: 0.72em"
-            >nagomez@mi.unc.edu.ar</a
-          >
+          <div class="footer-links">
+            <span class="dim2">UNC QA Audit · Propuesta</span>
+            <span class="nav-hint">← → navegar · T tema · F fullscreen</span>
+            <a
+              href="index.html"
+              style="color: var(--accent); text-decoration: none; font-size: 0.75em"
+              >Course Kit →</a
+            >
+            <a
+              href="propuesta-qa-focus.html"
+              style="color: var(--accent); text-decoration: none; font-size: 0.75em"
+              >Focus →</a
+            >
+            <a
+              href="mailto:nagomez@mi.unc.edu.ar"
+              style="color: var(--text-2); text-decoration: none; font-size: 0.72em"
+              >nagomez@mi.unc.edu.ar</a
+            >
+          </div>
           <span class="slide-number" data-current="1" data-total="8"></span>
         </div>
       </section>
