@@ -76,7 +76,7 @@
 <td>Proceso automático que ejecuta las auditorías sin intervención manual. Corre periódicamente (por ejemplo, cada semana) y publica los resultados en la web para que cualquiera del equipo los consulte.</td>
 </tr>
 <tr>
-<td><strong>Analizador automático</strong> <em>(parser)</em></td>
+<td><strong>Analizador sintáctico automático</strong> <em>(parser)</em></td>
 <td>Un programa que lee documentos en distintos formatos (Word, Excel, planillas .csv) y extrae información para compararla con Moodle. Funciona como un lector automático: entiende la estructura del documento sin ayuda humana.</td>
 </tr>
 <tr>
@@ -178,7 +178,7 @@
 <tr>
 <td><strong>Costo de mantenimiento</strong></td>
 <td>Bajo — procesos claros = reportes estables</td>
-<td>Variable — si cambian formatos sin aviso, el analizador falla y requiere ajustes</td>
+<td>Variable — si cambian formatos sin aviso, el analizador sintáctico falla y requiere ajustes</td>
 </tr>
 <tr>
 <td><strong>Curva de adopción</strong></td>
@@ -227,13 +227,13 @@
 <p><strong>Alcance:</strong></p>
 <ul>
 <li>Plataforma de auditoría desplegada en la web (acceso vía URL, sin instalación)</li>
-<li>Analizador automático que lee documentos en los formatos que el equipo ya usa (.docx, .xlsx, .csv, .md). Detecta correspondencias aunque los nombres no coincidan exactamente entre la documentación y Moodle —por ejemplo, reconoce que &quot;TP Funciones&quot; y &quot;Trabajo Práctico: Funciones&quot; hablan de lo mismo—. Esto permite arrancar sin cambiar los procesos actuales, pero introduce un margen de interpretación</li>
+<li>Analizador sintáctico automático que lee documentos en los formatos que el equipo ya usa (.docx, .xlsx, .csv, .md). Detecta correspondencias aunque los nombres no coincidan exactamente entre la documentación y Moodle —por ejemplo, reconoce que &quot;TP Funciones&quot; y &quot;Trabajo Práctico: Funciones&quot; hablan de lo mismo—. Esto permite arrancar sin cambiar los procesos actuales, pero introduce un margen de interpretación</li>
 <li>Reportes que muestran de un vistazo la confianza de cada dato: 🟢 verde si se verificó directo contra Moodle, 🟠 naranja si se infirió de la documentación del equipo <em>(ver sección 4.1)</em></li>
 <li>Re-ejecución con 1 click desde el mismo reporte</li>
 <li>Historial automático de todas las ejecuciones</li>
 <li>Actualización semanal automática: las auditorías se ejecutan solas y los resultados se publican sin intervención manual</li>
 <li>Soporte para carga de documentos vía web (formatos .docx/.xlsx/.csv/.md)</li>
-<li>Ajustes del analizador automático según nuevos formatos que surjan</li>
+<li>Ajustes del analizador sintáctico automático según nuevos formatos que surjan</li>
 </ul>
 <table>
 <thead>
@@ -403,7 +403,7 @@
 </tr>
 <tr>
 <td>2-4</td>
-<td>Incorporación de nuevos cursos a pedido. Ajustes del analizador para formatos UNC.</td>
+<td>Incorporación de nuevos cursos a pedido. Ajustes del analizador sintáctico para formatos UNC.</td>
 </tr>
 <tr>
 <td>4-12</td>

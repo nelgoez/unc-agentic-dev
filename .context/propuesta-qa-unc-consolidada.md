@@ -20,17 +20,17 @@ Resuelve problemas como el del curso 269, donde un requisito de avance señalaba
 
 Esta propuesta contiene algunos términos técnicos que conviene aclarar desde el inicio. Están explicados para que cualquier persona del equipo —sin importar su formación previa— pueda leer el documento completo sin perderse.
 
-| Término                                        | Qué significa en este proyecto                                                                                                                                                                                                                                                                                                                                                                                                           |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Flujo de trabajo** _(pipeline)_              | La secuencia de pasos por los que pasa un curso: desde que se planifica, pasando por controles automáticos, hasta que se publica en Moodle.                                                                                                                                                                                                                                                                                              |
-| **Condición de acceso** _(restricción, gate)_  | Un requisito que el estudiante debe cumplir para avanzar. Por ejemplo: "para ver el Módulo 3, primero hay que entregar el TP del Módulo 2". Si la restricción apunta a una actividad que no existe o fue renombrada, el estudiante queda bloqueado sin saber por qué.                                                                                                                                                                    |
-| **Verificación directa** _(🟢 verde)_          | El dato se obtuvo directamente de Moodle (vía API). Es un hecho objetivo: lo que Moodle tiene configurado, el reporte lo refleja. No depende de interpretación.                                                                                                                                                                                                                                                                          |
-| **Verificación documental** _(🟠 naranja)_     | El dato se infiere de los documentos del equipo (planillas, Word, archivos de texto). Es la mejor interpretación posible, pero su precisión depende de qué tan completos y actualizados estén esos documentos.                                                                                                                                                                                                                           |
-| **Integración Continua** _(CI)_                | Proceso automático que ejecuta las auditorías sin intervención manual. Corre periódicamente (por ejemplo, cada semana) y publica los resultados en la web para que cualquiera del equipo los consulte.                                                                                                                                                                                                                                   |
-| **Analizador automático** _(parser)_           | Un programa que lee documentos en distintos formatos (Word, Excel, planillas .csv) y extrae información para compararla con Moodle. Funciona como un lector automático: entiende la estructura del documento sin ayuda humana.                                                                                                                                                                                                           |
-| **Coincidencia aproximada** _(fuzzy matching)_ | Técnica que encuentra correspondencias aunque los nombres no sean idénticos. Ejemplo: si un documento dice "TP Funciones" y en Moodle la actividad se llama "Trabajo Práctico: Funciones", el sistema detecta que probablemente hablan de lo mismo. Es útil cuando los formatos varían entre cursos, pero introduce un margen de interpretación (🟠 naranja) y por lo tanto un riesgo de error que no existe en la verificación directa. |
-| **Línea de comandos** _(CLI)_                  | Herramienta que se opera escribiendo comandos en una terminal de texto, no desde el navegador. Requiere cierta familiaridad técnica. Las opciones B y Express de esta propuesta no requieren línea de comandos: todo se maneja desde una página web.                                                                                                                                                                                     |
-| **Reporte accionable**                         | Un reporte que no solo describe un problema sino que indica exactamente qué corregir. Ejemplo: no dice "hay inconsistencias", dice "la actividad X del Módulo 2 no existe en Moodle; renombrarla o quitarla de las condiciones de acceso".                                                                                                                                                                                               |
+| Término                                         | Qué significa en este proyecto                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Flujo de trabajo** _(pipeline)_               | La secuencia de pasos por los que pasa un curso: desde que se planifica, pasando por controles automáticos, hasta que se publica en Moodle.                                                                                                                                                                                                                                                                                              |
+| **Condición de acceso** _(restricción, gate)_   | Un requisito que el estudiante debe cumplir para avanzar. Por ejemplo: "para ver el Módulo 3, primero hay que entregar el TP del Módulo 2". Si la restricción apunta a una actividad que no existe o fue renombrada, el estudiante queda bloqueado sin saber por qué.                                                                                                                                                                    |
+| **Verificación directa** _(🟢 verde)_           | El dato se obtuvo directamente de Moodle (vía API). Es un hecho objetivo: lo que Moodle tiene configurado, el reporte lo refleja. No depende de interpretación.                                                                                                                                                                                                                                                                          |
+| **Verificación documental** _(🟠 naranja)_      | El dato se infiere de los documentos del equipo (planillas, Word, archivos de texto). Es la mejor interpretación posible, pero su precisión depende de qué tan completos y actualizados estén esos documentos.                                                                                                                                                                                                                           |
+| **Integración Continua** _(CI)_                 | Proceso automático que ejecuta las auditorías sin intervención manual. Corre periódicamente (por ejemplo, cada semana) y publica los resultados en la web para que cualquiera del equipo los consulte.                                                                                                                                                                                                                                   |
+| **Analizador sintáctico automático** _(parser)_ | Un programa que lee documentos en distintos formatos (Word, Excel, planillas .csv) y extrae información para compararla con Moodle. Funciona como un lector automático: entiende la estructura del documento sin ayuda humana.                                                                                                                                                                                                           |
+| **Coincidencia aproximada** _(fuzzy matching)_  | Técnica que encuentra correspondencias aunque los nombres no sean idénticos. Ejemplo: si un documento dice "TP Funciones" y en Moodle la actividad se llama "Trabajo Práctico: Funciones", el sistema detecta que probablemente hablan de lo mismo. Es útil cuando los formatos varían entre cursos, pero introduce un margen de interpretación (🟠 naranja) y por lo tanto un riesgo de error que no existe en la verificación directa. |
+| **Línea de comandos** _(CLI)_                   | Herramienta que se opera escribiendo comandos en una terminal de texto, no desde el navegador. Requiere cierta familiaridad técnica. Las opciones B y Express de esta propuesta no requieren línea de comandos: todo se maneja desde una página web.                                                                                                                                                                                     |
+| **Reporte accionable**                          | Un reporte que no solo describe un problema sino que indica exactamente qué corregir. Ejemplo: no dice "hay inconsistencias", dice "la actividad X del Módulo 2 no existe en Moodle; renombrarla o quitarla de las condiciones de acceso".                                                                                                                                                                                               |
 
 ---
 
@@ -72,13 +72,13 @@ En el caso del curso 269: sin documentación disponible, todos los datos se infi
 
 La proporción entre verde y naranja no es solo un indicador visual: tiene consecuencias concretas sobre el proyecto.
 
-|                            | 🟢 Mayoría verde _(procesos claros)_       | 🟠 Mayoría naranja _(documentación dispersa)_                                    |
-| -------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------- |
-| **Costo de setup**         | Requiere estandarización previa (Opción A) | Funciona sin cambiar nada (Opción B)                                             |
-| **Riesgo de error**        | Bajo — se verifica contra producción real  | Medio — la documentación puede estar desactualizada                              |
-| **Riesgo de omisión**      | Bajo — lo que Moodle tiene, se ve          | Alto — si un documento omite algo, el reporte también                            |
-| **Costo de mantenimiento** | Bajo — procesos claros = reportes estables | Variable — si cambian formatos sin aviso, el analizador falla y requiere ajustes |
-| **Curva de adopción**      | Lenta (requiere capacitación)              | Inmediata (cero configuración)                                                   |
+|                            | 🟢 Mayoría verde _(procesos claros)_       | 🟠 Mayoría naranja _(documentación dispersa)_                                               |
+| -------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| **Costo de setup**         | Requiere estandarización previa (Opción A) | Funciona sin cambiar nada (Opción B)                                                        |
+| **Riesgo de error**        | Bajo — se verifica contra producción real  | Medio — la documentación puede estar desactualizada                                         |
+| **Riesgo de omisión**      | Bajo — lo que Moodle tiene, se ve          | Alto — si un documento omite algo, el reporte también                                       |
+| **Costo de mantenimiento** | Bajo — procesos claros = reportes estables | Variable — si cambian formatos sin aviso, el analizador sintáctico falla y requiere ajustes |
+| **Curva de adopción**      | Lenta (requiere capacitación)              | Inmediata (cero configuración)                                                              |
 
 Esta es la razón por la cual la Opción A cuesta más pero entrega reportes más confiables, y la Opción B es más accesible pero sus reportes heredan cualquier imprecisión de la documentación actual. No es que una sea mejor que la otra: son puntos de partida distintos según el momento del equipo.
 
@@ -112,13 +112,13 @@ Los montos se expresan en módulos como unidad primaria, con equivalencias en AR
 **Alcance:**
 
 - Plataforma de auditoría desplegada en la web (acceso vía URL, sin instalación)
-- Analizador automático que lee documentos en los formatos que el equipo ya usa (.docx, .xlsx, .csv, .md). Detecta correspondencias aunque los nombres no coincidan exactamente entre la documentación y Moodle —por ejemplo, reconoce que "TP Funciones" y "Trabajo Práctico: Funciones" hablan de lo mismo—. Esto permite arrancar sin cambiar los procesos actuales, pero introduce un margen de interpretación
+- Analizador sintáctico automático que lee documentos en los formatos que el equipo ya usa (.docx, .xlsx, .csv, .md). Detecta correspondencias aunque los nombres no coincidan exactamente entre la documentación y Moodle —por ejemplo, reconoce que "TP Funciones" y "Trabajo Práctico: Funciones" hablan de lo mismo—. Esto permite arrancar sin cambiar los procesos actuales, pero introduce un margen de interpretación
 - Reportes que muestran de un vistazo la confianza de cada dato: 🟢 verde si se verificó directo contra Moodle, 🟠 naranja si se infirió de la documentación del equipo _(ver sección 4.1)_
 - Re-ejecución con 1 click desde el mismo reporte
 - Historial automático de todas las ejecuciones
 - Actualización semanal automática: las auditorías se ejecutan solas y los resultados se publican sin intervención manual
 - Soporte para carga de documentos vía web (formatos .docx/.xlsx/.csv/.md)
-- Ajustes del analizador automático según nuevos formatos que surjan
+- Ajustes del analizador sintáctico automático según nuevos formatos que surjan
 
 | Concepto          | Módulos UNC | ARS                   | ≈ USD         |
 | ----------------- | ----------- | --------------------- | ------------- |
@@ -182,12 +182,12 @@ Los montos se expresan en módulos como unidad primaria, con equivalencias en AR
 
 ## 7. Cronograma Estimado
 
-| Semana | Actividad                                                                          |
-| ------ | ---------------------------------------------------------------------------------- |
-| 1      | Setup inicial. Reportes de cursos piloto. Índice web.                              |
-| 2-4    | Incorporación de nuevos cursos a pedido. Ajustes del analizador para formatos UNC. |
-| 4-12   | Ejecuciones semanales automáticas. Acumulación de métricas y patrones.             |
-| 12     | Revisión: ¿los datos justifican avanzar a consultoría de procesos (Opción A)?      |
+| Semana | Actividad                                                                                     |
+| ------ | --------------------------------------------------------------------------------------------- |
+| 1      | Setup inicial. Reportes de cursos piloto. Índice web.                                         |
+| 2-4    | Incorporación de nuevos cursos a pedido. Ajustes del analizador sintáctico para formatos UNC. |
+| 4-12   | Ejecuciones semanales automáticas. Acumulación de métricas y patrones.                        |
+| 12     | Revisión: ¿los datos justifican avanzar a consultoría de procesos (Opción A)?                 |
 
 ---
 
