@@ -68,11 +68,11 @@ Cada dato del reporte muestra de un vistazo de dónde salió la información:
 
 Los reportes reales lo demuestran con claridad:
 
-- **Curso 269 (sin documentación):** el reporte muestra ✅ OK en verde. La estructura, las condiciones de acceso, el seguimiento de avance y los certificados están 100% correctos según la API de Moodle. Pero el reporte está incompleto: sin documentos, **no puede detectar** si lo que el equipo diseñó coincide con lo publicado. Es un reporte verde, pero ciego a las discrepancias documentales.
+- **Curso 269 (sin documentación):** el reporte muestra ✅ OK en verde y nivel de confianza baja. La estructura, condiciones de acceso y certificados están 100% correctos según la API. Pero el alcance de la auditoría es limitado: sin documentos, no podemos verificar si lo que el equipo diseñó coincide con lo publicado. El badge verde dice "no encontramos errores en lo que pudimos revisar", no dice "el curso está perfecto".
 
-- **Curso 304 (con documentación):** el reporte muestra ⚠️ ADVERTENCIAS en ámbar. Las mismas secciones de API están 100% verdes. Pero ahora **existe la sección doc↔producción**, y revela que solo el 17% de las actividades documentadas se corresponden con producción. Ese warning ámbar no es un error de la herramienta: es su valor. Detectó un problema que sin documentación habría sido invisible.
+- **Curso 304 (con documentación):** el reporte muestra ⚠️ ADVERTENCIAS en ámbar y nivel de confianza media. Las mismas secciones de API están 100% correctas. Pero al cargar documentación, la auditoría cubre más terreno: detecta que solo el 17% de las actividades documentadas coinciden con producción. El badge ámbar refleja un curso con más problemas visibles, pero también una auditoría **más completa y honesta** que la del 269.
 
-La paradoja es intencional: tener documentación **no garantiza** un reporte más verde; garantiza un reporte **más honesto**. Sin docs, todo parece funcionar porque no hay contra qué comparar. Con docs, el espejo refleja tanto lo que está bien como lo que no — y eso es exactamente lo que queremos.
+La paradoja es intencional: un reporte con advertencias puede tener **más confianza** que uno limpio. Porque la confianza no mide cuán bien está el curso — mide cuánto terreno cubrió la auditoría. Sin documentación, todo parece funcionar porque no hay contra qué comparar. Con documentación, el espejo refleja tanto lo que está bien como lo que no.
 
 ### 4.2 ¿Por qué impacta en costo y riesgo?
 
