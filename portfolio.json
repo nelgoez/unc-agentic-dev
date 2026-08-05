@@ -1,0 +1,40 @@
+{
+  "featured": true,
+  "thumbnail": "reports/audit/cas-before-submit.png",
+  "displayName": "UNC Agentic Dev",
+  "shortDescription": "Moodle automation & course audit infrastructure for UNC Campus Virtual — Playwright, Allure, Netlify, and AI-driven reengagement pipelines.",
+  "category": "automation",
+  "tags": [
+    "moodle",
+    "automation",
+    "playwright",
+    "allure",
+    "netlify",
+    "typescript",
+    "bun",
+    "course-audit",
+    "unc",
+    "reengagement",
+    "kata-testing"
+  ],
+  "order": 4,
+  "screenshots": [
+    {
+      "path": "reports/audit/course-269-section-0.png",
+      "alt": "Course 269 audit — section overview"
+    },
+    {
+      "path": "reports/audit/course-269-admin-section-0.png",
+      "alt": "Course 269 audit — admin view"
+    },
+    {
+      "path": "reports/audit/cas-before-submit.png",
+      "alt": "Moodle CAS workflow — before submission"
+    }
+  ],
+  "links": {
+    "production": "https://unc-course-kit.netlify.app",
+    "allure": "https://nelgoez.github.io/unc-agentic-dev",
+    "docs": "https://github.com/nelgoez/unc-agentic-dev/tree/main/docs"
+  }
+}
