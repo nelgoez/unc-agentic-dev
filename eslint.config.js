@@ -33,6 +33,7 @@ export default antfu({
     'ts/explicit-function-return-type': 'off',
     'ts/restrict-template-expressions': 'off',
     'regexp/no-super-linear-backtracking': 'off',
+    'jsonc/comma-dangle': 'off',
     'style/max-statements-per-line': 'off',
   },
 });

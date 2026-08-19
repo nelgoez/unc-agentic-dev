@@ -122,8 +122,9 @@ export async function promptCursoConfig(): Promise<CursoConfig> {
         case 'manual':
           completionCriteria = { kind: 'manual' };
           break;
-        default:
+        case 'view':
           completionCriteria = { kind: 'view' };
+          break;
       }
 
       const rescueTrigger = await confirm({

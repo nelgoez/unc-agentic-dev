@@ -14,7 +14,6 @@ const screenshotsDir = resolve(outDir, 'screenshots');
 
 test.describe('MVP — Multi-Role Comparison with Fresh Test Users', () => {
   let adminLogin: MoodleLogin;
-  let adminCourse: MoodleCourse;
   let userAdmin: MoodleUserAdmin;
 
   let studentUser: CreatedUser;
@@ -26,7 +25,6 @@ test.describe('MVP — Multi-Role Comparison with Fresh Test Users', () => {
 
     const { ctx } = createFixture(page);
     adminLogin = new MoodleLogin(page, ctx.env.baseUrl);
-    adminCourse = new MoodleCourse(page, ctx.env.baseUrl);
     userAdmin = new MoodleUserAdmin(page, ctx.env.baseUrl);
 
     await adminLogin.loginAsAdmin();

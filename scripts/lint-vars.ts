@@ -42,8 +42,7 @@ function findEnvReferences(): Set<string> {
     .replace(/\/\*[\s\S]*?\*\//g, ''); // block comments
   const refs = new Set<string>();
   const re = /\{env:([A-Z_][A-Z0-9_]*)\}/g;
-  let match;
-  while ((match = re.exec(content)) !== null) {
+  for (let match = re.exec(content); match !== null; match = re.exec(content)) {
     refs.add(match[1]);
   }
   return refs;

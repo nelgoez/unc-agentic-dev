@@ -19,7 +19,6 @@ interface CourseInfo {
 }
 
 const OUTPUT_PATH = resolve(__dirname, '..', 'reports', 'mvp-demo', 'discovered-courses.json');
-const PAGE_TIMEOUT = 15000;
 const USER_AGENT
   = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
 
@@ -126,13 +125,12 @@ async function tryFetchLogin(): Promise<CourseInfo[]> {
   const courses = new Map<number, CourseInfo>();
 
   const patterns = [
-    /<a[^>]+href="[^"]*course\/view\.php\?id=(\d+)[^"]*"[^>]*>([\s\S]*?)<\/a>/gi,
-    /<a[^>]+href="[^"]*\?id=(\d+)[^"]*course[^"]*"[^>]*>([\s\S]*?)<\/a>/gi,
+    /<a[^>]+href="[^"]*course\/view\.php\?id=(\d+)(?:&[^"]*)?"[^>]*>([\s\S]*?)<\/a>/gi,
+    /<a[^>]+href="[^"]*\?id=(\d+)(?:&[^"]*)?course[^"]*"[^>]*>([\s\S]*?)<\/a>/gi,
   ];
 
   for (const pattern of patterns) {
-    let match: RegExpExecArray | null;
-    while ((match = pattern.exec(idxHtml)) !== null) {
+    for (let match = pattern.exec(idxHtml); match !== null; match = pattern.exec(idxHtml)) {
       const id = Number.parseInt(match[1], 10);
       const rawName = match[2]
         .replace(/<[^>]*>/g, '')
@@ -159,9 +157,9 @@ async function tryFetchLogin(): Promise<CourseInfo[]> {
       },
     });
     const dashHtml = await dashResp.text();
-    const dashPattern = /<a[^>]+href="[^"]*course\/view\.php\?id=(\d+)[^"]*"[^>]*>([\s\S]*?)<\/a>/gi;
-    let m: RegExpExecArray | null;
-    while ((m = dashPattern.exec(dashHtml)) !== null) {
+    const dashPattern
+      = /<a[^>]+href="[^"]*course\/view\.php\?id=(\d+)(?:&[^"]*)?"[^>]*>([\s\S]*?)<\/a>/gi;
+    for (let m = dashPattern.exec(dashHtml); m !== null; m = dashPattern.exec(dashHtml)) {
       const id = Number.parseInt(m[1], 10);
       const rawName = m[2]
         .replace(/<[^>]*>/g, '')
@@ -183,10 +181,9 @@ async function tryFetchLogin(): Promise<CourseInfo[]> {
   // Step 6: If still too few, try browsing categories
   if (courses.size < 5) {
     console.log('[FETCH] Step 5: Few courses found, browsing categories...');
-    const catPattern = /href="[^"]*\/course\/index\.php\?categoryid=(\d+)[^"]*"/gi;
-    let cm: RegExpExecArray | null;
+    const catPattern = /href="[^"]*\/course\/index\.php\?categoryid=(\d+)(?:&[^"]*)?"/gi;
     const catIds = new Set<number>();
-    while ((cm = catPattern.exec(idxHtml)) !== null) {
+    for (let cm = catPattern.exec(idxHtml); cm !== null; cm = catPattern.exec(idxHtml)) {
       catIds.add(Number.parseInt(cm[1], 10));
     }
 
@@ -198,9 +195,8 @@ async function tryFetchLogin(): Promise<CourseInfo[]> {
         });
         const catHtml = await catResp.text();
         const catPattern
-          = /<a[^>]+href="[^"]*course\/view\.php\?id=(\d+)[^"]*"[^>]*>([\s\S]*?)<\/a>/gi;
-        let cm2: RegExpExecArray | null;
-        while ((cm2 = catPattern.exec(catHtml)) !== null) {
+          = /<a[^>]+href="[^"]*course\/view\.php\?id=(\d+)(?:&[^"]*)?"[^>]*>([\s\S]*?)<\/a>/gi;
+        for (let cm2 = catPattern.exec(catHtml); cm2 !== null; cm2 = catPattern.exec(catHtml)) {
           const id = Number.parseInt(cm2[1], 10);
           const rawName = cm2[2]
             .replace(/<[^>]*>/g, '')

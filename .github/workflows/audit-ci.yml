@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       course_id:
-        description: 'Course ID to audit'
+        description: Course ID to audit
         required: false
         default: '304'
 

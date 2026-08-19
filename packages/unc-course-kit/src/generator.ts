@@ -76,7 +76,7 @@ export function generateCursoKit(config: CursoConfig, outputDir: string): void {
   console.log(`\n   Para empezar: cd ${config.slug} && gemini`);
 }
 
-function renderGeminiSettings(config: CursoConfig): string {
+function renderGeminiSettings(_config: CursoConfig): string {
   return JSON.stringify(
     {
       general: {
@@ -97,7 +97,7 @@ function renderGeminiSettings(config: CursoConfig): string {
   );
 }
 
-function renderOpenCodeConfig(config: CursoConfig): string {
+function renderOpenCodeConfig(_config: CursoConfig): string {
   return `{
   "$schema": "https://opencode.ai/config.json",
   "instructions": [
@@ -166,24 +166,6 @@ ${m.activities
   return overview;
 }
 
-function formatActivities(config: CursoConfig): string {
-  return config.modules
-    .map(
-      m =>
-        `### ${m.name}
-
-| # | Actividad | Tipo | Obligatoria | Requisito | Criteria | Rescue | Tiempo |
-|---|-----------|------|-------------|-----------|----------|--------|--------|
-${m.activities
-  .map(
-    a =>
-      `| ${a.order} | ${a.name} | ${a.type} | ${a.mandatory ? 'Sí' : 'No'} | ${a.gatesToNextModule ? 'Sí' : 'No'} | ${renderCriteria(a)} | ${a.rescueTrigger ? 'Sí' : 'No'} | ${a.estimatedTimeMinutes}min |`,
-  )
-  .join('\n')}`,
-    )
-    .join('\n\n');
-}
-
 /**
  * Estimate token count for a string.
  * ~4 chars per token for Spanish text (conservative).
@@ -222,7 +204,7 @@ function contextBudget(label: string, prompt: string): void {
 
 /**
  * Render a single module's activities table (for per-module prompting).
- * Smaller context than formatActivities() — keeps prompts under MECW.
+ * Keeps prompts under MECW.
  */
 function formatModuleActivities(module: CursoConfig['modules'][0]): string {
   return `### ${module.name}
@@ -295,7 +277,6 @@ Ayudame a definir:
 }
 
 function renderFaseScaffold(config: CursoConfig): string {
-  const gates = config.modules.flatMap(m => m.activities.filter(a => a.gatesToNextModule));
   const specialActs = config.modules.flatMap(m =>
     m.activities.filter(a => a.gatesToNextModule || a.rescueTrigger || a.maintenanceTrigger),
   );
@@ -303,7 +284,7 @@ function renderFaseScaffold(config: CursoConfig): string {
   // Build per-module instructions separately to keep each prompt small
   const moduleInstructions = config.modules
     .map(
-      (m, i) => `### ${m.name}
+      m => `### ${m.name}
 ${formatModuleActivities(m)}
 
 Completá este módulo antes de pasar al siguiente.
@@ -383,10 +364,6 @@ ${
 }
 
 function renderFaseContenido(config: CursoConfig): string {
-  const htmlActivities = config.modules.flatMap(m =>
-    m.activities.filter(a => a.type === 'html' || a.type === 'video' || a.type === 'url'),
-  );
-
   const prompt = `# Fase 3: Contenido — Generar materiales con Gemini
 
 ## Objetivo

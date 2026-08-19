@@ -42,7 +42,6 @@ async function main() {
   const breakdown = await api.getAvailabilityJsonBreakdown(courseId);
   const orphans = await api.findOrphanedCmIds(contents);
 
-  let nelthor = null;
   let progression = null;
   let nelthorCompletionStatus: Array<{ cmid: number; state: number; tracking: number }> | null
     = null;
@@ -50,7 +49,6 @@ async function main() {
   try {
     const users = await api.getUsersByField('username', ['nelthor']);
     if (users[0]) {
-      nelthor = { id: users[0].id, name: users[0].fullname };
       nelthorCompletionStatus = await api.getActivitiesCompletionStatus(courseId, users[0].id);
       const status = nelthorCompletionStatus;
       const tracked = status.filter((s: { tracking: number }) => s.tracking > 0);
@@ -72,7 +70,7 @@ async function main() {
         for (const mod of incompleteMods.slice(0, 5)) {
           try {
             const r = await api.markActivityComplete(courseId, mod.cmid, users[0].id);
-            if (r && (r).state === 1)
+            if (r && r.state === 1)
               completed++;
           }
           catch (err) {

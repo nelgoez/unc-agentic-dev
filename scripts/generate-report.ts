@@ -63,19 +63,19 @@ async function auditCourse(api: MoodleApiClient, courseId: string): Promise<Cour
   const report: CourseReport = {
     courseId,
     courseName: contents[0]?.name || `Curso ${courseId}`,
-    sections: breakdown.sections.map((s: any) => ({
+    sections: breakdown.sections.map(s => ({
       number: s.section,
       name: s.name,
       activityCount: s.moduleCount,
       restricted: s.hasSectionRestriction || s.modulesWithRestrictions.length > 0,
     })),
     restrictions: breakdown.sections
-      .filter((s: any) => s.modulesWithRestrictions.length > 0)
-      .flatMap((s: any) =>
-        s.modulesWithRestrictions.map((m: any) => ({
+      .filter(s => s.modulesWithRestrictions.length > 0)
+      .flatMap(s =>
+        s.modulesWithRestrictions.map(m => ({
           section: s.name,
           activityName: m.name,
-          conditions: m.conditions.map((c: any) => ({
+          conditions: m.conditions.map(c => ({
             type: c.type,
             detail: c.cm
               ? `Requiere completion de cmid ${c.cm}`

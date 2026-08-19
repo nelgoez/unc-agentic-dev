@@ -12,7 +12,6 @@ pptx.subject = 'Propuesta de servicios de desarrollo para reenganche, dashboard 
 // ── Colors ──
 const NAVY = '1A3A8A';
 const BLUE = '3466D0';
-const LIGHT_BLUE = '5B8DEF';
 const WHITE = 'FFFFFF';
 const DARK = '0A1628';
 const GRAY = '44556D';

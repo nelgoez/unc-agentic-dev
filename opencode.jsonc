@@ -11,7 +11,7 @@
     ".context/cursos-activos.md",
     ".context/course-kit-pitch.md",
     ".context/cicd-course-pipeline.md",
-    ".context/referencia-rapida.md"
+    ".context/referencia-rapida.md",
   ],
 
   // MCP servers for the UNC ecosystem
@@ -19,7 +19,7 @@
     "context7": {
       "type": "local",
       "command": ["bunx", "-y", "@upstash/context7-mcp"],
-      "enabled": true
+      "enabled": true,
     },
     "tavily": {
       "type": "local",
@@ -27,9 +27,9 @@
         "bunx",
         "-y",
         "mcp-remote",
-        "https://mcp.tavily.com/mcp/?tavilyApiKey={env:TAVILY_API_KEY}"
+        "https://mcp.tavily.com/mcp/?tavilyApiKey={env:TAVILY_API_KEY}",
       ],
-      "enabled": false
+      "enabled": false,
     },
     "playwright": {
       "type": "local",
@@ -41,15 +41,15 @@
         "--timeout-action",
         "10000",
         "--timeout-navigation",
-        "30000"
+        "30000",
       ],
-      "enabled": false
+      "enabled": false,
     },
     "supabase": {
       "type": "remote",
       "url": "https://mcp.supabase.com/mcp?project_ref={env:SUPABASE_PROJECT_REF}",
-      "enabled": false
-    }
+      "enabled": false,
+    },
   },
 
   // Permissions — safe defaults, allow common dev tools
@@ -88,8 +88,8 @@
       "git reset --hard *": "deny",
       "git clean -fd *": "deny",
       "git branch -D *": "deny",
-      "chmod 777 *": "deny"
-    }
+      "chmod 777 *": "deny",
+    },
   },
 
   // Custom commands for UNC workflows
@@ -97,22 +97,22 @@
     "resume": {
       "description": "Resume last session — loads progress files from .context/",
       "template": "You are resuming a previously interrupted session for $ARGUMENTS.\n\nLoad the current state:\n@.context/$ARGUMENTS/PROGRESS.md\n@.context/$ARGUMENTS/ROADMAP.md\n\nSummarize what was in progress and suggest next action.\nSkip missing files gracefully.",
-      "agent": "plan"
+      "agent": "plan",
     },
     "reengagement": {
       "description": "Work on Moodle Reengagement plugin — loads implementation plan",
       "template": "Load and analyze the Reengagement implementation context:\n\n1. Read @.context/reengagement/plan-implementacion.md\n2. Read @.context/reengagement/cursos-config.md\n\nReport:\n- Current phase and status\n- Pending actions per course (IA, Python, Yoga)\n- Next deadline or milestone",
-      "agent": "plan"
+      "agent": "plan",
     },
     "dashboard": {
       "description": "Work on Activity Analysis Dashboard — loads config and status",
       "template": "Load the dashboard context:\n\n1. Read @.context/dashboard/requirements.md\n2. Read @.context/dashboard/PROGRESS.md\n\nReport current dashboard state, next features, and any blockers.",
-      "agent": "plan"
+      "agent": "plan",
     },
     "pitch": {
       "description": "Load UNC Course Kit pitch and project state — proposal to management",
       "template": "Load the Course Kit pitch context:\n\n1. Read @.context/course-kit-pitch.md\n2. Read @docs/pitch/PROPUESTA-unc-course-kit.md\n\nSummarize:\n- What is being proposed\n- Current project state\n- Next steps needed to move forward",
-      "agent": "plan"
-    }
-  }
+      "agent": "plan",
+    },
+  },
 }
