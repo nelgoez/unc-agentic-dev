@@ -5,3 +5,11 @@ build/
 *.log
 .DS_Store
 bun.lock
+
+# Generated artifacts
+test-results/
+.playwright-mcp/
+allure-results/
+allure-report/
+graphify-out/
+reports/allure/

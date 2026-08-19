@@ -79,3 +79,4 @@ graphify-out/
 # Playwright cache
 playwright/.cache/
 playwright/.auth/
+.playwright-mcp/
