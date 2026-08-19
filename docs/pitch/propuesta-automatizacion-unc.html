@@ -40,73 +40,120 @@
 </head>
 <body>
 <h1>Propuesta de Servicios — Estrategia de Automatización del Campus Virtual</h1>
-<p><strong>Para:</strong> Dirección del Campus Virtual — Universidad Nacional de Córdoba (UNC)<br><strong>Atención:</strong> Patricia Altamirano (Dirección), Ignacio Acuña, Fernando Acosta, Natalia (equipo de automatización)<br><strong>Fecha:</strong> Agosto 2026<br><strong>Proponente:</strong> Nahuel Gómez — Arquitectura e Integración de Automatización<br><strong>Contacto:</strong> <a href="mailto:nagomez@mi.unc.edu.ar">nagomez@mi.unc.edu.ar</a></p>
+<p><strong>Destinatario:</strong> Dirección del Campus Virtual — Universidad Nacional de Córdoba (UNC)<br><strong>Atención:</strong> Patricia Altamirano (Dirección) · Ignacio Acuña (coordinación) · Natalia (automatización)<br><strong>Proponente:</strong> Nahuel Gómez — Arquitectura e Integración de Automatización<br><strong>Fecha:</strong> Agosto 2026<br><strong>Contacto:</strong> <a href="mailto:nagomez@mi.unc.edu.ar">nagomez@mi.unc.edu.ar</a></p>
 <hr>
 <h2>1. Resumen Ejecutivo</h2>
-<p>Esta propuesta reencuadra nuestro trabajo previo de auditoría de cursos Moodle dentro de una<br><strong>Estrategia de Automatización del Campus Virtual</strong> que parte de los problemas y procesos, no de la<br>herramienta.</p>
-<p>Aportamos dos capacidades concretas al proceso que ya está en marcha:</p>
-<ol>
-<li><strong>Ordenar el &quot;quién hace qué&quot;</strong> — un mapa de responsabilidades (RACI) para que la calidad viva<br>donde corresponde: dentro del Diseño Instruccional.</li>
-<li><strong>Convertir los criterios de calidad en controles automáticos de finalización</strong> — una lista de<br>chequeo que corre sola antes de que una propuesta se considere terminada, en lugar de una capa de<br>rechequeo permanente.</li>
-</ol>
-<p>La auditoría de Moodle (cursos 304 y 269) es la <strong>evidencia</strong> de que ese control automático ya<br>funciona. No es el centro de la propuesta: es un módulo más de la arquitectura.</p>
+<p>El Campus Virtual de la UNC publica cursos en Moodle cuyo ciclo de vida —diseño, producción,<br>publicación y operación— involucra múltiples equipos y pasos que hoy carecen de una validación<br>automática entre lo documentado y lo efectivamente publicado. Los errores resultantes (el caso del<br>curso 269, donde una actividad inexistente bloqueaba el avance de estudiantes, es el ejemplo<br>paradigmático) se detectan tardíamente, por lo general cuando un estudiante los reporta.</p>
+<p>La presente propuesta se inscribe en la <strong>Estrategia de Automatización del Campus Virtual</strong> definida<br>por la Dirección, partiendo de los procesos y no de la herramienta. Propone, como primer paso<br>contratable, una <strong>Fase 0 de diagnóstico y arquitectura</strong> que ordene procesos, responsabilidades y<br>criterios de calidad, y que produzca la información necesaria para decidir con evidencia qué<br>automatizaciones implementar y con qué alcance.</p>
+<p>El servicio se presta bajo modalidad de servicios profesionales, sin contrato de permanencia, con<br>tecnología de código abierto y sin costo de licencias.</p>
 <hr>
-<h2>2. Contexto</h2>
-<p>El Campus Virtual publica cursos en Moodle cuyo diseño involucra múltiples pasos (pre-montaje,<br>validación, producción). Hoy no existe validación automática entre lo documentado y lo publicado; los<br>errores —como el caso del curso 269, donde una actividad inexistente bloqueaba el avance— se detectan<br>cuando un estudiante los reporta.</p>
-<p>La Dirección definió un orden claro: primero ordenar procesos, responsabilidades y criterios de<br>calidad; después identificar qué vale la pena automatizar; recién entonces elegir tecnología y<br>recursos. Esta propuesta se integra a esa secuencia.</p>
+<h2>2. Contexto y Antecedentes</h2>
+<p>El Campus Virtual opera con una estructura acotada: el equipo de Diseño Instruccional (3-4<br>integrantes más coordinación y cocoordinación, con participación de Ignacio Acuña) y un equipo<br>audiovisual (3 integrantes, coordinado por el mismo). La Dirección ha identificado la necesidad de<br>ordenar <strong>quién hace qué y dónde reside la responsabilidad por la calidad en cada etapa</strong>, antes de<br>incorporar automatización.</p>
+<p>La Dirección delineó cinco áreas de proceso prioritarias:</p>
+<ol>
+<li><strong>Mesa de Ayuda</strong> — clasificación y respuesta de consultas recurrentes.</li>
+<li><strong>Asistencia con IA en el diseño</strong> — detección de problemas e inconsistencias antes de producción.</li>
+<li><strong>Producción audiovisual</strong> — seguimiento del circuito completo de producción.</li>
+<li><strong>Experiencia de les estudiantes</strong> — detección de abandono y dificultades de navegación.</li>
+<li><strong>Indicadores y monitoreo</strong> — información para la toma de decisiones y la mejora continua.</li>
+</ol>
+<p>El proponente ha desarrollado y demostrado una <strong>auditoría automática de cursos Moodle</strong> sobre los<br>cursos 304 y 269, que constituye la evidencia técnica de la capacidad de instrumentar controles de<br>calidad automáticos. Dicha auditoría se reencuadra en esta propuesta como un módulo de la<br>arquitectura, no como una iniciativa independiente.</p>
 <hr>
 <h2>3. Principio Rector</h2>
 <blockquote>
-<p><strong>No construimos una capa de control nueva. Movemos la calidad al lugar donde ya tiene dueños.</strong></p>
-<p>Si una tarea corresponde a un área, la calidad debe ser un criterio de finalización de esa área —<br>una lista de chequeo automática — y no una IA que vuelve a controlar lo que alguien ya debía<br>controlar. La automatización se justifica cuando reduce trabajo, tiempos o errores de forma real.</p>
+<p><strong>No se incorpora una capa de control adicional. Se desplaza la calidad al lugar donde ya tiene<br>responsables.</strong></p>
+<p>La calidad debe constituirse en un <strong>criterio de finalización</strong> de cada etapa —una verificación<br>automática que se ejecuta antes de dar por terminado un trabajo— y no en un rechequeo permanente<br>sobre trabajo ya validado. La automatización se justifica cuando reduce trabajo, tiempos o errores<br>de forma significativa y verificable.</p>
 </blockquote>
 <hr>
-<h2>4. Nuestra Propuesta: las 5 áreas de proceso</h2>
+<h2>4. Alcance — Mapeo sobre las Cinco Áreas</h2>
 <table>
 <thead>
 <tr>
 <th>Área</th>
-<th>Nuestro aporte</th>
+<th>Contribución propuesta</th>
 </tr>
 </thead>
 <tbody><tr>
 <td><strong>Asistencia con IA en el diseño</strong></td>
-<td>Criterios de calidad convertidos en chequeos automáticos que corren <strong>antes</strong> de producción (enlaces rotos, actividades inexistentes, restricciones mal configuradas). Punto de entrada ya probado.</td>
+<td>Criterios de calidad convertidos en verificaciones automáticas previas a producción (enlaces rotos, actividades inexistentes, restricciones mal configuradas, discrepancias entre documentación y Moodle).</td>
 </tr>
 <tr>
 <td><strong>Mesa de Ayuda</strong></td>
-<td>Clasificación automática de consultas recurrentes: responder lo estandarizable y derivar a una persona solo lo que lo necesita.</td>
+<td>Clasificación automática de consultas recurrentes: respuesta automática de lo estandarizable y derivación a persona únicamente de lo que requiere intervención.</td>
 </tr>
 <tr>
 <td><strong>Producción audiovisual</strong></td>
-<td>Un tablero único que sigue el circuito completo: pendientes, demoras, tiempos por etapa.</td>
+<td>Tablero unificado de seguimiento del circuito de producción: pendientes, demoras y tiempos por etapa.</td>
 </tr>
 <tr>
 <td><strong>Experiencia de les estudiantes</strong></td>
-<td>Detección de puntos de abandono y configuraciones que bloquean el avance (lo que ya detectamos en el curso 269).</td>
+<td>Instrumentación de indicadores continuos (KPI) de abandono y bloqueo, en complemento de las encuestas de satisfacción actuales.</td>
 </tr>
 <tr>
 <td><strong>Indicadores y monitoreo</strong></td>
-<td>Información consolidada para decidir y mejorar, no para controlar.</td>
+<td>Capa de información consolidada para la toma de decisiones y la mejora continua.</td>
 </tr>
 </tbody></table>
-<p>Todo en una sola arquitectura, con datos en un único lugar.</p>
+<p>La totalidad se integra en una única arquitectura, con datos en un único repositorio.</p>
 <hr>
-<h2>5. Plan de Integración</h2>
-<h3>Fase 0 — Ordenar (inmediata, 2-3 semanas)</h3>
-<p>El primer paso, acotado y contratable:</p>
+<h2>5. Metodología</h2>
+<p>El trabajo se organiza en fases incrementales. Cada fase concluye con entregables verificables y<br>permite a la UNC decidir la continuidad con información en mano.</p>
 <ul>
-<li><strong>Mapa de procesos y responsabilidades (RACI):</strong> quién hace qué, dónde reside la calidad.</li>
-<li><strong>Criterios de calidad como reglas verificables:</strong> la lista de &quot;esto tiene que cumplirse&quot; en términos<br>que un software pueda chequear.</li>
-<li><strong>Arquitectura de automatización priorizada:</strong> qué automatizar primero, por impacto.</li>
+<li><strong>Relevamiento participativo:</strong> sesiones de trabajo con los equipos y lectura de la documentación<br>existente, complementadas con el recorrido de un curso real de punta a punta.</li>
+<li><strong>Documentación centralizada y enlazada:</strong> los criterios y mapas de proceso se producen como<br>documentos centrales, enlazados transversalmente a cada etapa y a cada curso, de modo que sean<br>el punto de referencia único para el equipo y la base de la automatización.</li>
+<li><strong>Priorización por retorno (ROI):</strong> cada iniciativa de automatización se evalúa según su capacidad<br>de reducir trabajo, tiempo o errores, antes de comprometer recursos.</li>
+<li><strong>Herramientas evaluadas por efectividad, escalabilidad y mantenibilidad:</strong> se privilegian<br>soluciones de código abierto que la UNC pueda sostener sin dependencia de un único proveedor.</li>
 </ul>
-<h3>Fase 1 — Automatizar lo que rinde (a definir tras la Fase 0)</h3>
-<p>Ejecutar las 2-3 automatizaciones de mayor retorno, empezando por los criterios de finalización del<br>Diseño Instruccional.</p>
-<h3>Fase 2 — Extender</h3>
-<p>Producción audiovisual y experiencia estudiantil, sobre la base ya funcionando.</p>
-<p><strong>Solo la Fase 0 se contrata ahora.</strong> Es acotada, no compromete el resto, y su entregable es la<br>información que habilita decidir la Fase 1 con evidencia.</p>
 <hr>
-<h2>6. Fase 0 — Entregable y Precio</h2>
+<h2>6. Fase 0 — Diagnóstico y Arquitectura</h2>
+<p>Primer hito contratable. Duración estimada: 2-3 semanas.</p>
+<h3>6.1 Alcance</h3>
+<ol>
+<li><strong>Mapa de procesos y responsabilidades (RACI).</strong> Quién hace qué en cada etapa, dónde reside la<br>calidad, y qué controles existen hoy.</li>
+<li><strong>Catálogo de criterios de calidad.</strong> La lista formal de &quot;esto debe cumplirse&quot; por etapa y por<br>tipo de curso, expresada de forma verificable. Incluye la revisión de los criterios en discusión<br>actual y su consolidación en un documento centralizado y enlazado.</li>
+<li><strong>Arquitectura de automatización objetivo.</strong> El diseño de la capa técnica —priorizada por<br>impacto— que instrumenta los criterios como controles automáticos de finalización, integrada a la<br>propuesta de automatización en curso.</li>
+</ol>
+<h3>6.2 Cronograma</h3>
+<table>
+<thead>
+<tr>
+<th>Semana</th>
+<th>Actividad</th>
+<th>Entregable parcial</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Relevamiento: sesiones con DI, audiovisual y Mesa de Ayuda; lectura documental; recorrido de un curso real.</td>
+<td>Nota de hallazgos y mapa preliminar del flujo actual.</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Consolidación de mapa RACI y catálogo de criterios de calidad (centralizado y enlazado).</td>
+<td>Mapa RACI · catálogo de criterios.</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Traducción a reglas verificables y diseño de arquitectura priorizada.</td>
+<td>Reglas verificables · arquitectura objetivo · recomendación de herramientas.</td>
+</tr>
+</tbody></table>
+<h3>6.3 Entregables de la Fase 0</h3>
+<ul>
+<li>Documento de <strong>mapa de procesos y responsabilidades (RACI)</strong>.</li>
+<li><strong>Catálogo de criterios de calidad</strong> centralizado y enlazado a etapas y cursos.</li>
+<li><strong>Arquitectura de automatización priorizada</strong>, con recomendación de herramientas (efectividad,<br>escalabilidad, mantenibilidad).</li>
+<li><strong>Recomendación de hoja de ruta</strong> para las Fases 1 y 2, con estimación de impacto por iniciativa.</li>
+</ul>
+<hr>
+<h2>7. Fases 1 y 2 — Visión</h2>
+<ul>
+<li><strong>Fase 1 — Automatizar lo que rinde.</strong> Implementación de las 2-3 automatizaciones de mayor<br>retorno, comenzando por los criterios de finalización del Diseño Instruccional. Se cotiza a partir<br>de los resultados de la Fase 0.</li>
+<li><strong>Fase 2 — Extender.</strong> Producción audiovisual y experiencia estudiantil, sobre la base operativa.</li>
+</ul>
+<p><strong>Solo la Fase 0 se contrata en esta instancia.</strong> Las fases siguientes se definen con los datos que<br>produzca la Fase 0, en función del retorno esperado.</p>
+<hr>
+<h2>8. Propuesta Económica</h2>
 <table>
 <thead>
 <tr>
@@ -115,114 +162,120 @@
 </tr>
 </thead>
 <tbody><tr>
-<td>Mapa de procesos + responsabilidades (RACI)</td>
-<td>incluido</td>
-</tr>
-<tr>
-<td>Criterios de calidad verificables</td>
-<td>incluido</td>
-</tr>
-<tr>
-<td>Arquitectura de automatización priorizada</td>
-<td>incluido</td>
-</tr>
-<tr>
-<td><strong>Precio total (único pago)</strong></td>
+<td>Fase 0 — Diagnóstico y Arquitectura (entregables de §6.3)</td>
 <td><strong>38–40 módulos UNC</strong></td>
+</tr>
+<tr>
+<td>Fases 1 y 2</td>
+<td>A cotizar tras la Fase 0</td>
 </tr>
 </tbody></table>
 <p><strong>Unidad de contratación:</strong> Módulo UNC, valor vigente <strong>$48.696</strong> (RESOL-2026-15-UNC-SGI#AGI,<br>20/03/2026).</p>
 <ul>
-<li><strong>38–40 módulos</strong> ≈ <strong>$1.850.000 – $1.950.000 ARS</strong> por única vez.</li>
-<li>Sin suscripción. Sin permanencia.</li>
+<li><strong>38–40 módulos</strong> equivalen a <strong>$1.850.000 – $1.950.000 ARS</strong> por única vez.</li>
+<li>Sin suscripción. Sin permanencia. Sin costo de licencias (stack de código abierto).</li>
 </ul>
 <hr>
-<h2>7. Información que necesitamos</h2>
+<h2>9. Requisitos y Accesos Necesarios</h2>
+<p>Para la ejecución de la Fase 0, se requiere la colaboración y el acceso a lo siguiente:</p>
 <ol>
-<li>La propuesta de automatización en curso (Ignacio + Natalia).</li>
-<li>El borrador de criterios de calidad (autor, estado, acceso).</li>
-<li>El mapa de &quot;quién hace qué&quot;: Diseño Instruccional (3-4 integrantes + coordinación + cocoordinación)<br>y audiovisual (3, coordinado por Ignacio). En qué pasos podemos intervenir y en cuáles no.</li>
-<li>Articulación del proceso de Diseño Instruccional con el desarrollo: pre-montaje → validación →<br>producción; herramientas (Drive/Sheets/Docs) y convenciones de archivos.</li>
-<li>Mesa de Ayuda: herramienta, volumen, categorías recurrentes.</li>
-<li>Presupuesto y camino de contratación (quién firma, rol de la Prosecretaría de Informática, plazos).</li>
-<li>Experiencia estudiantil: cómo detectan hoy abandono o dificultades de navegación.</li>
-<li>Producción audiovisual: método de seguimiento actual.</li>
+<li><strong>Propuesta de automatización en curso</strong> (documento o documentos existentes, aun en borrador),<br>incluyendo la relación con la colaboración en curso con Santex.</li>
+<li><strong>Criterios de calidad</strong> en su estado actual (formalizados o en discusión), con identificación de<br>autoría y responsables.</li>
+<li><strong>Mapa de roles y responsabilidades</strong> de Diseño Instruccional y audiovisual, incluyendo la<br>delimitación de las etapas en las que el proponente puede intervenir.</li>
+<li><strong>Detalle del proceso de Diseño Instruccional</strong>: herramientas utilizadas en cada paso (Drive,<br>Sheets, Docs, Moodle u otras), flujo de pre-montaje a producción, y convenciones de archivos.</li>
+<li><strong>Información de Mesa de Ayuda</strong>: herramienta de seguimiento, volumen, categorías de consulta y<br>métricas disponibles.</li>
+<li><strong>Información de producción audiovisual</strong>: tipo de contenido producido, método de seguimiento<br>actual y puntos de integración con el resto del proceso.</li>
+<li><strong>Presupuesto y camino de contratación</strong> (responsable de la firma, rol de la Prosecretaría de<br>Informática, plazos estimados).</li>
 </ol>
+<p>La falta de alguno de estos elementos no impide el inicio de la Fase 0; en su defecto, su<br>relevamiento pasa a formar parte del alcance de la misma.</p>
 <hr>
-<h2>8. Colaboración con Santex</h2>
-<p>Si el equipo avanza con las capacitaciones de Santex, lo vemos como complementario: ellos aportan<br>formación colectiva en IA; nosotros aportamos la arquitectura y la integración técnica al proceso real.<br>Sugerimos coordinar la capacitación <strong>después</strong> de la Fase 0, para aplicarla sobre una base ordenada.</p>
-<hr>
-<h2>9. Condiciones</h2>
+<h2>10. Condiciones Contractuales</h2>
 <ul>
-<li><strong>Sin contrato de permanencia.</strong> Facturación por entrega. Cancelación en cualquier momento.</li>
-<li><strong>Sin costo de herramientas.</strong> Todo el stack es open source / free tier. Solo se cobra el servicio profesional.</li>
-<li><strong>Propiedad de los datos.</strong> Todo reporte e histórico es de la UNC, en formatos abiertos (HTML + JSON).</li>
-<li><strong>Confidencialidad.</strong> Las credenciales se manejan como secrets, sin exposición.</li>
-<li><strong>Modalidad.</strong> Servicios profesionales bajo normativa UNC vigente (OHCS 4/2025), liquidable vía SIU-Diaguita.</li>
-<li><strong>Ajuste por inflación.</strong> Si el pago se demora más de 60 días, el monto en módulos se recalcula al<br>valor vigente al momento del pago.</li>
-<li><strong>Validez.</strong> 60 días desde la fecha de emisión.</li>
+<li><strong>Modalidad.</strong> Servicios profesionales bajo normativa UNC vigente (OHCS 4/2025), liquidable vía<br>SIU-Diaguita.</li>
+<li><strong>Sin permanencia.</strong> Facturación por entrega; cancelación en cualquier momento.</li>
+<li><strong>Propiedad de los datos.</strong> Todo reporte, catálogo e histórico es propiedad de la UNC, entregado en<br>formatos abiertos (HTML + JSON).</li>
+<li><strong>Confidencialidad.</strong> Las credenciales se administran como secretos, sin exposición ni persistencia<br>en repositorios.</li>
+<li><strong>Sin costo de licencias.</strong> La totalidad del stack tecnológico es de código abierto o de nivel<br>gratuito; solo se factura el servicio profesional.</li>
+<li><strong>Ajuste por inflación.</strong> Si el pago se demora más de 60 días, el monto en módulos se recalcula al<br>valor vigente a la fecha de pago.</li>
+<li><strong>Validez de la oferta.</strong> 60 días desde su emisión.</li>
 </ul>
 <hr>
-<h2>10. Guía de Términos</h2>
+<h2>11. Glosario</h2>
 <table>
 <thead>
 <tr>
 <th>Término</th>
-<th>Qué significa, en simple</th>
+<th>Definición</th>
 </tr>
 </thead>
 <tbody><tr>
+<td><strong>KPI</strong> (<em>Key Performance Indicator</em> — Indicador Clave de Desempeño)</td>
+<td>Métrica concreta y medible para evaluar si un proceso u objetivo progresa correctamente (p. ej., tasa de reactivación, tiempo medio de respuesta, porcentaje de abandono).</td>
+</tr>
+<tr>
+<td><strong>Mantenibilidad</strong> (<em>maintainability</em>)</td>
+<td>Facilidad y costo de mantener un sistema funcionando y actualizado en el tiempo. Distinta de la escalabilidad: un sistema puede escalar bien pero ser costoso de mantener. Se buscan ambas propiedades.</td>
+</tr>
+<tr>
+<td><strong>Escalabilidad</strong> (<em>scalability</em>)</td>
+<td>Capacidad de crecer —más cursos, estudiantes y procesos— sin rehacer lo construido, manteniendo acotados costo y tiempo.</td>
+</tr>
+<tr>
+<td><strong>ROI</strong> (<em>Return On Investment</em> — retorno de inversión)</td>
+<td>Relación entre el ahorro (trabajo, tiempo, errores) y el costo de la automatización.</td>
+</tr>
+<tr>
 <td><strong>RACI</strong></td>
-<td>Mapa de responsabilidades: quién <strong>hace</strong> cada tarea, quién <strong>responde</strong>, a quién se <strong>consulta</strong>, a quién se <strong>informa</strong>.</td>
+<td>Matriz de responsabilidades: quién <strong>hace</strong> (Responsible), quién <strong>responde</strong> (Accountable), a quién se <strong>consulta</strong> (Consulted) y a quién se <strong>informa</strong> (Informed).</td>
 </tr>
 <tr>
 <td><strong>DI (Diseño Instruccional)</strong></td>
-<td>El proceso de diseñar un curso: contenidos, orden, actividades y evaluaciones.</td>
+<td>Proceso de diseño de un curso: contenidos, secuencia, actividades y evaluación.</td>
 </tr>
 <tr>
 <td><strong>Criterios de calidad</strong></td>
-<td>La lista de &quot;esto tiene que cumplirse&quot; para dar un curso por terminado.</td>
+<td>Conjunto de condiciones que debe cumplir un curso para considerarse finalizado.</td>
 </tr>
 <tr>
 <td><strong>Control automático de finalización</strong></td>
-<td>Esa lista de chequeo ejecutada por software: corre sola y avisa qué falta.</td>
+<td>Verificación ejecutada por software que valida los criterios de calidad antes de dar por terminada una etapa.</td>
 </tr>
 <tr>
 <td><strong>Gate / restricción de acceso</strong></td>
-<td>Requisito para avanzar (ej: &quot;para ver el Módulo 3, entregá el TP del Módulo 2&quot;).</td>
+<td>Requisito para avanzar en un curso (p. ej., &quot;para acceder al Módulo 3, entregar el TP del Módulo 2&quot;).</td>
 </tr>
 <tr>
 <td><strong>Pipeline (flujo)</strong></td>
-<td>La secuencia de pasos por la que pasa un curso, de la planificación a la publicación.</td>
+<td>Secuencia de etapas por la que transita un curso, desde la planificación hasta la publicación.</td>
+</tr>
+<tr>
+<td><strong>Instrumentación</strong></td>
+<td>Incorporación de medición y monitoreo a un proceso (análogo al tablero de un vehículo) para observar su comportamiento en tiempo real.</td>
 </tr>
 <tr>
 <td><strong>Módulo UNC</strong></td>
-<td>Unidad de contratación de la universidad (hoy $48.696).</td>
-</tr>
-<tr>
-<td><strong>ROI</strong></td>
-<td>Cuánto trabajo, tiempo o errores se ahorran en relación con el costo de automatizar.</td>
+<td>Unidad de contratación de la universidad (valor vigente $48.696).</td>
 </tr>
 <tr>
 <td><strong>OHCS 4/2025 / SIU-Diaguita</strong></td>
-<td>La normativa y el sistema por los que la UNC contrata y liquida servicios profesionales.</td>
+<td>Normativa y sistema por los que la UNC contrata y liquida servicios profesionales.</td>
 </tr>
 </tbody></table>
 <hr>
-<h2>11. Próximos Pasos</h2>
+<h2>12. Próximos Pasos</h2>
 <ol>
-<li>Reunión de trabajo (30-45 min) con Ignacio y Natalia para revisar la propuesta en curso.</li>
+<li>Reunión de trabajo con el equipo de automatización para revisar la propuesta en curso.</li>
 <li>Acceso a los criterios de calidad y a un curso completo de ejemplo (documentación → producción).</li>
-<li>Firma de acuerdo simple (1 página) para arrancar la Fase 0.</li>
+<li>Firma de acuerdo simple para el inicio de la Fase 0.</li>
 </ol>
 <hr>
-<p><strong>Contacto:</strong> Nahuel Gómez · <a href="mailto:nagomez@mi.unc.edu.ar">nagomez@mi.unc.edu.ar</a><br><strong>Reportes de evidencia:</strong> <a href="https://nelgoez.github.io/unc-agentic-dev/audit/">https://nelgoez.github.io/unc-agentic-dev/audit/</a><br><strong>Presentación interactiva:</strong> <a href="https://unc-course-kit.netlify.app/propuesta-automatizacion.html">https://unc-course-kit.netlify.app/propuesta-automatizacion.html</a></p>
+<p><strong>Contacto:</strong> Nahuel Gómez · <a href="mailto:nagomez@mi.unc.edu.ar">nagomez@mi.unc.edu.ar</a><br><strong>Reportes de evidencia:</strong> <a href="https://nelgoez.github.io/unc-agentic-dev/audit/">https://nelgoez.github.io/unc-agentic-dev/audit/</a></p>
 <hr>
-<p><em>Los precios se expresan en módulos UNC. El valor del módulo se ajusta al vigente a la fecha de<br>contratación. Equivalencias en ARS a tipo de cambio oficial estimado. Propuesta válida por 60 días.</em></p>
+<p><em>Los precios se expresan en módulos UNC. El valor del módulo se ajusta al vigente a la fecha de<br>contratación. Equivalencias en ARS estimadas a tipo de cambio oficial. Propuesta válida por 60 días.</em></p>
 
 <div class="footer-print">
   <strong>Contacto:</strong> Nahuel Gómez · nagomez@mi.unc.edu.ar<br>
-  <strong>Documento generado:</strong> 18 de agosto de 2026
+  <strong>Documento generado:</strong> 19 de agosto de 2026
 </div>
 </body>
 </html>
