@@ -31,10 +31,11 @@
 
 El paper **"Context Is What You Need" (2509.21361)** muestra que los LLM degradan rápido cuando el contexto crece. El MECW (Maximum Effective Context Window) es hasta **99% menor** que el reportado.
 
-| Para hacer esto...              | Usá esto...                        | Notas                        |
-| ------------------------------- | ---------------------------------- | ---------------------------- |
-| Comprimir respuestas del agente | `/caveman` o activar skill caveman | Corta ~65% tokens de salida  |
-| Comprimir conversación vieja    | DCP (Dynamic Context Pruning)      | Corre solo si está instalado |
+| Para hacer esto...               | Usá esto...                        | Notas                                       |
+| -------------------------------- | ---------------------------------- | ------------------------------------------- |
+| Comprimir respuestas del agente  | `/caveman` o activar skill caveman | Corta ~65% tokens de salida                 |
+| Consultar el codebase sin releer | `graphify` (graphify-out/ existe)  | Query del grafo en vez de grep/read sueltos |
+| Comprimir conversación vieja     | DCP (Dynamic Context Pruning)      | Corre solo si está instalado                |
 
 ## Mantenimiento
 
