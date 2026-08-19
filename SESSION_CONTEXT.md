@@ -1,61 +1,67 @@
-# UNC Campus Virtual — Session Context
+# UNC Campus Virtual — Session Context (RESUME HERE)
 
-## Status: WAITING — UNC response pending
+## Status: PROPOSAL PIVOT DONE — pending Nahuel's review before sending to UNC
 
-Awaiting UNC answers to onboarding checklist (access, credentials, point of contact).
+Patricia Altamirano (Directora del Campus) pidió un enfoque más amplio que la propuesta de
+"auditoría de Moodle": partir de los problemas/procesos, no de la herramienta. Reencuadramos nuestra
+oferta como la **capa de arquitectura + instrumentación de QA** de la Estrategia de Automatización
+del Campus, produjimos email + propuesta formal + deck + PDF, y quedó todo pusheado.
 
-## Session log
+## Dónde estamos
 
-### 2026-06-02
+- Propuesta reencuadrada: de "herramienta de auditoría" → "estrategia de automatización".
+- Todos los artefactos escritos, refinados y pusheados a `master` (4 commits).
+- `bun run repo:check` en verde (format + lint + types + vars).
+- **Todavía NO se envió a la UNC** — falta que Nahuel revise y envíe.
 
-**Setup:**
+## Entregables (archivos)
 
-- Created `unc-agentic-dev/` — agentic dev infrastructure based on `agentic-diplo-track-sys` patterns
-- `bun opencode` command using `dotenv-cli` to load `.env` before launching OpenCode
-- `opencode.jsonc` with MCP servers (context7, tavily, playwright, supabase), permissions, custom commands
-- `.opencode/` extensions: commands (`/resume`, `/reengagement`, `/dashboard`, `/start`), tools (`at-file.ts`), plugins (`at-resolver.ts`)
-- `.context/` directory with UNC project documentation from PDFs
-- `cli/doctor.ts` — health check, `scripts/lint-vars.ts` — env var validation
-- tsconfig.json, .gitignore, .prettierrc, eslint.config.js — all configured
-- Dependencies installed (`bun install` passed, doctor reports OK)
+Cliente (español):
 
-**PDF analysis:**
+- `.context/comunicacion-patricia-ago-2026.md` — **cuerpo del email** (para Patricia + Natalia + Nacho + Fer + Victoria)
+- `.context/nota-privada-patricia-ago-2026.md` — nota privada corta a Patricia (DM aparte)
+- `.context/propuesta-automatizacion-unc.md` — propuesta formal (fuente del PDF)
+- `docs/pitch/propuesta-automatizacion.html` — deck interactivo (10 slides)
+- `docs/pitch/propuesta-automatizacion-unc.pdf` — propuesta formal en PDF (generado)
+- `docs/setup-audit-trigger-apps-script.md` — reemplazo Apps Script del trigger de auditoría (segundo plano)
 
-- PDF #1 "Plan de implementación Reengagement" — sub-project of PDF #2, detailed Moodle plugin config plan
-- PDF #2 "Proyecto Automatización" — umbrella project with 4 workstreams
+Interno:
 
-**Deliverable estimates for UNC:**
+- `.context/pivot-patricia-ago-2026.md` — registro de decisión del pivote
 
-- 8 email templates: 4 weeks
-- Reengagement plugin DEV+PROD: 5 weeks
-- Activity dashboard: 3 weeks
-- Analytics query + Module 0: 2 weeks
-- **Total: 14 weeks (~3.5 months)** — finishes mid-August 2026
+## Decisiones clave (lockeadas)
 
-**Comparison with UNC schedule:**
+- Posicionamiento: capa de arquitectura + QA de la estrategia (no iniciativa paralela).
+- Fase 0 (diagnóstico + arquitectura) = **38–40 módulos UNC**, único pago, contratable ya.
+- Fases 1 y 2 como visión, a cotizar post-Fase 0.
+- Santex = socio de capacitación; nosotros dueños de arquitectura + integración.
+- Glosario (KPI, mantenibilidad, escalabilidad, ROI, RACI, instrumentación) en email y propuesta formal.
+- Trigger de auditoría: Google Apps Script (cuota free de Netlify agotada).
 
-- UNC original plan targeted May 2026 completion (already passed)
-- All dates in PDFs are behind schedule before developer joined
-- August delivery is realistic given current June baseline
+## Tooling arreglado (leveling up)
 
-**Pending from UNC (onboarding checklist):**
+- `.gitattributes` (`* text=auto eol=lf`) — arregló el pre-commit hook roto (lint-staged `git stash create` se rompía con warnings CRLF).
+- `eslint.config.js` — desactivada `jsonc/comma-dangle` (chocaba con prettier `trailingComma: all`).
+- `.prettierignore` + `.gitignore` — excluidos artefactos generados (test-results, .playwright-mcp).
+- 22 errores de lint preexistentes resueltos (código muerto, regex, while→for, callbacks tipados).
 
-1. Code repository URL + access
-2. Moodle URL (dev/staging) + API token
-3. PostgreSQL credentials (dev)
-4. Confirmation of technical point of contact
-5. Where work is tracked (Jira, Trello, etc.)
-6. Branch strategy and PR approval process
-7. Code conventions (linter, formatter)
+## Próximos pasos (en orden)
 
-**Key contacts identified in PDFs:**
-Tadeo Otaola, Ignacio Acuña, Melisa Caffaratti (dashboard), Verónica Gonzalez, Laura Carpio, Matías Salvatierra (induction), Fernando Acosta (Module 0)
+1. Nahuel revisa y **envía** el email + nota privada a Patricia (con links a deck y PDF).
+2. Coordinar la reunión de trabajo con Nacho + Natalia.
+3. Esperar la info de la UNC (los 7 puntos del email) → arrancar Fase 0.
+4. Opcional: verificar que el deck renderiza bien en el browser (abrir `propuesta-automatizacion.html`).
 
-## Project files
+## Commits pusheados
 
-- `.context/onboarding-checklist.html` — clean checklist for UNC (without contact names)
-- `.context/entregables-tiempos.html` — deliverable timeline for UNC
+- `c7c6e2c` fix: lint + conflicto config + .gitattributes
+- `1d8e4fe` docs: artefactos de propuesta iniciales
+- `e5ea53b` docs: refinar propuesta (cómo de Fase 0, relevamiento, glosario)
+- `fd371bd` chore: prettierignore/gitignore artefactos generados
 
-## Next session
+## Al retomar: leer esto
 
-When UNC responds: pick up with `/start` or `/resume`, load relevant context, begin Sprint 1.
+1. Este archivo (`SESSION_CONTEXT.md`)
+2. `.context/pivot-patricia-ago-2026.md` (registro de decisión)
+3. `.context/comunicacion-patricia-ago-2026.md` (el email a enviar)
+4. `.context/propuesta-automatizacion-unc.md` (la propuesta formal)
