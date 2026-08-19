@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Email — Estrategia de Automatización del Campus Virtual</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 24px 0;
+        background-color: #ffffff;
+        color: #1f2937;
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        font-size: 15px;
+      }
+      .email {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 8px 16px 32px;
+        background-color: #ffffff;
+        overflow-wrap: break-word;
+        word-wrap: break-word;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 16px;
+        color: #0f172a;
+      }
+      h2 {
+        font-size: 17px;
+        margin: 28px 0 10px;
+        color: #0f172a;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 6px;
+      }
+      h3 {
+        font-size: 15px;
+        margin: 20px 0 8px;
+        color: #1e293b;
+      }
+      p {
+        margin: 0 0 12px;
+      }
+      a {
+        color: #2563eb;
+        text-decoration: none;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+      .muted {
+        color: #6b7280;
+        font-size: 13px;
+      }
+      .small {
+        font-size: 13px;
+        color: #475569;
+      }
+      .callout {
+        background-color: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-left: 4px solid #2563eb;
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin: 12px 0;
+      }
+      .callout p {
+        margin: 4px 0;
+      }
+      .decklink {
+        font-size: 13px;
+        color: #6b7280;
+        margin: 10px 0 0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0 16px;
+        font-size: 14px;
+      }
+      th,
+      td {
+        border: 1px solid #e2e8f0;
+        padding: 10px 12px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background-color: #f8fafc;
+        color: #475569;
+        font-weight: 600;
+        font-size: 13px;
+      }
+      ul {
+        margin: 0 0 12px;
+        padding-left: 22px;
+      }
+      li {
+        margin-bottom: 8px;
+      }
+      .numbered li {
+        margin-bottom: 12px;
+      }
+      .signoff {
+        margin-top: 28px;
+      }
+      .footer {
+        margin-top: 28px;
+        padding-top: 16px;
+        border-top: 1px solid #e2e8f0;
+        font-size: 13px;
+        color: #6b7280;
+      }
+      strong {
+        color: #0f172a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="email">
+      <p>Hola a todos,</p>
+
+      <p>
+        Gracias, Patricia, por tu respuesta. Coincido con el orden: primero procesos y
+        responsabilidades, después qué vale automatizar, recién entonces tecnología. Esta nota
+        propone <strong>cómo me integro a ese proceso</strong> y — tan importante como el qué —
+        <strong>qué información concreta necesito de ustedes</strong> para dejar de especular y
+        empezar a ser preciso.
+      </p>
+
+      <div class="callout">
+        <p><strong>📎 Acompaña esta nota</strong></p>
+        <p>
+          <strong>Propuesta formal (PDF):</strong>
+          <a href="https://unc-course-kit.netlify.app/propuesta-automatizacion-unc.pdf"
+            >https://unc-course-kit.netlify.app/propuesta-automatizacion-unc.pdf</a
+          >
+        </p>
+        <p>
+          <strong>Presentación interactiva (10 diapositivas):</strong>
+          <a href="https://unc-course-kit.netlify.app/propuesta-automatizacion.html"
+            >https://unc-course-kit.netlify.app/propuesta-automatizacion.html</a
+          >
+        </p>
+        <p class="small" style="margin-top: 8px">
+          Para moverte entre las diapositivas usá las <strong>flechas ← → del teclado</strong> (o
+          clic en los bordes de la pantalla). El número de diapositiva aparece abajo a la derecha.
+        </p>
+      </div>
+
+      <h2>1. Guía de términos</h2>
+      <p class="small"><em>Los términos en negrita se usan a lo largo de esta nota.</em></p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Término</th>
+            <th>Qué significa, en simple</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <strong>KPI</strong>
+              <span class="muted">(Key Performance Indicator — Indicador Clave de Desempeño)</span>
+            </td>
+            <td>
+              Una métrica concreta y medible para saber si un proceso u objetivo va bien (ej: tasa
+              de reactivación, tiempo medio de respuesta, % de abandono).
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Mantenibilidad</strong> <span class="muted">(maintainability)</span></td>
+            <td>
+              Qué tan fácil y económico es mantener un sistema funcionando y actualizado en el
+              tiempo. Distinta de la escalabilidad: algo puede escalar bien pero ser caro de
+              mantener. Buscamos ambas.
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Escalabilidad</strong> <span class="muted">(scalability)</span></td>
+            <td>
+              Capacidad de crecer sin rehacer (más cursos, más estudiantes, más procesos)
+              manteniendo costo y tiempo acotados.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <strong>ROI</strong>
+              <span class="muted">(Return On Investment — retorno de inversión)</span>
+            </td>
+            <td>
+              Cuánto trabajo, tiempo o errores se ahorran en relación con lo que cuesta automatizar.
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <strong>RACI</strong>
+              <span class="muted">(Responsible · Accountable · Consulted · Informed)</span>
+            </td>
+            <td>
+              Mapa de responsabilidades: quién <strong>hace</strong> (Responsible), quién
+              <strong>responde</strong> (Accountable), a quién se
+              <strong>consulta</strong> (Consulted) y a quién se
+              <strong>informa</strong> (Informed).
+            </td>
+          </tr>
+          <tr>
+            <td><strong>DI (Diseño Instruccional)</strong></td>
+            <td>El proceso de diseñar un curso: contenidos, orden, actividades y evaluaciones.</td>
+          </tr>
+          <tr>
+            <td><strong>Criterios de calidad</strong></td>
+            <td>La lista de "esto tiene que cumplirse" para dar un curso por terminado.</td>
+          </tr>
+          <tr>
+            <td><strong>Control automático de finalización</strong></td>
+            <td>Esa lista de chequeo ejecutada por software: corre sola y avisa qué falta.</td>
+          </tr>
+          <tr>
+            <td><strong>Gate / restricción de acceso</strong></td>
+            <td>
+              Requisito para avanzar (ej: "para ver el Módulo 3, entregá el TP del Módulo 2").
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Pipeline (flujo)</strong></td>
+            <td>
+              La secuencia de pasos por la que pasa un curso, de la planificación a la publicación.
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Instrumentación</strong></td>
+            <td>
+              Agregar medición y monitoreo a un proceso (como el tablero de un auto), para ver qué
+              ocurre en tiempo real.
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Módulo UNC</strong></td>
+            <td>Unidad de contratación de la universidad (hoy $48.696).</td>
+          </tr>
+          <tr>
+            <td><strong>OHCS 4/2025 / SIU-Diaguita</strong></td>
+            <td>
+              La normativa y el sistema por los que la UNC contrata y liquida servicios
+              profesionales.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>2. Mi lugar</h2>
+      <p>
+        No vengo a sumar una capa de control. Aporto dos capacidades al plan que ya llevan Nacho y
+        Natalia:
+      </p>
+      <ul>
+        <li>
+          <strong>Ordenar el "quién hace qué"</strong> (mapa de responsabilidades RACI —
+          <em>Responsible, Accountable, Consulted, Informed</em>) para que la calidad viva donde
+          corresponde — dentro del Diseño Instruccional.
+        </li>
+        <li>
+          <strong
+            >Convertir los criterios de calidad en controles automáticos de finalización</strong
+          >: que la lista de chequeo corra sola <em>antes</em> de dar un curso por terminado, no que
+          una IA lo revise al final.
+        </li>
+      </ul>
+      <p>
+        La auditoría de Moodle (cursos 304 y 269) es la <strong>evidencia</strong> de que ese
+        control ya funciona. Queda como un módulo más de la arquitectura, no como el centro.
+      </p>
+      <p class="decklink">
+        📎 Presentación:
+        <a href="https://unc-course-kit.netlify.app/propuesta-automatizacion.html#/4"
+          >ver diapositiva →</a
+        >
+      </p>
+
+      <h2>3. Qué ofrezco, sobre las 5 áreas</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Área</th>
+            <th>Mi aporte</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Asistencia con IA en el diseño</strong></td>
+            <td>
+              Criterios de calidad convertidos en chequeos automáticos que corren
+              <strong>antes</strong> de producción (enlaces rotos, actividades inexistentes,
+              restricciones mal configuradas). Punto de entrada ya probado.
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Mesa de Ayuda</strong></td>
+            <td>
+              Clasificación automática de consultas recurrentes: se responde lo estandarizable y se
+              deriva a una persona solo lo que lo necesita.
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Producción audiovisual</strong></td>
+            <td>Tablero único del circuito completo: pendientes, demoras, tiempos por etapa.</td>
+          </tr>
+          <tr>
+            <td><strong>Experiencia de les estudiantes</strong></td>
+            <td>
+              Detección de abandono y configuraciones que bloquean el avance (lo que ya detecté en
+              269).
+            </td>
+          </tr>
+          <tr>
+            <td><strong>Indicadores y monitoreo</strong></td>
+            <td>Información para decidir y mejorar, no solo para controlar.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="decklink">
+        📎 Presentación:
+        <a href="https://unc-course-kit.netlify.app/propuesta-automatizacion.html#/3"
+          >ver diapositiva →</a
+        >
+      </p>
+
+      <h2>4. Plan en 3 fases — y el "cómo" de la Fase 0</h2>
+
+      <h3>Fase 0 — Ordenar (2-3 semanas)</h3>
+      <p>Esto es lo que vos, Patricia, marcaste como primer paso. Concretamente, así lo haría:</p>
+      <ul>
+        <li>
+          <strong>Semana 1 — Relevamiento.</strong> Sesiones de trabajo con Diseño Instruccional,
+          audiovisual y Mesa de Ayuda, más la lectura de la documentación existente. Recorro
+          <strong>un curso real de punta a punta</strong> (de la planificación a la publicación)
+          para ver el flujo tal como es hoy, no como está documentado.
+        </li>
+        <li>
+          <strong>Semana 2 — Mapa y criterios.</strong> Produzco el mapa de procesos y
+          responsabilidades (RACI), y el <strong>catálogo de criterios de calidad</strong>, enlazado
+          a cada etapa del proceso y a cada curso.
+        </li>
+        <li>
+          <strong>Semana 3 — Reglas y arquitectura.</strong> Traduzco los criterios a
+          <strong>reglas verificables por software</strong> y armo la
+          <strong>arquitectura objetivo</strong>, priorizada por impacto (qué se automatiza primero
+          y por qué).
+        </li>
+      </ul>
+      <p>
+        <strong>Entregables:</strong> mapa RACI · catálogo de criterios de calidad (documento
+        centralizado y enlazado) · arquitectura priorizada · recomendación de herramientas
+        (efectivas, escalables y mantenibles).
+      </p>
+      <p>
+        <strong>Solo la Fase 0 se contrata ahora.</strong> Es acotada y su entregable es justamente
+        la evidencia para decidir Fase 1. Precio:
+        <strong>38–40 módulos UNC</strong> (~$1.850.000–$1.950.000 ARS, único pago).
+      </p>
+
+      <h3>Fase 1 — Automatizar lo que rinde</h3>
+      <p>
+        Las 2-3 automatizaciones de mayor retorno, empezando por los criterios de finalización del
+        DI.
+      </p>
+
+      <h3>Fase 2 — Extender</h3>
+      <p>Producción audiovisual y experiencia estudiantil, sobre la base ya funcionando.</p>
+
+      <p class="decklink">
+        📎 Presentación:
+        <a href="https://unc-course-kit.netlify.app/propuesta-automatizacion.html#/5"
+          >ver diapositiva →</a
+        >
+      </p>
+
+      <h2>5. Lo que necesito de ustedes</h2>
+      <p>
+        Para que la Fase 0 no sea especulativa, necesito precisar varias cosas que hoy no tengo
+        claras. Algunas apuntan a un punto de fondo:
+        <strong>hay varios hilos de trabajo en paralelo</strong> (la propuesta de Nacho y Natalia,
+        la colaboración con Santex, los criterios de calidad en discusión) y necesito verlos
+        consolidados para no superponerme ni duplicar esfuerzo. Ser explícito acá es justamente lo
+        que me va a permitir aportar sin fricción.
+      </p>
+
+      <ol class="numbered">
+        <li>
+          <strong>La propuesta de automatización en curso — ¿cuál es, y cuántas hay?</strong
+          ><br />Sé que Nacho y Natalia llevan una propuesta, y que hay una colaboración con Santex.
+          ¿Son la misma cosa? ¿Hay una tercera iniciativa? Necesito el o los documentos que existan,
+          aunque estén en borrador, para alinearme a la arquitectura que ya tienen (o ayudarlos a
+          definirla si aún no está cerrada).
+        </li>
+        <li>
+          <strong>Criterios de calidad — ¿están estandarizados hoy?</strong><br />¿Existe una lista
+          formal de criterios de calidad, o se maneja de forma implícita por cada equipo? Si existe:
+          ¿cuáles son, quién los mantiene y en qué estado están? Me sirve muchísimo un
+          <strong>documento compartido</strong>, y ojalá
+          <strong>centralizado y enlazado de forma transversal</strong> a cada etapa y cada curso
+          (es decir: que desde el plan de un curso se pueda llegar al criterio de calidad que le
+          aplica). Sobre eso puedo ser específico en <em>cómo</em> mejorarlos y automatizarlos, y
+          <em>con qué</em> herramientas — las más efectivas, más fáciles de escalar y, no menos
+          importante, <strong>mantenibles</strong> (ver glosario).
+        </li>
+        <li>
+          <strong
+            >Articulación entre Diseño Instruccional y desarrollo — paso a paso y herramienta a
+            herramienta.</strong
+          ><br />Necesito saber exactamente cómo implementan un diseño hoy: ¿promptean a Gemini y
+          guardan archivos HTML en carpetas? ¿Qué arquitectura o instrucciones le dan a la IA? ¿Cómo
+          se articula cada paso con el siguiente y con qué herramientas (Drive, Sheets, Docs,
+          Moodle, otra)? Con eso defino qué es realmente automatizable, cómo, y qué conviene
+          reemplazar. Sin este detalle, todo lo demás es adivinanza.
+        </li>
+        <li>
+          <strong>Mesa de Ayuda — ¿cómo le dan seguimiento hoy?</strong><br />¿Qué herramienta usan
+          (correo, planilla, sistema de tickets)? ¿Pueden medir volumen, categorías de consulta,
+          nivel de impacto o costo por consulta? Si no hay medición, es un primer problema que puedo
+          resolver en la Fase 0.
+        </li>
+        <li>
+          <strong>Experiencia de les estudiantes — hoy solo llega por dos vías.</strong><br />Por lo
+          que conversamos, lo que hoy reciben es: consultas de Mesa de Ayuda + encuestas de
+          satisfacción al final (los cursos 269 y 304 tienen un módulo con eso). Eso es feedback
+          <em>reactivo</em>. Mi aporte es pasar a <strong>seguimiento continuo con KPI</strong> (ver
+          glosario): detectar abandono y bloqueos <em>cuando ocurren</em>, no después. Es un punto
+          que creo importante que vean: cambia la forma de medir la experiencia de "reaccionar a
+          quejas" a "anticipar problemas".
+        </li>
+        <li>
+          <strong>Producción audiovisual — qué se produce y cómo se integra.</strong><br />Entiendo
+          que es el contenido audiovisual de los cursos (clases grabadas, videos, imágenes).
+          Necesito saber no solo <em>dónde</em> se guarda o cómo se trackea, sino
+          <strong>cómo se integra con cada paso del proceso</strong>: ¿en qué momento entra la
+          producción audiovisual, quién la pide, cómo llega el material al curso, dónde se producen
+          las demoras?
+        </li>
+        <li>
+          <strong>Presupuesto y camino de contratación.</strong> Quién firma, rol de la
+          Prosecretaría de Informática, plazos estimados.
+        </li>
+      </ol>
+
+      <p class="decklink">
+        📎 Presentación:
+        <a href="https://unc-course-kit.netlify.app/propuesta-automatizacion.html#/7"
+          >ver diapositiva →</a
+        >
+      </p>
+
+      <h2>6. Reunión de trabajo propuesta</h2>
+      <p>
+        Para avanzar rápido, propongo una
+        <strong>reunión de 30-45 minutos con Nacho y Natalia esta semana</strong>, para que me
+        compartan la propuesta en curso y ajustemos juntos el alcance de la Fase 0. Fernando,
+        bienvenido a sumarse. Patricia, me encantaría que participes al menos del cierre para
+        validar la dirección.
+      </p>
+
+      <h2>7. Sobre Santex</h2>
+      <p>
+        Complementario, no excluyente: ellos aportan formación colectiva en IA; yo, arquitectura e
+        integración técnica al proceso real. Sugiero coordinar la capacitación
+        <strong>después</strong> de la Fase 0, para aplicarla sobre una base ordenada.
+      </p>
+
+      <h2>8. Condiciones generales</h2>
+      <ul>
+        <li>
+          Sin contrato de permanencia. Facturación por entrega. Cancelación en cualquier momento.
+        </li>
+        <li>
+          Sin costo de herramientas: stack open source / free tier. Solo se cobra el servicio
+          profesional.
+        </li>
+        <li>
+          Propiedad de los datos: reportes e histórico son de la UNC, en formatos abiertos (HTML +
+          JSON).
+        </li>
+        <li>Confidencialidad: credenciales como secrets, sin exposición.</li>
+        <li>
+          Modalidad: servicios profesionales bajo normativa UNC (OHCS 4/2025), liquidable vía
+          SIU-Diaguita.
+        </li>
+        <li>
+          Ajuste por inflación: si el pago se demora más de 60 días, el monto en módulos se
+          recalcula al valor vigente al pago.
+        </li>
+      </ul>
+
+      <div class="signoff">
+        <p>Quedo a disposición para coordinar la reunión y arrancar la Fase 0.</p>
+        <p>Saludos,</p>
+        <p>
+          <strong>Nahuel Gómez</strong><br /><a href="mailto:nagomez@mi.unc.edu.ar"
+            >nagomez@mi.unc.edu.ar</a
+          >
+        </p>
+      </div>
+
+      <div class="footer">
+        <p>
+          Reportes de evidencia:
+          <a href="https://nelgoez.github.io/unc-agentic-dev/audit/"
+            >https://nelgoez.github.io/unc-agentic-dev/audit/</a
+          >
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

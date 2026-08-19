@@ -18,7 +18,7 @@ del Campus, produjimos email + propuesta formal + deck + PDF, y quedó todo push
 
 Cliente (español):
 
-- `.context/comunicacion-patricia-ago-2026.md` — **cuerpo del email** (para Patricia + Natalia + Nacho + Fer + Victoria)
+- `.context/comunicacion-patricia-ago-2026.md` — **cuerpo del email** (para Patricia + Natalia + Nacho + Fer)
 - `.context/nota-privada-patricia-ago-2026.md` — nota privada corta a Patricia (DM aparte)
 - `.context/propuesta-automatizacion-unc.md` — propuesta formal (fuente del PDF)
 - `docs/pitch/propuesta-automatizacion.html` — deck interactivo (10 slides)

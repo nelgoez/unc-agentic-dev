@@ -5,6 +5,7 @@
 **Proponente:** Nahuel Gómez — Arquitectura e Integración de Automatización
 **Fecha:** Agosto 2026
 **Contacto:** nagomez@mi.unc.edu.ar
+**Presentación interactiva:** https://unc-course-kit.netlify.app/propuesta-automatizacion.html (usá las flechas ← → del teclado para navegar)
 
 ---
 
@@ -27,7 +28,27 @@ tecnología de código abierto y sin costo de licencias.
 
 ---
 
-## 2. Contexto y Antecedentes
+## 2. Glosario
+
+| Término                                                              | Definición                                                                                                                                                                                              |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **KPI** (_Key Performance Indicator_ — Indicador Clave de Desempeño) | Métrica concreta y medible para evaluar si un proceso u objetivo progresa correctamente (p. ej., tasa de reactivación, tiempo medio de respuesta, porcentaje de abandono).                              |
+| **Mantenibilidad** (_maintainability_)                               | Facilidad y costo de mantener un sistema funcionando y actualizado en el tiempo. Distinta de la escalabilidad: un sistema puede escalar bien pero ser costoso de mantener. Se buscan ambas propiedades. |
+| **Escalabilidad** (_scalability_)                                    | Capacidad de crecer —más cursos, estudiantes y procesos— sin rehacer lo construido, manteniendo acotados costo y tiempo.                                                                                |
+| **ROI** (_Return On Investment_ — retorno de inversión)              | Relación entre el ahorro (trabajo, tiempo, errores) y el costo de la automatización.                                                                                                                    |
+| **RACI**                                                             | Matriz de responsabilidades: quién **hace** (Responsible), quién **responde** (Accountable), a quién se **consulta** (Consulted) y a quién se **informa** (Informed).                                   |
+| **DI (Diseño Instruccional)**                                        | Proceso de diseño de un curso: contenidos, secuencia, actividades y evaluación.                                                                                                                         |
+| **Criterios de calidad**                                             | Conjunto de condiciones que debe cumplir un curso para considerarse finalizado.                                                                                                                         |
+| **Control automático de finalización**                               | Verificación ejecutada por software que valida los criterios de calidad antes de dar por terminada una etapa.                                                                                           |
+| **Gate / restricción de acceso**                                     | Requisito para avanzar en un curso (p. ej., "para acceder al Módulo 3, entregar el TP del Módulo 2").                                                                                                   |
+| **Pipeline (flujo)**                                                 | Secuencia de etapas por la que transita un curso, desde la planificación hasta la publicación.                                                                                                          |
+| **Instrumentación**                                                  | Incorporación de medición y monitoreo a un proceso (análogo al tablero de un vehículo) para observar su comportamiento en tiempo real.                                                                  |
+| **Módulo UNC**                                                       | Unidad de contratación de la universidad (valor vigente $48.696).                                                                                                                                       |
+| **OHCS 4/2025 / SIU-Diaguita**                                       | Normativa y sistema por los que la UNC contrata y liquida servicios profesionales.                                                                                                                      |
+
+---
+
+## 3. Contexto y Antecedentes
 
 El Campus Virtual opera con una estructura acotada: el equipo de Diseño Instruccional (3-4
 integrantes más coordinación y cocoordinación, con participación de Ignacio Acuña) y un equipo
@@ -50,7 +71,7 @@ arquitectura, no como una iniciativa independiente.
 
 ---
 
-## 3. Principio Rector
+## 4. Principio Rector
 
 > **No se incorpora una capa de control adicional. Se desplaza la calidad al lugar donde ya tiene
 > responsables.**
@@ -62,7 +83,7 @@ arquitectura, no como una iniciativa independiente.
 
 ---
 
-## 4. Alcance — Mapeo sobre las Cinco Áreas
+## 5. Alcance — Mapeo sobre las Cinco Áreas
 
 | Área                               | Contribución propuesta                                                                                                                                                                                     |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -76,7 +97,7 @@ La totalidad se integra en una única arquitectura, con datos en un único repos
 
 ---
 
-## 5. Metodología
+## 6. Metodología
 
 El trabajo se organiza en fases incrementales. Cada fase concluye con entregables verificables y
 permite a la UNC decidir la continuidad con información en mano.
@@ -93,14 +114,14 @@ permite a la UNC decidir la continuidad con información en mano.
 
 ---
 
-## 6. Fase 0 — Diagnóstico y Arquitectura
+## 7. Fase 0 — Diagnóstico y Arquitectura
 
 Primer hito contratable. Duración estimada: 2-3 semanas.
 
-### 6.1 Alcance
+### 7.1 Alcance
 
-1. **Mapa de procesos y responsabilidades (RACI).** Quién hace qué en cada etapa, dónde reside la
-   calidad, y qué controles existen hoy.
+1. **Mapa de procesos y responsabilidades (RACI — _Responsible, Accountable, Consulted, Informed_).**
+   Quién hace qué en cada etapa, dónde reside la calidad, y qué controles existen hoy.
 2. **Catálogo de criterios de calidad.** La lista formal de "esto debe cumplirse" por etapa y por
    tipo de curso, expresada de forma verificable. Incluye la revisión de los criterios en discusión
    actual y su consolidación en un documento centralizado y enlazado.
@@ -108,7 +129,7 @@ Primer hito contratable. Duración estimada: 2-3 semanas.
    impacto— que instrumenta los criterios como controles automáticos de finalización, integrada a la
    propuesta de automatización en curso.
 
-### 6.2 Cronograma
+### 7.2 Cronograma
 
 | Semana | Actividad                                                                                                   | Entregable parcial                                                           |
 | ------ | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
@@ -116,7 +137,7 @@ Primer hito contratable. Duración estimada: 2-3 semanas.
 | 2      | Consolidación de mapa RACI y catálogo de criterios de calidad (centralizado y enlazado).                    | Mapa RACI · catálogo de criterios.                                           |
 | 3      | Traducción a reglas verificables y diseño de arquitectura priorizada.                                       | Reglas verificables · arquitectura objetivo · recomendación de herramientas. |
 
-### 6.3 Entregables de la Fase 0
+### 7.3 Entregables de la Fase 0
 
 - Documento de **mapa de procesos y responsabilidades (RACI)**.
 - **Catálogo de criterios de calidad** centralizado y enlazado a etapas y cursos.
@@ -126,7 +147,7 @@ Primer hito contratable. Duración estimada: 2-3 semanas.
 
 ---
 
-## 7. Fases 1 y 2 — Visión
+## 8. Fases 1 y 2 — Visión
 
 - **Fase 1 — Automatizar lo que rinde.** Implementación de las 2-3 automatizaciones de mayor
   retorno, comenzando por los criterios de finalización del Diseño Instruccional. Se cotiza a partir
@@ -138,11 +159,11 @@ produzca la Fase 0, en función del retorno esperado.
 
 ---
 
-## 8. Propuesta Económica
+## 9. Propuesta Económica
 
 | Concepto                                                  | Valor                    |
 | --------------------------------------------------------- | ------------------------ |
-| Fase 0 — Diagnóstico y Arquitectura (entregables de §6.3) | **38–40 módulos UNC**    |
+| Fase 0 — Diagnóstico y Arquitectura (entregables de §7.3) | **38–40 módulos UNC**    |
 | Fases 1 y 2                                               | A cotizar tras la Fase 0 |
 
 **Unidad de contratación:** Módulo UNC, valor vigente **$48.696** (RESOL-2026-15-UNC-SGI#AGI,
@@ -153,7 +174,7 @@ produzca la Fase 0, en función del retorno esperado.
 
 ---
 
-## 9. Requisitos y Accesos Necesarios
+## 10. Requisitos y Accesos Necesarios
 
 Para la ejecución de la Fase 0, se requiere la colaboración y el acceso a lo siguiente:
 
@@ -177,7 +198,7 @@ relevamiento pasa a formar parte del alcance de la misma.
 
 ---
 
-## 10. Condiciones Contractuales
+## 11. Condiciones Contractuales
 
 - **Modalidad.** Servicios profesionales bajo normativa UNC vigente (OHCS 4/2025), liquidable vía
   SIU-Diaguita.
@@ -194,26 +215,6 @@ relevamiento pasa a formar parte del alcance de la misma.
 
 ---
 
-## 11. Glosario
-
-| Término                                                              | Definición                                                                                                                                                                                              |
-| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **KPI** (_Key Performance Indicator_ — Indicador Clave de Desempeño) | Métrica concreta y medible para evaluar si un proceso u objetivo progresa correctamente (p. ej., tasa de reactivación, tiempo medio de respuesta, porcentaje de abandono).                              |
-| **Mantenibilidad** (_maintainability_)                               | Facilidad y costo de mantener un sistema funcionando y actualizado en el tiempo. Distinta de la escalabilidad: un sistema puede escalar bien pero ser costoso de mantener. Se buscan ambas propiedades. |
-| **Escalabilidad** (_scalability_)                                    | Capacidad de crecer —más cursos, estudiantes y procesos— sin rehacer lo construido, manteniendo acotados costo y tiempo.                                                                                |
-| **ROI** (_Return On Investment_ — retorno de inversión)              | Relación entre el ahorro (trabajo, tiempo, errores) y el costo de la automatización.                                                                                                                    |
-| **RACI**                                                             | Matriz de responsabilidades: quién **hace** (Responsible), quién **responde** (Accountable), a quién se **consulta** (Consulted) y a quién se **informa** (Informed).                                   |
-| **DI (Diseño Instruccional)**                                        | Proceso de diseño de un curso: contenidos, secuencia, actividades y evaluación.                                                                                                                         |
-| **Criterios de calidad**                                             | Conjunto de condiciones que debe cumplir un curso para considerarse finalizado.                                                                                                                         |
-| **Control automático de finalización**                               | Verificación ejecutada por software que valida los criterios de calidad antes de dar por terminada una etapa.                                                                                           |
-| **Gate / restricción de acceso**                                     | Requisito para avanzar en un curso (p. ej., "para acceder al Módulo 3, entregar el TP del Módulo 2").                                                                                                   |
-| **Pipeline (flujo)**                                                 | Secuencia de etapas por la que transita un curso, desde la planificación hasta la publicación.                                                                                                          |
-| **Instrumentación**                                                  | Incorporación de medición y monitoreo a un proceso (análogo al tablero de un vehículo) para observar su comportamiento en tiempo real.                                                                  |
-| **Módulo UNC**                                                       | Unidad de contratación de la universidad (valor vigente $48.696).                                                                                                                                       |
-| **OHCS 4/2025 / SIU-Diaguita**                                       | Normativa y sistema por los que la UNC contrata y liquida servicios profesionales.                                                                                                                      |
-
----
-
 ## 12. Próximos Pasos
 
 1. Reunión de trabajo con el equipo de automatización para revisar la propuesta en curso.
@@ -224,6 +225,7 @@ relevamiento pasa a formar parte del alcance de la misma.
 
 **Contacto:** Nahuel Gómez · nagomez@mi.unc.edu.ar
 **Reportes de evidencia:** https://nelgoez.github.io/unc-agentic-dev/audit/
+**Presentación interactiva:** https://unc-course-kit.netlify.app/propuesta-automatizacion.html
 
 ---
 
