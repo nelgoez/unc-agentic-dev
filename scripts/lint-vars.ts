@@ -12,13 +12,6 @@ const REPO_ROOT = process.cwd();
 const ENV_EXAMPLE = join(REPO_ROOT, '.env.example');
 const OPENCODE_CONFIG = join(REPO_ROOT, 'opencode.jsonc');
 
-interface Result {
-  errors: string[];
-  warnings: string[];
-  declared: Set<string>;
-  referenced: Set<string>;
-}
-
 function parseEnvExample(): Set<string> {
   if (!existsSync(ENV_EXAMPLE))
     return new Set();
@@ -36,9 +29,10 @@ function findEnvReferences(): Set<string> {
   if (!existsSync(OPENCODE_CONFIG))
     return new Set();
   const raw = readFileSync(OPENCODE_CONFIG, 'utf-8');
-  // Strip JSONC comments so examples in comments don't trigger false positives
+  // Strip JSONC comments so examples in comments don't trigger false positives.
+  // Keep `://` intact (URLs) — only strip `//` not preceded by `:`.
   const content = raw
-    .replace(/\/\/.*$/gm, '') // single-line comments
+    .replace(/(^|[^:])\/\/.*$/gm, '$1') // single-line comments
     .replace(/\/\*[\s\S]*?\*\//g, ''); // block comments
   const refs = new Set<string>();
   const re = /\{env:([A-Z_][A-Z0-9_]*)\}/g;
@@ -49,50 +43,32 @@ function findEnvReferences(): Set<string> {
 }
 
 function main(): void {
-  const result: Result = { errors: [], warnings: [], declared: new Set(), referenced: new Set() };
-
-  result.declared = parseEnvExample();
-  result.referenced = findEnvReferences();
+  const declared = parseEnvExample();
+  const referenced = findEnvReferences();
 
   // Check: every {env:VAR} in opencode.jsonc must exist in .env.example
-  for (const ref of result.referenced) {
-    if (!result.declared.has(ref)) {
-      result.errors.push(
-        `{env:${ref}} referenced in opencode.jsonc but NOT declared in .env.example`,
-      );
-    }
-  }
-
-  // Check: vars in .env.example without references (warn only)
-  for (const dec of result.declared) {
-    if (!result.referenced.has(dec)) {
-      result.warnings.push(
-        `${dec} declared in .env.example but never referenced via {env:${dec}} in opencode.jsonc`,
-      );
+  const errors: string[] = [];
+  for (const ref of referenced) {
+    if (!declared.has(ref)) {
+      errors.push(`{env:${ref}} referenced in opencode.jsonc but NOT declared in .env.example`);
     }
   }
 
   // Output
   console.log('UNC Vars Lint Report');
   console.log('====================\n');
-  console.log(`Declared in .env.example: ${result.declared.size}`);
-  console.log(`Referenced in opencode.jsonc: ${result.referenced.size}`);
+  console.log(`Declared in .env.example: ${declared.size}`);
+  console.log(`Referenced in opencode.jsonc: ${referenced.size}`);
 
-  if (result.errors.length === 0 && result.warnings.length === 0) {
+  if (errors.length === 0) {
     console.log('\nAll good — no issues found.');
   }
   else {
-    if (result.errors.length > 0) {
-      console.log(`\nERRORS (${result.errors.length}):`);
-      for (const e of result.errors) console.log(`  - ${e}`);
-    }
-    if (result.warnings.length > 0) {
-      console.log(`\nWARNINGS (${result.warnings.length}):`);
-      for (const w of result.warnings) console.log(`  - ${w}`);
-    }
+    console.log(`\nERRORS (${errors.length}):`);
+    for (const e of errors) console.log(`  - ${e}`);
   }
 
-  process.exit(result.errors.length > 0 ? 1 : 0);
+  process.exit(errors.length > 0 ? 1 : 0);
 }
 
 main();

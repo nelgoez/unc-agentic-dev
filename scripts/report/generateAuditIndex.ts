@@ -162,6 +162,31 @@ export function generateAuditIndex(): string {
     </tr>`;
   }
 
+  const triggerUrl = (process.env.AUDIT_TRIGGER_URL ?? '').trim();
+  const triggerForm = triggerUrl
+    ? `<input type="number" id="new-course-id" placeholder="ID del curso" min="1"><button class="btn-primary" onclick="triggerAudit()">Auditar ahora</button><span class="trigger-msg" id="trigger-msg"></span>`
+    : `<a class="btn-primary" href="https://github.com/nelgoez/unc-agentic-dev/actions/workflows/audit-ci.yml" target="_blank" rel="noopener">Auditar ahora →</a>`;
+  const triggerScript = triggerUrl
+    ? `<script>
+async function triggerAudit() {
+  const inp = document.getElementById('new-course-id');
+  const btn = inp.nextElementSibling;
+  const msg = document.getElementById('trigger-msg');
+  const id = parseInt(inp.value);
+  if (!id || id < 1) { msg.textContent = 'Ingresá un ID válido'; msg.style.color = '#dc2626'; return; }
+  btn.disabled = true;
+  msg.textContent = 'Disparando…';
+  msg.style.color = '';
+  try {
+    await fetch(${JSON.stringify(triggerUrl)} + '?courseId=' + id, { mode: 'no-cors' });
+    msg.textContent = 'Enviado! Visible en 2-3 min.';
+    msg.style.color = '#16a34a';
+  } catch (e) { msg.textContent = 'Error de conexión'; msg.style.color = '#dc2626'; }
+  btn.disabled = false;
+}
+</script>`
+    : '';
+
   return `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -209,9 +234,10 @@ ${
 <div class="action-bar">
 <p><strong>Actualización automática:</strong> Todos los cursos se auditan semanalmente (lunes). Los reportes se actualizan solos.</p>
 <div class="trigger-form">
-  <a class="btn-primary" href="https://github.com/nelgoez/unc-agentic-dev/actions/workflows/audit-ci.yml" target="_blank" rel="noopener">Auditar ahora →</a>
+${triggerForm}
 </div>
 </div>
+${triggerScript}
 <div class="footer">Generado automáticamente por UNC QA Audit · <a href="mailto:nagomez@mi.unc.edu.ar" style="color:#3b82f6">nagomez@mi.unc.edu.ar</a></div>
 </div>
 </body>

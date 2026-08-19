@@ -37,6 +37,31 @@ export function generateAuditHtml(data: AuditData): string {
     ]);
   }
 
+  const triggerUrl = (process.env.AUDIT_TRIGGER_URL ?? '').trim();
+  const rerunScript = triggerUrl
+    ? `async function reRunAudit() {
+  const btn = document.getElementById('rerun-btn');
+  const msg = document.getElementById('rerun-msg');
+  btn.disabled = true;
+  msg.textContent = 'Disparando auditoría…';
+  msg.className = 'rerun-msg';
+  try {
+    await fetch(${JSON.stringify(`${triggerUrl}?courseId=${d.courseId}`)}, { mode: 'no-cors' });
+    msg.textContent = 'Auditoría disparada. Refrescá en 2-3 min.';
+    msg.className = 'rerun-msg ok';
+  } catch (e) {
+    msg.textContent = 'Error de conexión';
+    msg.className = 'rerun-msg err';
+  }
+  btn.disabled = false;
+}`
+    : `function reRunAudit() {
+  const msg = document.getElementById('rerun-msg');
+  msg.textContent = 'Abriendo GitHub para confirmar…';
+  msg.className = 'rerun-msg';
+  window.open('https://github.com/nelgoez/unc-agentic-dev/actions/workflows/audit-ci.yml', '_blank');
+}`;
+
   let html = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -102,12 +127,7 @@ details .detail-content{background:#f8fafc;border-radius:6px;padding:10px 14px;m
 .raw-json{background:#1e293b;color:#e2e8f0;padding:10px 14px;border-radius:6px;font-size:.75em;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto}.footer{text-align:center;color:#94a3b8;font-size:.78em;margin-top:28px;padding-top:14px;border-top:1px solid #e2e8f0}
 </style>
 <script>
-function reRunAudit() {
-  const msg = document.getElementById('rerun-msg');
-  msg.textContent = 'Abriendo GitHub para confirmar…';
-  msg.className = 'rerun-msg';
-  window.open('https://github.com/nelgoez/unc-agentic-dev/actions/workflows/audit-ci.yml', '_blank');
-}
+${rerunScript}
 </script>
 </head>
 <body>

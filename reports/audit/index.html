@@ -38,38 +38,56 @@ tr:last-child td{border-bottom:none}
 <thead><tr><th></th><th>Curso</th><th>ID</th><th>Última ejecución</th><th>Secc</th><th>Act</th><th></th><th>Historial</th></tr></thead>
 <tbody>
     <tr>
-      <td><span style="background:#fffbeb;color:#d97706;padding:2px 8px;border-radius:10px;font-size:.75em;font-weight:600">ADVERTENCIAS</span></td>
-      <td><a href="304/latest.html" style="color:#3b82f6;text-decoration:none;font-weight:500">Violencias Digitales</a></td>
-      <td>304</td>
-      <td>3 de ago de 2026 17:44</td>
-      <td>9</td>
-      <td>31</td>
-      <td>5 ejecuciones</td>
-      <td style="font-size:.78em">
-        <a href="304/2026-08-03-1744.html" style="color:#3b82f6;text-decoration:none;margin-right:8px">3/8 17:44</a><a href="304/2026-08-03-1557.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 15:57</a><a href="304/2026-08-03-1544.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 15:44</a>
-        <span id="hist-304" style="display:none"><a href="304/2026-08-03-1544.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 15:44</a><a href="304/2026-08-03-1442.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 14:42</a></span><button onclick="document.getElementById('hist-304').style.display='inline';this.style.display='none'" style="background:none;border:none;color:#3b82f6;cursor:pointer;font-size:.9em;padding:0">+2 más</button>
-      </td>
-    </tr>
-    <tr>
       <td><span style="background:#f0fdf4;color:#16a34a;padding:2px 8px;border-radius:10px;font-size:.75em;font-weight:600">OK</span></td>
       <td><a href="269/latest.html" style="color:#3b82f6;text-decoration:none;font-weight:500">Python 1</a></td>
       <td>269</td>
-      <td>3 de ago de 2026 16:52</td>
+      <td>19 de ago de 2026 19:58</td>
       <td>5</td>
       <td>46</td>
-      <td>3 ejecuciones</td>
+      <td>4 ejecuciones</td>
       <td style="font-size:.78em">
-        <a href="269/2026-08-03-1652.html" style="color:#3b82f6;text-decoration:none;margin-right:8px">3/8 16:52</a><a href="269/2026-08-03-1544.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 15:44</a><a href="269/2026-08-03-1442.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 14:42</a>
-        
+        <a href="269/2026-08-19-1958.html" style="color:#3b82f6;text-decoration:none;margin-right:8px">19/8 19:58</a><a href="269/2026-08-03-1652.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 16:52</a><a href="269/2026-08-03-1544.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 15:44</a>
+        <span id="hist-269" style="display:none"><a href="269/2026-08-03-1442.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 14:42</a></span><button onclick="document.getElementById('hist-269').style.display='inline';this.style.display='none'" style="background:none;border:none;color:#3b82f6;cursor:pointer;font-size:.9em;padding:0">+1 más</button>
+      </td>
+    </tr>
+    <tr>
+      <td><span style="background:#fffbeb;color:#d97706;padding:2px 8px;border-radius:10px;font-size:.75em;font-weight:600">ADVERTENCIAS</span></td>
+      <td><a href="304/latest.html" style="color:#3b82f6;text-decoration:none;font-weight:500">Violencias Digitales</a></td>
+      <td>304</td>
+      <td>19 de ago de 2026 19:58</td>
+      <td>9</td>
+      <td>31</td>
+      <td>6 ejecuciones</td>
+      <td style="font-size:.78em">
+        <a href="304/2026-08-19-1958.html" style="color:#3b82f6;text-decoration:none;margin-right:8px">19/8 19:58</a><a href="304/2026-08-03-1744.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 17:44</a><a href="304/2026-08-03-1557.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 15:57</a>
+        <span id="hist-304" style="display:none"><a href="304/2026-08-03-1544.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 15:44</a><a href="304/2026-08-03-1544.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 15:44</a><a href="304/2026-08-03-1442.html" style="color:#94a3b8;text-decoration:none;margin-right:8px">3/8 14:42</a></span><button onclick="document.getElementById('hist-304').style.display='inline';this.style.display='none'" style="background:none;border:none;color:#3b82f6;cursor:pointer;font-size:.9em;padding:0">+3 más</button>
       </td>
     </tr></tbody>
 </table>
 <div class="action-bar">
 <p><strong>Actualización automática:</strong> Todos los cursos se auditan semanalmente (lunes). Los reportes se actualizan solos.</p>
 <div class="trigger-form">
-  <a class="btn-primary" href="https://github.com/nelgoez/unc-agentic-dev/actions/workflows/audit-ci.yml" target="_blank" rel="noopener">Auditar ahora →</a>
+<input type="number" id="new-course-id" placeholder="ID del curso" min="1"><button class="btn-primary" onclick="triggerAudit()">Auditar ahora</button><span class="trigger-msg" id="trigger-msg"></span>
 </div>
 </div>
+<script>
+async function triggerAudit() {
+  const inp = document.getElementById('new-course-id');
+  const btn = inp.nextElementSibling;
+  const msg = document.getElementById('trigger-msg');
+  const id = parseInt(inp.value);
+  if (!id || id < 1) { msg.textContent = 'Ingresá un ID válido'; msg.style.color = '#dc2626'; return; }
+  btn.disabled = true;
+  msg.textContent = 'Disparando…';
+  msg.style.color = '';
+  try {
+    await fetch("https://script.google.com/macros/s/AKfycbxjUCxM-Zi1rI1BB-5p9Uevc_AyqbKQeIDaZHCJ0rFynbGBvAGY2f9I-2zxtDNmM7-GSg/exec" + '?courseId=' + id, { mode: 'no-cors' });
+    msg.textContent = 'Enviado! Visible en 2-3 min.';
+    msg.style.color = '#16a34a';
+  } catch (e) { msg.textContent = 'Error de conexión'; msg.style.color = '#dc2626'; }
+  btn.disabled = false;
+}
+</script>
 <div class="footer">Generado automáticamente por UNC QA Audit · <a href="mailto:nagomez@mi.unc.edu.ar" style="color:#3b82f6">nagomez@mi.unc.edu.ar</a></div>
 </div>
 </body>

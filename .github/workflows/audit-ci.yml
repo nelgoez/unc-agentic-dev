@@ -156,6 +156,7 @@ jobs:
     env:
       MOODLE_BASE_URL: ${{ secrets.MOODLE_BASE_URL }}
       MOODLE_WS_TOKEN: ${{ secrets.MOODLE_WS_TOKEN }}
+      AUDIT_TRIGGER_URL: ${{ vars.AUDIT_TRIGGER_URL }}
     steps:
       - uses: actions/checkout@v7
 
@@ -163,8 +164,12 @@ jobs:
 
       - name: Run course audits
         run: |
-          bun cli/audit-curso.ts 304 --name "Violencias Digitales" || true
-          bun cli/audit-curso.ts 269 --name "Python 1" || true
+          if [ -n "${{ inputs.course_id }}" ]; then
+            bun cli/audit-curso.ts "${{ inputs.course_id }}" || true
+          else
+            bun cli/audit-curso.ts 304 --name "Violencias Digitales" || true
+            bun cli/audit-curso.ts 269 --name "Python 1" || true
+          fi
 
       - name: Upload audit reports
         uses: actions/upload-artifact@v7
@@ -174,10 +179,11 @@ jobs:
             reports/audit/*/2026-*
             reports/audit/*/latest.*
             reports/audit/*/history.json
+            reports/audit/index.html
 
   deploy-report:
     if: github.ref == 'refs/heads/master'
-    needs: [generate-report]
+    needs: [generate-report, course-audit]
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -215,8 +221,8 @@ jobs:
         run: |
           if [ -d reports/audit ]; then
             mkdir -p _site/audit
-            cp -r reports/audit/*/ _site/audit/ || true
-            cp reports/audit/index.html _site/audit/index.html || true
+            cp -rn reports/audit/*/ _site/audit/ || true
+            cp -n reports/audit/index.html _site/audit/index.html || true
           fi
 
       - name: Copy landing page
