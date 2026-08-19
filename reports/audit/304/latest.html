@@ -63,31 +63,11 @@ details .detail-content{background:#f8fafc;border-radius:6px;padding:10px 14px;m
 .raw-json{background:#1e293b;color:#e2e8f0;padding:10px 14px;border-radius:6px;font-size:.75em;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:300px;overflow-y:auto}.footer{text-align:center;color:#94a3b8;font-size:.78em;margin-top:28px;padding-top:14px;border-top:1px solid #e2e8f0}
 </style>
 <script>
-async function reRunAudit() {
-  const btn = document.getElementById('rerun-btn');
+function reRunAudit() {
   const msg = document.getElementById('rerun-msg');
-  btn.disabled = true;
-  msg.textContent = 'Disparando...';
+  msg.textContent = 'Abriendo GitHub para confirmar…';
   msg.className = 'rerun-msg';
-  try {
-    const res = await fetch('https://unc-course-kit.netlify.app/api/trigger-audit', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ courseId: 304, courseName: "Violencias Digitales" })
-    });
-    const data = await res.json();
-    if (data.ok) {
-      msg.textContent = 'Auditoría disparada. Refrescá en 2-3 min.';
-      msg.className = 'rerun-msg ok';
-    } else {
-      msg.textContent = data.error || 'Error al disparar';
-      msg.className = 'rerun-msg err';
-    }
-  } catch(e) {
-    msg.textContent = 'Error de conexión';
-    msg.className = 'rerun-msg err';
-  }
-  btn.disabled = false;
+  window.open('https://github.com/nelgoez/unc-agentic-dev/actions/workflows/audit-ci.yml', '_blank');
 }
 </script>
 </head>
