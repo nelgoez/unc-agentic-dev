@@ -7,7 +7,7 @@ GitHub Pages (nelgoez.github.io/unc-agentic-dev/)
   └── audit/     ← Los reportes se sirven aca (desplegados por CI)
 
 Netlify (unc-course-kit.netlify.app)
-  ├── index.html, propuesta-qa.html  ← Pitch + propuesta QA
+  ├── propuesta-automatizacion.html  ← Deck de la estrategia de automatización
   └── api/trigger-audit             ← Netlify Function (dispara el CI)
 ```
 

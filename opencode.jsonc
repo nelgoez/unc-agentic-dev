@@ -9,8 +9,7 @@
   "instructions": [
     ".context/unc-overview.md",
     ".context/cursos-activos.md",
-    ".context/course-kit-pitch.md",
-    ".context/cicd-course-pipeline.md",
+    ".context/pivot-patricia-ago-2026.md",
     ".context/referencia-rapida.md",
   ],
 
@@ -110,8 +109,8 @@
       "agent": "plan",
     },
     "pitch": {
-      "description": "Load UNC Course Kit pitch and project state — proposal to management",
-      "template": "Load the Course Kit pitch context:\n\n1. Read @.context/course-kit-pitch.md\n2. Read @docs/pitch/PROPUESTA-unc-course-kit.md\n\nSummarize:\n- What is being proposed\n- Current project state\n- Next steps needed to move forward",
+      "description": "Load current UNC automation strategy pitch and project state",
+      "template": "Load the automation strategy pitch context:\n\n1. Read @.context/pivot-patricia-ago-2026.md\n2. Read @.context/propuesta-automatizacion-unc.md\n\nSummarize:\n- What is being proposed\n- Current project state\n- Next steps needed to move forward",
       "agent": "plan",
     },
   },

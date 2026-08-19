@@ -47,10 +47,10 @@ auditoría como un módulo más, no como iniciativa paralela.
 
 ## Entregables de esta sesión
 
-- [ ] `comunicacion-patricia-ago-2026.md` — email completo (español, con glosario)
-- [ ] `nota-privada-patricia-ago-2026.md` — nota corta de alineación
-- [ ] Deck nuevo "Estrategia de Automatización" (reusa template/CSS existente) + landing/footer
-- [ ] Regenerar PDF desde el deck nuevo; marcar `propuesta-qa-unc.pdf` como reemplazado
+- [x] `comunicacion-patricia-ago-2026.md` — email completo (español, con glosario)
+- [x] `nota-privada-patricia-ago-2026.md` — nota corta de alineación
+- [x] Deck nuevo "Estrategia de Automatización" (reusa template/CSS existente) + landing/footer
+- [x] PDF `propuesta-automatizacion-unc.pdf` regenerado; propuestas QA y Course Kit eliminadas del repo
 - [ ] Apps Script `trigger-audit` (reemplaza Netlify, cuota free agotada) — segundo plano
 
 ## Información a pedirles (8 puntos)
