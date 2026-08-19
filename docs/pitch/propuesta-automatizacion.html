@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="es" data-theme="catppuccin-mocha">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Estrategia de Automatización · Campus Virtual UNC</title>
+    <link rel="stylesheet" href="assets/fonts.css" />
+    <link rel="stylesheet" href="assets/base.css" />
+    <link rel="stylesheet" id="theme-link" href="assets/themes/pitch-deck-vc.css" />
+    <link rel="stylesheet" href="assets/animations/animations.css" />
+    <style>
+      .big-number {
+        font-size: 3.2em;
+        font-weight: 900;
+        color: var(--accent);
+        line-height: 1;
+      }
+      .big-number.warn {
+        color: var(--warn);
+      }
+      .big-number.bad {
+        color: var(--bad);
+      }
+      .truth-box {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 26px;
+        border: 2px solid var(--accent);
+        text-align: center;
+      }
+      .truth-box p {
+        font-size: 0.9em;
+        color: var(--text-2);
+        margin-top: 8px;
+      }
+      .phase-card {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 18px 22px;
+        border-left: 4px solid var(--accent);
+      }
+      .phase-card.one {
+        border-left-color: var(--good);
+      }
+      .phase-card.two {
+        border-left-color: var(--accent);
+      }
+      .phase-card.three {
+        border-left-color: var(--warn);
+      }
+      .phase-label {
+        font-size: 0.72em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-2);
+        margin-bottom: 4px;
+      }
+      .price-box {
+        background: var(--surface);
+        border-radius: var(--radius-lg);
+        padding: 22px;
+        text-align: center;
+        border: 2px solid var(--accent);
+      }
+      .price-box .amount {
+        font-size: 2.2em;
+        font-weight: 900;
+        color: var(--accent);
+      }
+      .price-box .label {
+        font-size: 0.78em;
+        color: var(--text-2);
+        margin-top: 4px;
+      }
+      .evidence-link {
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: var(--radius);
+        background: var(--accent);
+        color: #fff;
+        text-decoration: none;
+        font-weight: 600;
+        margin-top: 12px;
+        font-size: 0.9em;
+      }
+      .area-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .area-tag {
+        flex: 1 1 30%;
+        min-width: 150px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 12px 14px;
+        font-size: 0.82em;
+      }
+      .area-tag.hot {
+        border-color: var(--accent);
+        border-width: 2px;
+      }
+      .area-tag .tag-label {
+        font-size: 0.7em;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--accent);
+        font-weight: 700;
+      }
+      .click-left,
+      .click-right {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        width: 80px;
+        z-index: 10;
+        cursor: pointer;
+      }
+      .click-left {
+        left: 0;
+      }
+      .click-right {
+        right: 0;
+      }
+      .click-left:hover,
+      .click-right:hover {
+        background: rgba(128, 128, 128, 0.05);
+      }
+      .deck-footer {
+        position: relative;
+        z-index: 11;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        margin-top: auto;
+        padding-top: 8px;
+      }
+      .deck-footer a,
+      .deck-footer span {
+        pointer-events: auto;
+      }
+      .deck-footer .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+      }
+      ul.plain {
+        font-size: 0.86em;
+        line-height: 1.9;
+      }
+      @media (max-width: 600px) {
+        .click-left,
+        .click-right {
+          width: 40px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="deck" data-slide-total="9">
+      <!-- 1: Hook -->
+      <section class="slide" data-title="Estrategia">
+        <p class="kicker">UNC Campus Virtual · Agosto 2026</p>
+        <h1>De los problemas al proceso: una estrategia de automatización</h1>
+        <p class="dim2 mt-s" style="font-size: 0.95em">
+          No partimos de la herramienta. Partimos de los problemas que hoy generan trabajo humano,
+          demoras, errores y dificultades.
+        </p>
+        <div class="truth-box mt-m">
+          <strong style="font-size: 1.1em"
+            >Nuestro lugar: la capa de arquitectura e instrumentación de esa estrategia.</strong
+          >
+          <p>
+            Ordenar procesos y responsabilidades → identificar qué automatizar → recién entonces
+            elegir tecnología.
+          </p>
+          <a href="https://nelgoez.github.io/unc-agentic-dev/audit/" class="evidence-link"
+            >Ver evidencia real →</a
+          >
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">Estrategia de Automatización · Campus Virtual UNC</span>
+          <span class="slide-number"></span>
+        </div>
+      </section>
+
+      <!-- 2: El cambio de enfoque -->
+      <section class="slide" data-title="El enfoque">
+        <p class="kicker">El orden correcto</p>
+        <h2>Problema → proceso → tecnología</h2>
+        <div class="grid g3 mt-m" style="gap: 14px">
+          <div class="phase-card one">
+            <div class="phase-label">Paso 1</div>
+            <h4>Ordenar</h4>
+            <p class="dim2" style="font-size: 0.8em">
+              Procesos, responsabilidades y criterios de calidad. Quién hace qué y dónde reside la
+              calidad.
+            </p>
+          </div>
+          <div class="phase-card two">
+            <div class="phase-label">Paso 2</div>
+            <h4>Identificar</h4>
+            <p class="dim2" style="font-size: 0.8em">
+              Qué tareas vale la pena automatizar: las que reducen trabajo, tiempos o errores de
+              forma real.
+            </p>
+          </div>
+          <div class="phase-card three">
+            <div class="phase-label">Paso 3</div>
+            <h4>Elegir</h4>
+            <p class="dim2" style="font-size: 0.8em">
+              Tecnología y recursos humanos, con presupuesto acotado y ROI justificado.
+            </p>
+          </div>
+        </div>
+        <div class="truth-box mt-m">
+          <strong
+            >Coincidimos con esta secuencia. Y queremos integrarnos a ella, no correr en
+            paralelo.</strong
+          >
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">Estrategia de Automatización · Campus Virtual UNC</span>
+          <span class="slide-number"></span>
+        </div>
+      </section>
+
+      <!-- 3: Las 5 áreas -->
+      <section class="slide" data-title="Las 5 áreas">
+        <p class="kicker">El mapa</p>
+        <h2>Las 5 áreas de proceso</h2>
+        <div class="area-grid mt-m">
+          <div class="area-tag hot">
+            <div class="tag-label">Entrada probada</div>
+            <strong>Asistencia con IA en el diseño</strong>
+            <p class="dim2" style="font-size: 0.78em; margin-top: 4px">
+              Detectar faltantes e inconsistencias antes de producción.
+            </p>
+          </div>
+          <div class="area-tag">
+            <div class="tag-label">Módulo</div>
+            <strong>Mesa de Ayuda</strong>
+            <p class="dim2" style="font-size: 0.78em; margin-top: 4px">
+              Clasificar y responder lo estandarizable; derivar solo lo que necesita persona.
+            </p>
+          </div>
+          <div class="area-tag">
+            <div class="tag-label">Módulo</div>
+            <strong>Producción audiovisual</strong>
+            <p class="dim2" style="font-size: 0.78em; margin-top: 4px">
+              Seguir el circuito completo: pendientes, demoras, tiempos por etapa.
+            </p>
+          </div>
+          <div class="area-tag">
+            <div class="tag-label">Módulo</div>
+            <strong>Experiencia de les estudiantes</strong>
+            <p class="dim2" style="font-size: 0.78em; margin-top: 4px">
+              Detectar abandono y configuraciones que bloquean el avance.
+            </p>
+          </div>
+          <div class="area-tag">
+            <div class="tag-label">Módulo</div>
+            <strong>Indicadores y monitoreo</strong>
+            <p class="dim2" style="font-size: 0.78em; margin-top: 4px">
+              Información para decidir y mejorar, no solo para controlar.
+            </p>
+          </div>
+        </div>
+        <p class="dim2 mt-s" style="font-size: 0.8em; text-align: center">
+          Una sola arquitectura. Datos en un único lugar. La auditoría de Moodle es nuestro punto de
+          entrada ya probado.
+        </p>
+        <div class="deck-footer">
+          <span class="dim2">Estrategia de Automatización · Campus Virtual UNC</span>
+          <span class="slide-number"></span>
+        </div>
+      </section>
+
+      <!-- 4: Nuestro lugar -->
+      <section class="slide" data-title="Nuestro lugar">
+        <p class="kicker">Sin capa de rechequeo</p>
+        <h2>La calidad vive dentro del proceso, no encima</h2>
+        <div class="grid g2 mt-m">
+          <div class="phase-card one">
+            <div class="phase-label">Capacidad 1</div>
+            <h4>Ordenar el "quién hace qué"</h4>
+            <p class="dim2" style="font-size: 0.82em">
+              Un mapa de responsabilidades (RACI): quién hace, quién responde, a quién se consulta y
+              a quién se informa. La calidad queda donde corresponde — en el Diseño Instruccional.
+            </p>
+          </div>
+          <div class="phase-card two">
+            <div class="phase-label">Capacidad 2</div>
+            <h4>Criterios de calidad como controles automáticos</h4>
+            <p class="dim2" style="font-size: 0.82em">
+              Convertir los criterios en una lista de chequeo que corre sola antes de que una
+              propuesta se considere terminada. No una IA que revisa al final.
+            </p>
+          </div>
+        </div>
+        <div class="truth-box mt-m">
+          <strong
+            >La auditoría no es el centro: es la evidencia de que este control automático ya
+            funciona.</strong
+          >
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">Estrategia de Automatización · Campus Virtual UNC</span>
+          <span class="slide-number"></span>
+        </div>
+      </section>
+
+      <!-- 5: Fase 0 + precio -->
+      <section class="slide" data-title="Fase 0">
+        <p class="kicker">El primer paso contratable</p>
+        <h2>Fase 0 — Ordenar (2-3 semanas)</h2>
+        <div class="grid g2 mt-m" style="align-items: center">
+          <div>
+            <div class="phase-card one" style="margin-bottom: 10px">
+              <h4>Entregables</h4>
+              <ul class="plain">
+                <li>Mapa de procesos y responsabilidades (RACI)</li>
+                <li>Criterios de calidad convertidos en reglas verificables</li>
+                <li>Arquitectura de automatización priorizada por impacto</li>
+              </ul>
+            </div>
+            <p class="dim2" style="font-size: 0.8em">
+              Acotada, no compromete el resto. Su entregable es justamente la evidencia para decidir
+              Fase 1.
+            </p>
+          </div>
+          <div class="price-box">
+            <div class="amount">38–40 M</div>
+            <div class="label">módulos UNC · único pago</div>
+            <div class="label" style="margin-top: 10px; font-size: 0.85em; color: var(--text-1)">
+              ≈ $1.850.000 – $1.950.000 ARS
+            </div>
+            <div class="label">1 módulo = $48.696 · sin suscripción · sin permanencia</div>
+          </div>
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">Estrategia de Automatización · Campus Virtual UNC</span>
+          <span class="slide-number"></span>
+        </div>
+      </section>
+
+      <!-- 6: Fase 1 y 2 -->
+      <section class="slide" data-title="Fases 1 y 2">
+        <p class="kicker">La visión (se cotiza tras la Fase 0)</p>
+        <h2>Fases 1 y 2</h2>
+        <div class="grid g2 mt-m">
+          <div class="phase-card two">
+            <div class="phase-label">Fase 1</div>
+            <h4>Automatizar lo que rinde</h4>
+            <p class="dim2" style="font-size: 0.82em">
+              Las 2-3 automatizaciones de mayor retorno, empezando por los criterios de finalización
+              del Diseño Instruccional.
+            </p>
+          </div>
+          <div class="phase-card three">
+            <div class="phase-label">Fase 2</div>
+            <h4>Extender</h4>
+            <p class="dim2" style="font-size: 0.82em">
+              Producción audiovisual y experiencia estudiantil, sobre la base ya funcionando.
+            </p>
+          </div>
+        </div>
+        <div class="truth-box mt-m">
+          <strong
+            >Solo la Fase 0 se contrata ahora. Fases 1 y 2 se definen con los datos que
+            produzca.</strong
+          >
+        </div>
+        <div class="deck-footer">
+          <span class="dim2">Estrategia de Automatización · Campus Virtual UNC</span>
+          <span class="slide-number"></span>
+        </div>
+      </section>
+
+      <!-- 7: Lo que necesitamos -->
+      <section class="slide" data-title="Qué necesitamos">
+        <p class="kicker">Información concreta</p>
+        <h2>Qué necesitamos de ustedes</h2>
+        <div class="grid g3 mt-m" style="gap: 12px">
+          <div class="phase-card one">
+            <h4>1 · Arquitectura en curso</h4>
+            <p class="dim2" style="font-size: 0.78em">
+              La propuesta de automatización que llevan Nacho y Natalia.
+            </p>
+          </div>
+          <div class="phase-card two">
+            <h4>2 · Criterios de calidad</h4>
+            <p class="dim2" style="font-size: 0.78em">
+              El borrador en el que están trabajando (autor, estado, acceso).
+            </p>
+          </div>
+          <div class="phase-card three">
+            <h4>3 · Quién hace qué</h4>
+            <p class="dim2" style="font-size: 0.78em">
+              El mapa de roles, y en qué pasos podemos intervenir y en cuáles no.
+            </p>
+          </div>
+          <div class="phase-card one">
+            <h4>4 · Proceso DI</h4>
+            <p class="dim2" style="font-size: 0.78em">
+              Pre-montaje → validación → producción. Herramientas y nombres de archivos.
+            </p>
+          </div>
+          <div class="phase-card two">
+            <h4>5 · Mesa de Ayuda</h4>
+            <p class="dim2" style="font-size: 0.78em">
+              Herramienta, volumen y categorías recurrentes.
+            </p>
+          </div>
+          <div class="phase-card three">
+            <h4>6 · Presupuesto</h4>
+            <p class="dim2" style="font-size: 0.78em">
+              Camino de contratación, quién firma, plazos.
+            </p>
+          </div>
+        </div>
+        <p class="dim2 mt-s" style="font-size: 0.78em; text-align: center">
+          También: cómo detectan abandono estudiantil y cómo siguen hoy la producción audiovisual.
+        </p>
+        <div class="deck-footer">
+          <span class="dim2">Estrategia de Automatización · Campus Virtual UNC</span>
+          <span class="slide-number"></span>
+        </div>
+      </section>
+
+      <!-- 8: Evidencia -->
+      <section class="slide" data-title="Evidencia">
+        <p class="kicker">No es teoría</p>
+        <h2>Ya auditamos dos cursos</h2>
+        <div class="grid g2 mt-m">
+          <div class="phase-card one">
+            <h4>Curso 304 — Violencias Digitales</h4>
+            <div class="kpi-row" style="justify-content: flex-start; margin: 12px 0">
+              <div style="text-align: center">
+                <div class="big-number" style="font-size: 1.8em">9</div>
+                <div class="dim2" style="font-size: 0.7em">secciones</div>
+              </div>
+              <div style="text-align: center">
+                <div class="big-number" style="font-size: 1.8em">31</div>
+                <div class="dim2" style="font-size: 0.7em">actividades</div>
+              </div>
+              <div style="text-align: center">
+                <div class="big-number warn" style="font-size: 1.8em">0</div>
+                <div class="dim2" style="font-size: 0.7em">errores</div>
+              </div>
+            </div>
+            <p class="dim2" style="font-size: 0.78em">
+              Con documentos de diseño. El mapeo doc↔producción revela la dispersión de nombres
+              actual.
+            </p>
+          </div>
+          <div class="phase-card two">
+            <h4>Curso 269 — Python</h4>
+            <div class="kpi-row" style="justify-content: flex-start; margin: 12px 0">
+              <div style="text-align: center">
+                <div class="big-number" style="font-size: 1.8em">5</div>
+                <div class="dim2" style="font-size: 0.7em">secciones</div>
+              </div>
+              <div style="text-align: center">
+                <div class="big-number" style="font-size: 1.8em">46</div>
+                <div class="dim2" style="font-size: 0.7em">actividades</div>
+              </div>
+            </div>
+            <p class="dim2" style="font-size: 0.78em">
+              El caso que motivó todo: una actividad inexistente bloqueaba el avance, detectado
+              tarde.
+            </p>
+          </div>
+        </div>
+        <a href="https://nelgoez.github.io/unc-agentic-dev/audit/" class="evidence-link"
+          >Ver todos los reportes →</a
+        >
+        <div class="deck-footer">
+          <span class="dim2">Estrategia de Automatización · Campus Virtual UNC</span>
+          <span class="slide-number"></span>
+        </div>
+      </section>
+
+      <!-- 9: Próximo paso -->
+      <section class="slide" data-title="Próximo paso">
+        <p class="kicker">Concreto</p>
+        <h2>Próximo paso</h2>
+        <div class="grid g2 mt-m">
+          <div class="phase-card one">
+            <h4>Reunión de trabajo</h4>
+            <p class="dim2" style="font-size: 0.82em">
+              30-45 min con Nacho y Natalia esta semana para ver la propuesta en curso y ajustar la
+              Fase 0.
+            </p>
+          </div>
+          <div class="phase-card two">
+            <h4>Santex</h4>
+            <p class="dim2" style="font-size: 0.82em">
+              Complementario: ellos aportan formación colectiva en IA; nosotros, arquitectura e
+              integración. La capacitación rinde más después de la Fase 0.
+            </p>
+          </div>
+        </div>
+        <div class="truth-box mt-m">
+          <strong
+            >Fase 0 acotada · sin permanencia · datos de la UNC · todo el stack open source.</strong
+          >
+          <p>Si funciona, escalamos. Si no, paramos.</p>
+        </div>
+        <div class="deck-footer">
+          <div class="footer-links">
+            <span class="dim2">Estrategia de Automatización</span>
+            <a
+              href="index.html"
+              style="color: var(--accent); text-decoration: none; font-size: 0.75em"
+              >Course Kit →</a
+            >
+            <a
+              href="propuesta-qa.html"
+              style="color: var(--accent); text-decoration: none; font-size: 0.75em"
+              >Auditoría (módulo) →</a
+            >
+            <a
+              href="mailto:nagomez@mi.unc.edu.ar"
+              style="color: var(--text-2); text-decoration: none; font-size: 0.72em"
+              >nagomez@mi.unc.edu.ar</a
+            >
+          </div>
+          <span class="slide-number"></span>
+        </div>
+      </section>
+    </div>
+    <script src="assets/runtime.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const deck = document.querySelector('.deck')
+        if (!deck) return
+        function go(dir) {
+          document.dispatchEvent(
+            new KeyboardEvent('keydown', { key: dir === 1 ? 'ArrowRight' : 'ArrowLeft' }),
+          )
+        }
+        const left = Object.assign(document.createElement('div'), { className: 'click-left' })
+        const right = Object.assign(document.createElement('div'), { className: 'click-right' })
+        left.onclick = () => go(-1)
+        right.onclick = () => go(1)
+        document.body.appendChild(left)
+        document.body.appendChild(right)
+      })
+    </script>
+  </body>
+</html>

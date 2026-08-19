@@ -1,5 +1,9 @@
 # Propuesta de Servicios — Auditoría Automática de Cursos Moodle
 
+> ⚠️ **Este documento fue reemplazado por `.context/propuesta-automatizacion-unc.md`** (Agosto 2026,
+> tras el pivote de Patricia Altamirano). La auditoría quedó reencuadrada como módulo dentro de la
+> Estrategia de Automatización. Se conserva como referencia histórica.
+
 **Para:** Dirección del Campus Virtual — Universidad Nacional de Córdoba (UNC)
 **Atención:** Patricia Altamirano (Dirección), Ignacio Acuña y Fernando Acosta (Diseño Instruccional)
 **Fecha:** Agosto 2026

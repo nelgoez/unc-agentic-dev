@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNC — Estrategia de Automatización · Propuesta de Servicios</title>
+<style>
+  @page { margin: 2cm 2.5cm; size: A4; }
+  body {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #1e293b;
+    max-width: 720px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  h1 { font-size: 1.5em; color: #0f172a; margin-top: 0; border-bottom: 2px solid #3b82f6; padding-bottom: 8px; }
+  h2 { font-size: 1.2em; color: #1e40af; margin-top: 28px; }
+  h3 { font-size: 1.05em; color: #334155; margin-top: 20px; }
+  h4 { font-size: 1em; color: #475569; margin-top: 16px; font-weight: 700; }
+  p { margin: 8px 0; }
+  strong { color: #0f172a; }
+  a { color: #3b82f6; text-decoration: none; }
+  blockquote {
+    border-left: 3px solid #3b82f6;
+    margin: 12px 0; padding: 8px 16px;
+    background: #f8fafc;
+    border-radius: 0 6px 6px 0;
+    color: #475569; font-size: 0.95em;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.9em; }
+  th { background: #f1f5f9; padding: 8px 10px; text-align: left; border-bottom: 2px solid #e2e8f0; font-weight: 600; color: #475569; }
+  td { padding: 7px 10px; border-bottom: 1px solid #f1f5f9; }
+  tr:last-child td { border-bottom: none; }
+  code { background: #f1f5f9; padding: 1px 6px; border-radius: 4px; font-size: 0.9em; }
+  hr { border: none; border-top: 1px solid #e2e8f0; margin: 24px 0; }
+  .footer-print { margin-top: 40px; padding-top: 14px; border-top: 1px solid #e2e8f0; font-size: 0.8em; color: #94a3b8; }
+</style>
+</head>
+<body>
+<h1>Propuesta de Servicios — Estrategia de Automatización del Campus Virtual</h1>
+<p><strong>Para:</strong> Dirección del Campus Virtual — Universidad Nacional de Córdoba (UNC)<br><strong>Atención:</strong> Patricia Altamirano (Dirección), Ignacio Acuña, Fernando Acosta, Natalia (equipo de automatización)<br><strong>Fecha:</strong> Agosto 2026<br><strong>Proponente:</strong> Nahuel Gómez — Arquitectura e Integración de Automatización<br><strong>Contacto:</strong> <a href="mailto:nagomez@mi.unc.edu.ar">nagomez@mi.unc.edu.ar</a></p>
+<hr>
+<h2>1. Resumen Ejecutivo</h2>
+<p>Esta propuesta reencuadra nuestro trabajo previo de auditoría de cursos Moodle dentro de una<br><strong>Estrategia de Automatización del Campus Virtual</strong> que parte de los problemas y procesos, no de la<br>herramienta.</p>
+<p>Aportamos dos capacidades concretas al proceso que ya está en marcha:</p>
+<ol>
+<li><strong>Ordenar el &quot;quién hace qué&quot;</strong> — un mapa de responsabilidades (RACI) para que la calidad viva<br>donde corresponde: dentro del Diseño Instruccional.</li>
+<li><strong>Convertir los criterios de calidad en controles automáticos de finalización</strong> — una lista de<br>chequeo que corre sola antes de que una propuesta se considere terminada, en lugar de una capa de<br>rechequeo permanente.</li>
+</ol>
+<p>La auditoría de Moodle (cursos 304 y 269) es la <strong>evidencia</strong> de que ese control automático ya<br>funciona. No es el centro de la propuesta: es un módulo más de la arquitectura.</p>
+<hr>
+<h2>2. Contexto</h2>
+<p>El Campus Virtual publica cursos en Moodle cuyo diseño involucra múltiples pasos (pre-montaje,<br>validación, producción). Hoy no existe validación automática entre lo documentado y lo publicado; los<br>errores —como el caso del curso 269, donde una actividad inexistente bloqueaba el avance— se detectan<br>cuando un estudiante los reporta.</p>
+<p>La Dirección definió un orden claro: primero ordenar procesos, responsabilidades y criterios de<br>calidad; después identificar qué vale la pena automatizar; recién entonces elegir tecnología y<br>recursos. Esta propuesta se integra a esa secuencia.</p>
+<hr>
+<h2>3. Principio Rector</h2>
+<blockquote>
+<p><strong>No construimos una capa de control nueva. Movemos la calidad al lugar donde ya tiene dueños.</strong></p>
+<p>Si una tarea corresponde a un área, la calidad debe ser un criterio de finalización de esa área —<br>una lista de chequeo automática — y no una IA que vuelve a controlar lo que alguien ya debía<br>controlar. La automatización se justifica cuando reduce trabajo, tiempos o errores de forma real.</p>
+</blockquote>
+<hr>
+<h2>4. Nuestra Propuesta: las 5 áreas de proceso</h2>
+<table>
+<thead>
+<tr>
+<th>Área</th>
+<th>Nuestro aporte</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Asistencia con IA en el diseño</strong></td>
+<td>Criterios de calidad convertidos en chequeos automáticos que corren <strong>antes</strong> de producción (enlaces rotos, actividades inexistentes, restricciones mal configuradas). Punto de entrada ya probado.</td>
+</tr>
+<tr>
+<td><strong>Mesa de Ayuda</strong></td>
+<td>Clasificación automática de consultas recurrentes: responder lo estandarizable y derivar a una persona solo lo que lo necesita.</td>
+</tr>
+<tr>
+<td><strong>Producción audiovisual</strong></td>
+<td>Un tablero único que sigue el circuito completo: pendientes, demoras, tiempos por etapa.</td>
+</tr>
+<tr>
+<td><strong>Experiencia de les estudiantes</strong></td>
+<td>Detección de puntos de abandono y configuraciones que bloquean el avance (lo que ya detectamos en el curso 269).</td>
+</tr>
+<tr>
+<td><strong>Indicadores y monitoreo</strong></td>
+<td>Información consolidada para decidir y mejorar, no para controlar.</td>
+</tr>
+</tbody></table>
+<p>Todo en una sola arquitectura, con datos en un único lugar.</p>
+<hr>
+<h2>5. Plan de Integración</h2>
+<h3>Fase 0 — Ordenar (inmediata, 2-3 semanas)</h3>
+<p>El primer paso, acotado y contratable:</p>
+<ul>
+<li><strong>Mapa de procesos y responsabilidades (RACI):</strong> quién hace qué, dónde reside la calidad.</li>
+<li><strong>Criterios de calidad como reglas verificables:</strong> la lista de &quot;esto tiene que cumplirse&quot; en términos<br>que un software pueda chequear.</li>
+<li><strong>Arquitectura de automatización priorizada:</strong> qué automatizar primero, por impacto.</li>
+</ul>
+<h3>Fase 1 — Automatizar lo que rinde (a definir tras la Fase 0)</h3>
+<p>Ejecutar las 2-3 automatizaciones de mayor retorno, empezando por los criterios de finalización del<br>Diseño Instruccional.</p>
+<h3>Fase 2 — Extender</h3>
+<p>Producción audiovisual y experiencia estudiantil, sobre la base ya funcionando.</p>
+<p><strong>Solo la Fase 0 se contrata ahora.</strong> Es acotada, no compromete el resto, y su entregable es la<br>información que habilita decidir la Fase 1 con evidencia.</p>
+<hr>
+<h2>6. Fase 0 — Entregable y Precio</h2>
+<table>
+<thead>
+<tr>
+<th>Concepto</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Mapa de procesos + responsabilidades (RACI)</td>
+<td>incluido</td>
+</tr>
+<tr>
+<td>Criterios de calidad verificables</td>
+<td>incluido</td>
+</tr>
+<tr>
+<td>Arquitectura de automatización priorizada</td>
+<td>incluido</td>
+</tr>
+<tr>
+<td><strong>Precio total (único pago)</strong></td>
+<td><strong>38–40 módulos UNC</strong></td>
+</tr>
+</tbody></table>
+<p><strong>Unidad de contratación:</strong> Módulo UNC, valor vigente <strong>$48.696</strong> (RESOL-2026-15-UNC-SGI#AGI,<br>20/03/2026).</p>
+<ul>
+<li><strong>38–40 módulos</strong> ≈ <strong>$1.850.000 – $1.950.000 ARS</strong> por única vez.</li>
+<li>Sin suscripción. Sin permanencia.</li>
+</ul>
+<hr>
+<h2>7. Información que necesitamos</h2>
+<ol>
+<li>La propuesta de automatización en curso (Ignacio + Natalia).</li>
+<li>El borrador de criterios de calidad (autor, estado, acceso).</li>
+<li>El mapa de &quot;quién hace qué&quot;: Diseño Instruccional (3-4 integrantes + coordinación + cocoordinación)<br>y audiovisual (3, coordinado por Ignacio). En qué pasos podemos intervenir y en cuáles no.</li>
+<li>Articulación del proceso de Diseño Instruccional con el desarrollo: pre-montaje → validación →<br>producción; herramientas (Drive/Sheets/Docs) y convenciones de archivos.</li>
+<li>Mesa de Ayuda: herramienta, volumen, categorías recurrentes.</li>
+<li>Presupuesto y camino de contratación (quién firma, rol de la Prosecretaría de Informática, plazos).</li>
+<li>Experiencia estudiantil: cómo detectan hoy abandono o dificultades de navegación.</li>
+<li>Producción audiovisual: método de seguimiento actual.</li>
+</ol>
+<hr>
+<h2>8. Colaboración con Santex</h2>
+<p>Si el equipo avanza con las capacitaciones de Santex, lo vemos como complementario: ellos aportan<br>formación colectiva en IA; nosotros aportamos la arquitectura y la integración técnica al proceso real.<br>Sugerimos coordinar la capacitación <strong>después</strong> de la Fase 0, para aplicarla sobre una base ordenada.</p>
+<hr>
+<h2>9. Condiciones</h2>
+<ul>
+<li><strong>Sin contrato de permanencia.</strong> Facturación por entrega. Cancelación en cualquier momento.</li>
+<li><strong>Sin costo de herramientas.</strong> Todo el stack es open source / free tier. Solo se cobra el servicio profesional.</li>
+<li><strong>Propiedad de los datos.</strong> Todo reporte e histórico es de la UNC, en formatos abiertos (HTML + JSON).</li>
+<li><strong>Confidencialidad.</strong> Las credenciales se manejan como secrets, sin exposición.</li>
+<li><strong>Modalidad.</strong> Servicios profesionales bajo normativa UNC vigente (OHCS 4/2025), liquidable vía SIU-Diaguita.</li>
+<li><strong>Ajuste por inflación.</strong> Si el pago se demora más de 60 días, el monto en módulos se recalcula al<br>valor vigente al momento del pago.</li>
+<li><strong>Validez.</strong> 60 días desde la fecha de emisión.</li>
+</ul>
+<hr>
+<h2>10. Guía de Términos</h2>
+<table>
+<thead>
+<tr>
+<th>Término</th>
+<th>Qué significa, en simple</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>RACI</strong></td>
+<td>Mapa de responsabilidades: quién <strong>hace</strong> cada tarea, quién <strong>responde</strong>, a quién se <strong>consulta</strong>, a quién se <strong>informa</strong>.</td>
+</tr>
+<tr>
+<td><strong>DI (Diseño Instruccional)</strong></td>
+<td>El proceso de diseñar un curso: contenidos, orden, actividades y evaluaciones.</td>
+</tr>
+<tr>
+<td><strong>Criterios de calidad</strong></td>
+<td>La lista de &quot;esto tiene que cumplirse&quot; para dar un curso por terminado.</td>
+</tr>
+<tr>
+<td><strong>Control automático de finalización</strong></td>
+<td>Esa lista de chequeo ejecutada por software: corre sola y avisa qué falta.</td>
+</tr>
+<tr>
+<td><strong>Gate / restricción de acceso</strong></td>
+<td>Requisito para avanzar (ej: &quot;para ver el Módulo 3, entregá el TP del Módulo 2&quot;).</td>
+</tr>
+<tr>
+<td><strong>Pipeline (flujo)</strong></td>
+<td>La secuencia de pasos por la que pasa un curso, de la planificación a la publicación.</td>
+</tr>
+<tr>
+<td><strong>Módulo UNC</strong></td>
+<td>Unidad de contratación de la universidad (hoy $48.696).</td>
+</tr>
+<tr>
+<td><strong>ROI</strong></td>
+<td>Cuánto trabajo, tiempo o errores se ahorran en relación con el costo de automatizar.</td>
+</tr>
+<tr>
+<td><strong>OHCS 4/2025 / SIU-Diaguita</strong></td>
+<td>La normativa y el sistema por los que la UNC contrata y liquida servicios profesionales.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>11. Próximos Pasos</h2>
+<ol>
+<li>Reunión de trabajo (30-45 min) con Ignacio y Natalia para revisar la propuesta en curso.</li>
+<li>Acceso a los criterios de calidad y a un curso completo de ejemplo (documentación → producción).</li>
+<li>Firma de acuerdo simple (1 página) para arrancar la Fase 0.</li>
+</ol>
+<hr>
+<p><strong>Contacto:</strong> Nahuel Gómez · <a href="mailto:nagomez@mi.unc.edu.ar">nagomez@mi.unc.edu.ar</a><br><strong>Reportes de evidencia:</strong> <a href="https://nelgoez.github.io/unc-agentic-dev/audit/">https://nelgoez.github.io/unc-agentic-dev/audit/</a><br><strong>Presentación interactiva:</strong> <a href="https://unc-course-kit.netlify.app/propuesta-automatizacion.html">https://unc-course-kit.netlify.app/propuesta-automatizacion.html</a></p>
+<hr>
+<p><em>Los precios se expresan en módulos UNC. El valor del módulo se ajusta al vigente a la fecha de<br>contratación. Equivalencias en ARS a tipo de cambio oficial estimado. Propuesta válida por 60 días.</em></p>
+
+<div class="footer-print">
+  <strong>Contacto:</strong> Nahuel Gómez · nagomez@mi.unc.edu.ar<br>
+  <strong>Documento generado:</strong> 18 de agosto de 2026
+</div>
+</body>
+</html>

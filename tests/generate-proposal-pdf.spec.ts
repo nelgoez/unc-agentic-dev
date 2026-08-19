@@ -5,9 +5,9 @@ import { marked } from 'marked';
 
 test('generate proposal PDF from markdown', async ({ page }) => {
   const cwd = process.cwd();
-  const mdPath = join(cwd, '.context', 'propuesta-qa-unc-consolidada.md');
-  const outHtml = join(cwd, 'docs', 'pitch', 'propuesta-qa-unc.html');
-  const outPdf = join(cwd, 'docs', 'pitch', 'propuesta-qa-unc.pdf');
+  const mdPath = join(cwd, '.context', 'propuesta-automatizacion-unc.md');
+  const outHtml = join(cwd, 'docs', 'pitch', 'propuesta-automatizacion-unc.html');
+  const outPdf = join(cwd, 'docs', 'pitch', 'propuesta-automatizacion-unc.pdf');
 
   if (!existsSync(mdPath))
     throw new Error(`No se encontró ${mdPath}`);
@@ -20,7 +20,7 @@ test('generate proposal PDF from markdown', async ({ page }) => {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UNC QA Audit — Propuesta de Servicios</title>
+<title>UNC — Estrategia de Automatización · Propuesta de Servicios</title>
 <style>
   @page { margin: 2cm 2.5cm; size: A4; }
   body {
